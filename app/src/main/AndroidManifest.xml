@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.symptomcheck.capstone" >
+
+    <!-- Required for fetching feed data. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Required to register a SyncStatusObserver to display a "syncing..." progress indicator. -->
+    <uses-permission android:name="android.permission.READ_SYNC_STATS" />
+    <!-- Required to enable our SyncAdapter after it's created. -->
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <!-- Required because we're manually creating a new account. -->
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="21" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="21" />
+
+    <!--
+     To retrieve OAuth 2.0 tokens or invalidate tokens to disconnect a user. This disconnect
+     option is required to comply with the Google+ Sign-In developer policies
+    -->
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" /> <!-- To retrieve the account name (email) as part of sign-in: -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" /> <!-- To auto-complete the email text field in the login form with the user's emails -->
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <application
+        android:name="org.symptomcheck.capstone.App"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_doctor"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.Capstone" >
+        <activity
+            android:name="org.symptomcheck.capstone.ui.LoginActivity"
+            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="org.symptomcheck.capstone.ui.MainActivity"
+            android:label="@string/title_activity_main" >
+        </activity>
+        <!--
+         This implements the account we'll use as an attachment point for our SyncAdapter. Since
+         our SyncAdapter doesn't need to authenticate the current user (it just fetches a public RSS
+         feed), this account's implementation is largely empty.
+
+         It's also possible to attach a SyncAdapter to an existing account provided by another
+         package. In that case, this element could be omitted here.
+        -->
+        <service android:name="org.symptomcheck.capstone.accounts.GenericAccountService" >
+
+            <!-- Required filter used by the system to launch our account service. -->
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <!-- This points to an XMLf ile which describes our account service. -->
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
+        <!--
+   This service implements our SyncAdapter. It needs to be exported, so that the system
+   sync framework can access it.
+        -->
+        <service
+            android:name="org.symptomcheck.capstone.SyncService"
+            android:exported="true" >
+
+            <!--
+            This intent filter is required. It allows the system to launch our sync service
+            as needed.
+            -->
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <!-- This points to a required XML file which describes our SyncAdapter. -->
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
+
+        <receiver android:name=".alarms.ReminderReceiver" />
+        <receiver
+            android:name="org.symptomcheck.capstone.alarms.SymptomBootReceiver"
+            android:enabled="false" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <meta-data
+            android:name="AA_DB_NAME"
+            android:value="symptomcheck.db" />
+        <meta-data
+            android:name="AA_DB_VERSION"
+            android:value="3" />
+        <meta-data
+            android:name="AA_SERIALIZERS"
+            android:value="org.symptomcheck.capstone.mode.StringArraySerializer" />
+
+        <provider
+            android:name="com.activeandroid.content.ContentProvider"
+            android:authorities="org.symptomcheck.capstone"
+            android:exported="false" />
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <service
+            android:name="org.symptomcheck.capstone.alarms.ReminderSchedulingService"
+            android:exported="false" >
+        </service>
+    </application>
+
+</manifest>

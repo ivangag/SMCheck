@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array
+        name="patient_fragments_array">
+        <item>Check-Ins</item>
+        <item>Doctors</item>
+        <item>Settings</item>
+    </string-array>
+
+    <string-array
+        name="doctor_fragments_array">
+        <item>Patients</item>
+        <item>Settings</item>
+    </string-array>
+</resources>
