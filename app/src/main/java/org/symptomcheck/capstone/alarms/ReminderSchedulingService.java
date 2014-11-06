@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.ui.MainActivity;
@@ -22,6 +23,7 @@ import org.symptomcheck.capstone.ui.MainActivity;
  */
 public class ReminderSchedulingService extends IntentService {
 
+    private final String TAG = ReminderSchedulingService.this.getClass().getSimpleName();
     // An ID used to post the notification.
     public static final int NOTIFICATION_ID = 1;
 
@@ -108,11 +110,12 @@ public class ReminderSchedulingService extends IntentService {
     // Post a notification indicating whether a doodle was found.
 
     private void sendNotification(String msg) {
+        Log.i(TAG,"sendNotification");
         mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, MainActivity.class), 0);
+                new Intent(this, MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)

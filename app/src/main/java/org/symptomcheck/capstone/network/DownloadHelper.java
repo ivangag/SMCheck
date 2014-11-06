@@ -4,9 +4,14 @@ package org.symptomcheck.capstone.network;
 
 import org.symptomcheck.capstone.model.UserInfo;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import retrofit.ErrorHandler;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
+import retrofit.android.MainThreadExecutor;
 import retrofit.client.ApacheClient;
 
 /**
@@ -86,6 +91,7 @@ public class DownloadHelper {
             .setEndpoint(GAE_URL_TRUSTED)
             .setLogLevel(RestAdapter.LogLevel.FULL);
 
+    Executor executor = Executors.newSingleThreadExecutor();
     public SymptomManagerSvcApi withRetrofitClient() {
         if(symptomManagerSvcClient == null) {
             symptomManagerSvcClient =
@@ -93,6 +99,7 @@ public class DownloadHelper {
                             .setUsername(this.userName)
                             .setPassword(this.password)
                             .setErrorHandler(error)
+                            //.setExecutors(executor,null)
                             .build()
                             .create(SymptomManagerSvcApi.class);
         }

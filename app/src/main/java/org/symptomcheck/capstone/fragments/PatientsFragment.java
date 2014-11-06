@@ -226,8 +226,6 @@ public class PatientsFragment extends Fragment implements LoaderManager.LoaderCa
         final int mask = ContentResolver.SYNC_OBSERVER_TYPE_PENDING |
                 ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE;
         mSyncObserverHandle = ContentResolver.addStatusChangeListener(mask, mSyncStatusObserver);
-
-        //getActivity().setTitle(R.id.patient_title);
     }
 
     @Override
@@ -257,7 +255,7 @@ public class PatientsFragment extends Fragment implements LoaderManager.LoaderCa
 
         @Override
         protected Card getCardFromCursor(Cursor cursor) {
-            MyCursorCard card = new MyCursorCard(super.getContext());
+            PatientCursorCard card = new PatientCursorCard(super.getContext());
             setCardFromCursor(card,cursor);
 
 
@@ -295,7 +293,7 @@ public class PatientsFragment extends Fragment implements LoaderManager.LoaderCa
             return card;
         }
 
-        private void setCardFromCursor(MyCursorCard card,Cursor cursor) {
+        private void setCardFromCursor(PatientCursorCard card,Cursor cursor) {
 
             card.setId(""+cursor.getInt(ID_COLUMN));
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.FIRST_NAME));
@@ -349,14 +347,14 @@ public class PatientsFragment extends Fragment implements LoaderManager.LoaderCa
     //-------------------------------------------------------------------------------------------------------------
 
 
-    public class MyCursorCard extends Card {
+    public class PatientCursorCard extends Card {
 
         String mainTitle;
         String secondaryTitle;
         String mainHeader;
         int resourceIdThumb;
 
-        public MyCursorCard(Context context) {
+        public PatientCursorCard(Context context) {
             super(context, R.layout.carddemo_cursor_inner_content);
         }
 

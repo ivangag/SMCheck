@@ -34,6 +34,7 @@ import org.symptomcheck.capstone.model.Doctor;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.network.DownloadHelper;
+import org.symptomcheck.capstone.utils.BuildInfo;
 
 import java.util.List;
 
@@ -99,17 +100,12 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
 
-        android.os.Debug.waitForDebugger();  // this line is key
-
+        /*
+        if(BuildInfo.get().IsDebug(getContext())) {
+            android.os.Debug.waitForDebugger();  // this line is key
+        }*/
         Log.i(TAG, "Beginning network synchronization");
-        //Vehicle vehicle = new Vehicle();
-        //vehicle.setVIN("VIN" + count);
-        //vehicle.save();
-        //count++;
         updateLocalData();
-
-
-
         EventBus.getDefault().post(new DownloadEvent.Builder().setStatus(true).setValueEvnt(count).Build());
 
         Log.i(TAG, "Network synchronization complete");

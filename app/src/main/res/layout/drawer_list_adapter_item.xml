@@ -1,22 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_marginTop="3dp"
+    android:layout_marginBottom="3dp"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:showDividers="end">
 
 
     <ImageView
         android:id="@+id/image_drawer_item"
-        android:layout_width="72dp"
-        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:contentDescription="@string/picasso" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
     <TextView
+        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/txtview_drawer_item"
-        android:text="Drawer_Item"
-        style="@style/Theme.Capstone"
-        />
+        android:textAllCaps="false"
+        android:background =  "@drawable/abc_list_divider_mtrl_alpha"
+        android:textColor = "@color/material_blue_grey_800"
+        android:textSize= "18sp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="Drawer_Item" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dip"
+        android:background="#FF909090" />
+    </LinearLayout>
 
 </LinearLayout>

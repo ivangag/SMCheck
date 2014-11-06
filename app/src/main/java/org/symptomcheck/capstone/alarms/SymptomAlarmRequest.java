@@ -9,6 +9,9 @@ import android.content.pm.PackageManager;
 import android.os.SystemClock;
 import android.util.Log;
 
+import org.symptomcheck.capstone.model.UserType;
+import org.symptomcheck.capstone.network.DownloadHelper;
+
 import java.util.Calendar;
 
 /**
@@ -18,6 +21,11 @@ public class SymptomAlarmRequest {
 
     public static int ALARM_REMINDER;
     public static int ALARM_CHECK_ALERTS;
+
+    public enum AlarmRequestedType{
+        ALARM_REMINDER,
+        ALARM_CHECK_ALERTS
+    }
 
     private static SymptomAlarmRequest ourInstance = new SymptomAlarmRequest();
     private AlarmManager alarmReminderMgr;
@@ -31,6 +39,30 @@ public class SymptomAlarmRequest {
     private SymptomAlarmRequest() {
     }
 
+    public void setAlarm(Context ctx,AlarmRequestedType alarmRequestedType){
+        switch (alarmRequestedType){
+            case ALARM_REMINDER:
+                if(DownloadHelper.get().getUser().getUserType() == UserType.PATIENT)
+                    setReminderAlarm(ctx);
+                break;
+            case ALARM_CHECK_ALERTS:
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void cancelAlarm(Context ctx,AlarmRequestedType alarmRequestedType){
+        switch (alarmRequestedType){
+            case ALARM_REMINDER:
+                cancelReminderAlarm(ctx);
+                break;
+            case ALARM_CHECK_ALERTS:
+                break;
+            default:
+                break;
+        }
+    }
 
     // BEGIN_INCLUDE(set_alarm)
     /**
@@ -38,7 +70,7 @@ public class SymptomAlarmRequest {
      * alarm fires, the app broadcasts an Intent to this WakefulBroadcastReceiver.
      * @param context
      */
-    public void setReminderAlarm(Context context) {
+    private void setReminderAlarm(Context context) {
 
         alarmReminderMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, ReminderReceiver.class);
@@ -100,7 +132,7 @@ public class SymptomAlarmRequest {
         // device is rebooted.
         ComponentName receiver = new ComponentName(context, SymptomBootReceiver.class);
         PackageManager pm = context.getPackageManager();
-
+        //AlarmManager.INTERVAL_DAY / N
         pm.setComponentEnabledSetting(receiver,
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                 PackageManager.DONT_KILL_APP);
@@ -115,7 +147,7 @@ public class SymptomAlarmRequest {
      * @param context
      */
     // BEGIN_INCLUDE(cancel_alarm)
-    public void cancelReminderAlarm(Context context) {
+    private void cancelReminderAlarm(Context context) {
         // If the alarm has been set, cancel it.
         if (alarmReminderMgr != null) {
             alarmReminderMgr.cancel(alarmReminderIntent);

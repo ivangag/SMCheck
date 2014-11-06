@@ -14,7 +14,13 @@ import org.apache.commons.io.IOUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 import retrofit.Endpoint;
 import retrofit.ErrorHandler;
@@ -88,75 +94,93 @@ public class SecuredRestBuilder extends RestAdapter.Builder {
 		 * 
 		 */
 		@Override
-		public void intercept(RequestFacade request) {
+		public void intercept(final RequestFacade request) {
 			// If we're not logged in, login and store the authentication token.
+             ExecutorService executor = Executors.newSingleThreadExecutor();
+
+
 			if (!loggedIn) {
-				try {
-					// This code below programmatically builds an OAuth 2.0 password
-					// grant request and sends it to the server. 
-					
-					// Encode the username and password into the body of the request.
-					FormUrlEncodedTypedOutput to = new FormUrlEncodedTypedOutput();
-					to.addField("username", username);
-					to.addField("password", password);
-					
-					// Add the client ID and client secret to the body of the request.
-					to.addField("client_id", clientId);
-					to.addField("client_secret", clientSecret);
-					
-					// Indicate that we're using the OAuth Password Grant Flow
-					// by adding grant_type=password to the body
-					to.addField("grant_type", "password");
-					
-					// The password grant requires BASIC authentication of the client.
-					// In order to do BASIC authentication, we need to concatenate the
-					// client_id and client_secret values together with a colon and then
-					// Base64 encode them. The final value is added to the request as
-					// the "Authorization" header and the value is set to "Basic " 
-					// concatenated with the Base64 client_id:client_secret value described
-					// above.
-					String base64Auth = BaseEncoding.base64().encode(new String(clientId + ":" + clientSecret).getBytes());
-					// Add the basic authorization header
-					List<Header> headers = new ArrayList<Header>();
-					headers.add(new Header("Authorization", "Basic " + base64Auth));
 
-					// Create the actual password grant request using the data above
-					Request req = new Request("POST", tokenIssuingEndpoint, headers, to);
-					
-					// Request the password grant.
-					Response resp = client.execute(req);
-					
-					// Make sure the server responded with 200 OK
-					if (resp.getStatus() < 200 || resp.getStatus() > 299) {
-						// If not, we probably have bad credentials
-						throw new SecuredRestException("Login failure: "
-								+ resp.getStatus() + " - " + resp.getReason());
-					} else {
-						// Extract the string body from the response
+                final Future<?> future  = executor.submit(new Runnable() {
+                      @Override
+                      public void run() {
 
-				        String body = IOUtils.toString(resp.getBody().in());
-						
-						// Extract the access_token (bearer token) from the response so that we
-				        // can add it to future requests.
-						accessToken = new Gson().fromJson(body, JsonObject.class).get("access_token").getAsString();
-						
-						// Add the access_token to this request as the "Authorization"
-						// header.
-						request.addHeader("Authorization", "Bearer " + accessToken);	
-						
-						// Let future calls know we've already fetched the access token
-						loggedIn = true;
-					}
-				} catch (Exception e) {
-					throw new SecuredRestException(e);
-				}
-			}
+                          try {
+                              // This code below programmatically builds an OAuth 2.0 password
+                              // grant request and sends it to the server.
+
+                              // Encode the username and password into the body of the request.
+                              FormUrlEncodedTypedOutput to = new FormUrlEncodedTypedOutput();
+                              to.addField("username", username);
+                              to.addField("password", password);
+
+                              // Add the client ID and client secret to the body of the request.
+                              to.addField("client_id", clientId);
+                              to.addField("client_secret", clientSecret);
+
+                              // Indicate that we're using the OAuth Password Grant Flow
+                              // by adding grant_type=password to the body
+                              to.addField("grant_type", "password");
+
+                              // The password grant requires BASIC authentication of the client.
+                              // In order to do BASIC authentication, we need to concatenate the
+                              // client_id and client_secret values together with a colon and then
+                              // Base64 encode them. The final value is added to the request as
+                              // the "Authorization" header and the value is set to "Basic "
+                              // concatenated with the Base64 client_id:client_secret value described
+                              // above.
+                              String base64Auth = BaseEncoding.base64().encode(new String(clientId + ":" + clientSecret).getBytes());
+                              // Add the basic authorization header
+                              List<Header> headers = new ArrayList<Header>();
+                              headers.add(new Header("Authorization", "Basic " + base64Auth));
+
+                              // Create the actual password grant request using the data above
+                              Request req = new Request("POST", tokenIssuingEndpoint, headers, to);
+
+                              // Request the password grant.
+                              Response resp = client.execute(req);
+
+                              // Make sure the server responded with 200 OK
+                              if (resp.getStatus() < 200 || resp.getStatus() > 299) {
+                                  // If not, we probably have bad credentials
+                                  throw new SecuredRestException("Login failure: "
+                                          + resp.getStatus() + " - " + resp.getReason());
+                              } else {
+                                  // Extract the string body from the response
+
+                                  String body = IOUtils.toString(resp.getBody().in());
+
+                                  // Extract the access_token (bearer token) from the response so that we
+                                  // can add it to future requests.
+                                  accessToken = new Gson().fromJson(body, JsonObject.class).get("access_token").getAsString();
+
+                                  // Add the access_token to this request as the "Authorization"
+                                  // header.
+                                  request.addHeader("Authorization", "Bearer " + accessToken);
+
+                                  // Let future calls know we've already fetched the access token
+                                  loggedIn = true;
+                              }
+                          } catch (Exception e) {
+                              throw new SecuredRestException(e);
+                          }
+
+                      }
+                  });
+                try {
+                    future.get();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
 			else {
 				// Add the access_token that we previously obtained to this request as 
 				// the "Authorization" header.
 				request.addHeader("Authorization", "Bearer " + accessToken );
 			}
-		}
+        }
 
 	}
 

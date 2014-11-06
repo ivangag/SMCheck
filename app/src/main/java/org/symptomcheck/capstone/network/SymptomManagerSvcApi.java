@@ -8,7 +8,9 @@ import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.UserInfo;
 
 import java.util.Collection;
+import java.util.concurrent.Callable;
 
+import retrofit.Callback;
 import retrofit.http.Body;
 import retrofit.http.GET;
 import retrofit.http.POST;
@@ -48,6 +50,10 @@ public interface SymptomManagerSvcApi {
 
     @GET(value="/userinfo")
     public UserInfo verifyUser();
+
+    @GET(value="/userinfo")
+    public void verifyUser(Callback<UserInfo> userInfoCallback);
+
 
     @GET(DOCTOR_SVC_PATH)
     public Collection<Doctor> getDoctorList();

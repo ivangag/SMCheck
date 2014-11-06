@@ -76,10 +76,12 @@ public class MainActivity extends Activity {
         mTextViewHeaderUser = (TextView) findViewById(R.id.txt_header_user);
         mTextViewUserDetails = (TextView) findViewById(R.id.txt_header_user_details);
 
+        //mDrawerList.addHeaderView(mTextViewHeaderUser);
+
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // Set the adapter for the list view
-        final DrawerItemAdapter mDrawerItemAdapter = new DrawerItemAdapter(mFragmentTitles);
+        final DrawerItemAdapter mDrawerItemAdapter = new DrawerItemAdapter(getApplicationContext(),mFragmentTitles);
 
         //mDrawerList.setAdapter(new ArrayAdapter<String>(this,
                 //R.layout.drawer_list_item, mFragmentTitles));
@@ -106,7 +108,6 @@ public class MainActivity extends Activity {
                 super.onDrawerOpened(drawerView);
                 getActionBar().setTitle(mDrawerTitle);
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-                mDrawerItemAdapter.notifyDataSetChanged();
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
@@ -114,7 +115,9 @@ public class MainActivity extends Activity {
         mTextViewHeaderUser.setText(user.getUserType().toString().toUpperCase() + "\n"
             + "[" + user.getUserIdentification() + "]");
         mTextViewUserDetails.setText(
-                user.getFirstName() + " " + user.getLastName());
+                user.getUserType().toString().toUpperCase()
+                        + "\n"
+                        + user.getFirstName() + " " + user.getLastName());
 
     }
     /* Called whenever we call invalidateOptionsMenu() */

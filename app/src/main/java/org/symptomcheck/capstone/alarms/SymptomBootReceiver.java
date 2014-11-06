@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import org.symptomcheck.capstone.model.UserType;
+import org.symptomcheck.capstone.network.DownloadHelper;
+
 /**
  * This BroadcastReceiver automatically (re)starts the alarm when the device is
  * rebooted. This receiver is set to be disabled (android:enabled="false") in the
@@ -22,7 +25,7 @@ public class SymptomBootReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED"))
         {
-            SymptomAlarmRequest.get().setReminderAlarm(context);
+           SymptomAlarmRequest.get().setAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_REMINDER);
         }
         Log.i(TAG,"SymptomBootReceiver=>onReceive");
     }

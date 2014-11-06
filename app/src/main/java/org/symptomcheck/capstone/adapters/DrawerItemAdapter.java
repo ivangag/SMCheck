@@ -1,6 +1,7 @@
 package org.symptomcheck.capstone.adapters;
 
 import android.app.Activity;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,19 +18,21 @@ import java.util.List;
  */
 public class DrawerItemAdapter extends BaseAdapter {
 
+    private final Context mContext;
     private String[] mItems;
 
-    public DrawerItemAdapter(String[] items){
+    public DrawerItemAdapter(Context context, String[] items){
+        mContext = context;
         mItems = items;
     }
     @Override
     public int getCount() {
-        return 0;
+        return (mItems != null ? mItems.length : 0);
     }
 
     @Override
     public Object getItem(int i) {
-        return null;
+        return (mItems != null ? mItems[i] : "");
     }
 
     @Override
@@ -43,9 +46,9 @@ public class DrawerItemAdapter extends BaseAdapter {
 
         if (convertView == null) {
             LayoutInflater inflater = ((Activity) viewGroup.getContext()).getLayoutInflater();
-            convertView = inflater.inflate(R.layout.drawer_list_adapter_item, null);
+            convertView = inflater.inflate(R.layout.drawer_list_adapter_item, viewGroup,false);
             holder = new ViewHolder();
-            holder.text = (TextView) convertView.findViewById(R.id.title);
+            holder.text = (TextView) convertView.findViewById(R.id.txtview_drawer_item);
             holder.imageView = (ImageView) convertView.findViewById(R.id.image_drawer_item);
 
             convertView.setTag(holder);
@@ -53,8 +56,8 @@ public class DrawerItemAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         holder.position = position;
-        holder.text.setText(mItems[position]);
-        //holder.imageView.setImageDrawable(R.drawable.ic_doctor);
+        holder.text.setText((CharSequence) getItem(position));
+        holder.imageView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_doctor));
         return  convertView;
     }
 
