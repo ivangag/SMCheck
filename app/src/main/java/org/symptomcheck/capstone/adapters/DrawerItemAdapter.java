@@ -19,20 +19,20 @@ import java.util.List;
 public class DrawerItemAdapter extends BaseAdapter {
 
     private final Context mContext;
-    private String[] mItems;
+    private List<DrawerItem> mItems;
 
-    public DrawerItemAdapter(Context context, String[] items){
+    public DrawerItemAdapter(Context context, List<DrawerItem> items){
         mContext = context;
         mItems = items;
     }
     @Override
     public int getCount() {
-        return (mItems != null ? mItems.length : 0);
+        return (mItems != null ? mItems.size() : 0);
     }
 
     @Override
-    public Object getItem(int i) {
-        return (mItems != null ? mItems[i] : "");
+    public DrawerItem getItem(int i) {
+        return (mItems != null ? mItems.get(i) : null);
     }
 
     @Override
@@ -56,8 +56,10 @@ public class DrawerItemAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         holder.position = position;
-        holder.text.setText((CharSequence) getItem(position));
-        holder.imageView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_doctor));
+        DrawerItem item = getItem(position);
+        holder.text.setText(item.getTextTitle());
+        //holder.imageView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_doctor));
+        holder.imageView.setImageDrawable(mContext.getResources().getDrawable(item.getDrawableResource()));
         return  convertView;
     }
 

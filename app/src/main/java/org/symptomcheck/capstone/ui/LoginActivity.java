@@ -6,7 +6,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,7 +29,6 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
-import org.symptomcheck.capstone.alarms.ReminderReceiver;
 import org.symptomcheck.capstone.alarms.SymptomAlarmRequest;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.UserInfo;
@@ -40,10 +38,10 @@ import org.symptomcheck.capstone.utils.UserPreferencesManager;
 
 import java.io.IOException;
 import java.util.List;
-
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 
 /**
@@ -278,8 +276,7 @@ public class LoginActivity extends Activity{
                 userInfo.setLogged(true);
                 DownloadHelper.get().setUser(userInfo);
                 DAOManager.get().saveUser(userInfo);
-
-                handleRegistrationRequest();
+                handleGCMRegistrationRequest(getApplicationContext());
             } catch (Exception e) {
                 Log.e(TAG,"Error on verifyUser: " + e.getMessage());
                 return false;
@@ -331,11 +328,11 @@ public class LoginActivity extends Activity{
         return registrationId;
     }
 
-    public void handleRegistrationRequest() {
+    public void handleGCMRegistrationRequest(Context context) {
         // Check device for Play Services APK. If check succeeds, proceed with GCM registration.
-        if (checkPlayServices()) {
-            gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
-            regid = getRegistrationId(getApplicationContext());
+        if (checkPlayServices(context)) {
+            gcm = GoogleCloudMessaging.getInstance(context);
+            regid = getRegistrationId(context);
              if (regid.isEmpty()) {
                 registerInBackground();
             }
@@ -350,6 +347,7 @@ public class LoginActivity extends Activity{
             if (gcm == null) {
                 gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
             }
+
             regid = gcm.register(SENDER_CAPSTONE_ID);
             msg = "Device registered, registration ID=" + regid;
 
@@ -364,7 +362,8 @@ public class LoginActivity extends Activity{
             // 'from' address in the message.
 
             // Persist the regID - no need to register again.
-            UserPreferencesManager.get().setGcmRegId(getApplicationContext(),regid);
+            UserPreferencesManager.get().setGcmRegId(getApplicationContext(), regid);
+            UserPreferencesManager.get().setAppVers(getApplicationContext(), BuildInfo.get().getAppVersion(getApplicationContext()));
         } catch (IOException ex) {
             msg = "Error :" + ex.getMessage();
             // If there is an error, don't just keep trying to register.
@@ -373,17 +372,28 @@ public class LoginActivity extends Activity{
         }
     }
 
+
     /**
      * Check the device to make sure it has the Google Play Services APK. If
      * it doesn't, display a dialog that allows users to download the APK from
      * the Google Play Store or enable it in the device's system settings.
+     * @param context
      */
-    private boolean checkPlayServices() {
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
+    private boolean checkPlayServices(final Context context) {
+        final int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
         if (resultCode != ConnectionResult.SUCCESS) {
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
-                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+                if(context instanceof Activity){
+                    ((Activity)context).runOnUiThread(
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    GooglePlayServicesUtil.getErrorDialog(resultCode,  ((Activity)context),
+                                            PLAY_SERVICES_RESOLUTION_REQUEST).show();
+                                }
+                            }
+                    );
+                }
             } else {
                 Log.i(TAG, "This device is not supported.");
                 finish();

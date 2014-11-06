@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
@@ -14,7 +13,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -23,12 +21,16 @@ import android.widget.Toast;
 import com.squareup.picasso.Picasso;
 
 import org.symptomcheck.capstone.R;
+import org.symptomcheck.capstone.adapters.DrawerItem;
 import org.symptomcheck.capstone.adapters.DrawerItemAdapter;
 import org.symptomcheck.capstone.bus.DownloadEvent;
 import org.symptomcheck.capstone.fragments.PatientsFragment;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.network.DownloadHelper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
@@ -38,6 +40,7 @@ public class MainActivity extends Activity {
     String TAG = "MainActivity" ;
     ImageView mImageView;
     private String[] mFragmentTitles;
+    private int[] mDrawerImagesResources;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private CharSequence mTitle;
@@ -65,10 +68,14 @@ public class MainActivity extends Activity {
 
 
         final UserType userType = DownloadHelper.get().getUser().getUserType();
-        if(userType == UserType.PATIENT)
+        if(userType == UserType.PATIENT) {
             mFragmentTitles = getResources().getStringArray(R.array.patient_fragments_array);
-        else if(userType == UserType.DOCTOR)
+            mDrawerImagesResources = new int[]{R.drawable.ic_patient, R.drawable.ic_doctor,  R.drawable.ic_action_refresh };
+        }
+        else if(userType == UserType.DOCTOR) {
             mFragmentTitles = getResources().getStringArray(R.array.doctor_fragments_array);
+            mDrawerImagesResources = new int[]{R.drawable.ic_patient,R.drawable.ic_action_search };
+        }
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
@@ -81,7 +88,11 @@ public class MainActivity extends Activity {
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // Set the adapter for the list view
-        final DrawerItemAdapter mDrawerItemAdapter = new DrawerItemAdapter(getApplicationContext(),mFragmentTitles);
+        List<DrawerItem> drawerItems = new ArrayList<DrawerItem>();
+        for(int idx=0; idx < mFragmentTitles.length; idx++){
+            drawerItems.add(new DrawerItem(mFragmentTitles[idx],mDrawerImagesResources[idx]));
+        }
+        final DrawerItemAdapter mDrawerItemAdapter = new DrawerItemAdapter(getApplicationContext(),drawerItems);
 
         //mDrawerList.setAdapter(new ArrayAdapter<String>(this,
                 //R.layout.drawer_list_item, mFragmentTitles));
@@ -226,7 +237,7 @@ public class MainActivity extends Activity {
     String urlPicassoTest = "http://chart.apis.google.com/chart?cht=p3&chs=500x200&chd=e:TNTNTNGa&chts=000000,16&chtt=A+Better+Web&chl=Hello|Hi|anas|Explorer&chco=FF5533,237745,9011D3,335423&chdl=Apple|Mozilla|Google|Microsoft";
 
     String getUrlPicassoTest2 = "http://i.imgur.com/DvpvklR.png";
-    String urlPatientTest ="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcTgp2tcphDVdowiI3KBPPs-fI9J1_gv5xpp-J0jWEkHTPXYRZzL2BulSxg";
+    String urlDoctorTest ="https://cdn0.iconfinder.com/data/icons/customicondesign-office6-shadow/256/doctor.png";
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -243,8 +254,10 @@ public class MainActivity extends Activity {
 
         if(id == R.id.action_test){
             try {
-                Picasso.with(this).load(urlPatientTest).resize(96, 96)
-                        .centerCrop().into(mImageView);
+                Picasso.with(this).load(urlDoctorTest)
+                        //.resize(96, 96)
+                        //.centerCrop()
+                        .into(mImageView);
             }catch (Exception e){
                 Toast.makeText(this, "Picasso error:" + e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
             }
