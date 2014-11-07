@@ -112,7 +112,8 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     void updateLocalData(){
-       final UserInfo user = DownloadHelper.get().getUser();
+       //final UserInfo user = DownloadHelper.get().getUser();
+        final UserInfo user = DAOManager.get().getUser();
         Log.i(TAG, "updateLocalData with: " + user.toString());
        if(user.isLogged()){
            switch (user.getUserType()){

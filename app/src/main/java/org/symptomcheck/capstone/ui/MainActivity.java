@@ -24,6 +24,7 @@ import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.adapters.DrawerItem;
 import org.symptomcheck.capstone.adapters.DrawerItemAdapter;
 import org.symptomcheck.capstone.bus.DownloadEvent;
+import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.fragments.PatientsFragment;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
@@ -37,9 +38,11 @@ import de.greenrobot.event.EventBus;
 
 public class MainActivity extends Activity {
 
-    String TAG = "MainActivity" ;
+    private final String TAG = MainActivity.this.getClass().getSimpleName();
+
+
     ImageView mImageView;
-    private String[] mFragmentTitles;
+    private String[] mFragmentTitles = new String[]{};
     private int[] mDrawerImagesResources;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -48,7 +51,7 @@ public class MainActivity extends Activity {
     private CharSequence mDrawerTitle;
     private TextView mTextViewHeaderUser;
     private TextView mTextViewUserDetails;
-    UserInfo user = DownloadHelper.get().getUser();
+
     private Fragment mBaseFragment;
     private int mSelectedFragment;
 
@@ -58,6 +61,7 @@ public class MainActivity extends Activity {
     private static final int CASE_PATIENT_DOCTORS = 1;
     private static final int CASE_PATIENT_SETTINGS = 2;
 
+    private UserInfo user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,8 +70,11 @@ public class MainActivity extends Activity {
 
         mTitle = mDrawerTitle = getTitle();
 
+        //final UserType userType = DownloadHelper.get().getUser().getUserType();
 
-        final UserType userType = DownloadHelper.get().getUser().getUserType();
+        user = DAOManager.get().getUser();
+        final UserType userType = DAOManager.get().getUser().getUserType();
+
         if(userType == UserType.PATIENT) {
             mFragmentTitles = getResources().getStringArray(R.array.patient_fragments_array);
             mDrawerImagesResources = new int[]{R.drawable.ic_patient, R.drawable.ic_doctor,  R.drawable.ic_action_refresh };

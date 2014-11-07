@@ -71,7 +71,7 @@ public class Doctor extends Model implements IModelBuilder {
   	private Set<String> patients = new HashSet<String>();
 
     @Column
-    private String[] patientsList = new String[]{};
+    private transient String[] patientsList = new String[]{};
   
 	@Override
 	public String toString() {

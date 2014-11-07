@@ -87,8 +87,19 @@ public class DAOManager {
         }
     }
 
+    public UserInfo getUser() {
+        return new ActiveHandler<UserInfo>().getItem(UserInfo.class);
+    }
+
 
     class ActiveHandler<T extends Model> {
+
+        public T getItem(Class<T> objectType){
+            return new Select().
+                    from(objectType)
+                            //.where("CustomerUniqueId = ?", Ancodice)
+                    .executeSingle();
+        }
 
           public List<T> getItems(Class<T> objectType){
             return new Select().

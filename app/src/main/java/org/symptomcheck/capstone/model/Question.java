@@ -20,7 +20,7 @@ public class Question extends Model implements IModelBuilder{
 	private QuestionType questionType;
 
     @Column(name = "CheckIn")
-    public CheckIn checkIn;
+    public transient CheckIn checkIn;
 	
 	public Question(){}
 	public Question(String question, String response, QuestionType questionType, String medicatationTakingTime){

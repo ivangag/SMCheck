@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.os.SystemClock;
 import android.util.Log;
 
+import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.network.DownloadHelper;
 
@@ -42,7 +43,7 @@ public class SymptomAlarmRequest {
     public void setAlarm(Context ctx,AlarmRequestedType alarmRequestedType){
         switch (alarmRequestedType){
             case ALARM_REMINDER:
-                if(DownloadHelper.get().getUser().getUserType() == UserType.PATIENT)
+                if(DAOManager.get().getUser().getUserType() == UserType.PATIENT)
                     setReminderAlarm(ctx);
                 break;
             case ALARM_CHECK_ALERTS:

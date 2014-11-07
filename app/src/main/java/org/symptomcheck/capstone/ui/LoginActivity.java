@@ -31,13 +31,18 @@ import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.alarms.SymptomAlarmRequest;
 import org.symptomcheck.capstone.dao.DAOManager;
+import org.symptomcheck.capstone.model.CheckIn;
+import org.symptomcheck.capstone.model.FeedStatus;
+import org.symptomcheck.capstone.model.PainLevel;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.utils.BuildInfo;
 import org.symptomcheck.capstone.utils.UserPreferencesManager;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -79,6 +84,7 @@ public class LoginActivity extends Activity{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         // Set up the login form.
@@ -272,9 +278,19 @@ public class LoginActivity extends Activity{
             try {
                 // Simulate network access.
                 //Thread.sleep(2000);
+                //test addCheckin patient
+                Map<String,String> meds = new HashMap<String,String>();
+
+                meds.put("XXX","YES");
+                meds.put("YYY","YES");
+                meds.put("ZZZ","NO");
+
+                CheckIn checkIn = CheckIn.createDummyCheckIn(PainLevel.SEVERE, FeedStatus.SOME,meds);
+                checkIn = DownloadHelper.get().setUserName("patient002").setPassword("pass").withRetrofitClient().addCheckIn("patient003",checkIn);
+
                 userInfo = DownloadHelper.get().setUserName(mEmail).setPassword(mPassword).withRetrofitClient().verifyUser();
                 userInfo.setLogged(true);
-                DownloadHelper.get().setUser(userInfo);
+                //DownloadHelper.get().setUser(userInfo);
                 DAOManager.get().saveUser(userInfo);
                 handleGCMRegistrationRequest(getApplicationContext());
             } catch (Exception e) {

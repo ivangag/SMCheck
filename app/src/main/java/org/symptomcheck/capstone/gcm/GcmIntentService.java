@@ -29,6 +29,7 @@ import android.util.Log;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.symptomcheck.capstone.R;
+import org.symptomcheck.capstone.ui.LoginActivity;
 import org.symptomcheck.capstone.ui.MainActivity;
 
 /**
@@ -94,15 +95,16 @@ public class GcmIntentService extends IntentService {
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, MainActivity.class), 0);
+                new Intent(this, LoginActivity.class), 0);
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
-        .setSmallIcon(R.drawable.ic_doctor)
-        .setContentTitle("GCM Notification")
-        .setStyle(new NotificationCompat.BigTextStyle()
-        .bigText(msg))
-        .setContentText(msg);
+                    .setSmallIcon(R.drawable.ic_doctor)
+                    .setContentTitle("GCM Notification")
+                    .setStyle(new NotificationCompat.BigTextStyle()
+                            .bigText(msg))
+                    .setAutoCancel(true)
+                    .setContentText(msg);
 
         mBuilder.setContentIntent(contentIntent);
         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
