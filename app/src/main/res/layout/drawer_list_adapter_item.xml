@@ -5,6 +5,7 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/btn_cab_done_capstone"
     android:showDividers="end">
 
 
@@ -22,23 +23,25 @@
         android:layout_marginBottom="8dp"
         android:orientation="vertical">
     <TextView
-        android:gravity="center"
+        android:gravity="start"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/txtview_drawer_item"
         android:textAllCaps="false"
-        android:background =  "@drawable/abc_list_divider_mtrl_alpha"
         android:textColor = "@color/material_blue_grey_800"
-        android:textSize= "18sp"
+        android:textSize= "16sp"
         android:layout_marginTop="2dp"
         android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:text="Drawer_Item" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0.1dp"
-        android:background="#FF909090" />
-
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.1dp"
+            android:background="#FF909090" />
     </LinearLayout>
+
+
 
 </LinearLayout>
