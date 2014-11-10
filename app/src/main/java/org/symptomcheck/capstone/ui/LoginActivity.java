@@ -112,7 +112,7 @@ public class LoginActivity extends Activity{
 
         if(UserPreferencesManager.get().getLoginRememberMe(this)
                 && (DAOManager.get().getUser() !=  null)
-                && (DAOManager.get().getUser().isLogged()))
+                && (DAOManager.get().getUser().getLogged()))
             attemptLogin();
     }
 
@@ -135,7 +135,9 @@ public class LoginActivity extends Activity{
         // Store values at the time of the login attempt.
         final String email;
         final String password;
-        if(UserPreferencesManager.get().getLoginRememberMe(this)){
+        if(UserPreferencesManager.get().getLoginRememberMe(this)
+                && (DAOManager.get().getUser() !=  null)
+                && (DAOManager.get().getUser().getLogged())){
             email = UserPreferencesManager.get().getLoginUsername(this);
             password = UserPreferencesManager.get().getLoginPassword(this);
         }else{
@@ -325,12 +327,7 @@ public class LoginActivity extends Activity{
     public void handleGCMRegistrationRequest(Context context) {
         // Check device for Play Services APK. If check succeeds, proceed with GCM registration.
         if (checkPlayServices(context)) {
-            //gcm = GoogleCloudMessaging.getInstance(context);
-            //regid = getRegistrationId(context);
-             //if (regid.isEmpty()) {
-                /*registerInBackground();*/
-                 GcmRegistrationService.startDeviceRegistration(context);
-            //}
+            GcmRegistrationService.startDeviceRegistration(context);
         } else {
             Log.i(TAG, "No valid Google Play Services APK found.");
         }

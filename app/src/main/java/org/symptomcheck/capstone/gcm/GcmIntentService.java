@@ -29,6 +29,7 @@ import android.util.Log;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.symptomcheck.capstone.R;
+import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.ui.LoginActivity;
 import org.symptomcheck.capstone.ui.MainActivity;
 
@@ -79,6 +80,9 @@ public class GcmIntentService extends IntentService {
                 // Post notification of received message.
                 sendNotification("Received: " + extras.toString());
                 Log.i(TAG, "Received: " + extras.toString());
+
+                //!!!!!!!!!!!!!!!!ONLY FOR TEST PURPOSE!!!!!!!!!!!!!!!!///
+                SyncUtils.TriggerRefresh();
             }
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.

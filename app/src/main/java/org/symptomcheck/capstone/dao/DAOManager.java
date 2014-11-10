@@ -8,6 +8,7 @@ import com.activeandroid.query.Select;
 import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.Doctor;
 import org.symptomcheck.capstone.model.IModelBuilder;
+import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.Question;
 import org.symptomcheck.capstone.model.UserInfo;
@@ -30,13 +31,19 @@ public class DAOManager {
     private DAOManager() {
     }
 
-    public List<Patient> getPatients(){
-        return Patient.getAll();
-    }
-
     public synchronized boolean saveUser(UserInfo userInfo){
         new ActiveHandler<UserInfo>().deleteItems(UserInfo.class);
         return userInfo.save() > 0;
+    }
+
+    /**
+     *
+     * @param doctors
+     * @param userIdentification
+     */
+    public synchronized void saveDoctors(List<Doctor> doctors, String userIdentification) {
+        this.deleteDoctors(userIdentification);
+        (new ActiveHandler<Doctor>()).saveItems(doctors);
     }
 
     /**
@@ -50,11 +57,16 @@ public class DAOManager {
     /**
      * Doctor user saving patients
      */
-    public synchronized void deletePatients(String userIdentification) {
+    private synchronized void deletePatients(String userIdentification) {
         //delete the foreign key objects also
         (new ActiveHandler<Question>()).deleteItems(Question.class);
         (new ActiveHandler<CheckIn>()).deleteItems(CheckIn.class);
         (new ActiveHandler<Patient>()).deleteItems(Patient.class);
+    }
+
+    private synchronized void deleteDoctors(String userIdentification) {
+        //delete the foreign key objects also
+        (new ActiveHandler<Doctor>()).deleteItems(Doctor.class);
     }
 
     public synchronized void saveCheckIns(List<CheckIn> checkIns, String medicalRecordNumber, String userIdentification) {
@@ -90,6 +102,11 @@ public class DAOManager {
     public UserInfo getUser() {
         return new ActiveHandler<UserInfo>().getItem(UserInfo.class);
     }
+
+    public synchronized void savePainMedications(List<PainMedication> medications, String medicalRecordNumber, String userIdentification) {
+        new ActiveHandler<PainMedication>().saveItems(medications);
+    }
+
 
 
     class ActiveHandler<T extends Model> {

@@ -27,14 +27,18 @@ import android.os.Bundle;
 import android.util.Log;
 
 
+import com.google.common.collect.Lists;
+
 import org.symptomcheck.capstone.bus.DownloadEvent;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.Doctor;
+import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.network.DownloadHelper;
-import org.symptomcheck.capstone.utils.BuildInfo;
+import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
+import org.symptomcheck.capstone.utils.UserPreferencesManager;
 
 import java.util.List;
 
@@ -53,6 +57,8 @@ import retrofit.RetrofitError;
 class SyncAdapter extends AbstractThreadedSyncAdapter {
     public final String TAG = SyncAdapter.this.getClass().getSimpleName();
 
+    private SymptomManagerSvcApi mSymptomClient;
+
     /**
      * Constructor. Obtains handle to content resolver for later use.
      */
@@ -69,6 +75,7 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
         super(context, autoInitialize, allowParallelSyncs);
         //mContentResolver = context.getContentResolver();
     }
+
 
     static Integer count = 0;
     /**
@@ -90,10 +97,15 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
 
+        String username = UserPreferencesManager.get().getLoginUsername(getContext());
+        String password = UserPreferencesManager.get().getLoginPassword(getContext());
+
+        mSymptomClient = DownloadHelper.get().setUserName(username).setPassword(password).withRetrofitClient();
         /*
         if(BuildInfo.get().IsDebug(getContext())) {
-            android.os.Debug.waitForDebugger();  // this line is key
+
         }*/
+        //android.os.Debug.waitForDebugger();  // this line is key
         Log.i(TAG, "Beginning network synchronization");
         updateLocalData();
         EventBus.getDefault().post(new DownloadEvent.Builder().setStatus(true).setValueEvnt(count).Build());
@@ -106,18 +118,21 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
        final UserInfo user = DAOManager.get().getUser();
        if(user != null) {
            Log.i(TAG, "updateLocalData with: " + user.toString());
-           if (user.isLogged()) {
+           if (user.getLogged()) {
                switch (user.getUserType()) {
                    case DOCTOR:
-                       //get and save Patients
-                       List<Patient> patients = syncPatients(user);
-                       //get and save Patients' Check-Ins
-                       syncPatientsCheckIns(user, patients);
+                       // get and save Doctor detail
+                       syncDoctorBaseInfo(user);
+                       //get and save Doctor's Patients
+                       syncDoctorPatients(user);
+                       //sync All Patients's information
+                       syncAllPatientsInfo(user);
                        break;
                    case PATIENT:
-                       // get and save Check-Ins Data
-
-                       // get and save Medication
+                       // get and save Patient detail
+                       syncPatientBaseInfo(user);
+                       //sync All Patient's information
+                       syncAllPatientsInfo(user);
                        break;
                    case ADMIN:
                        break;
@@ -128,14 +143,47 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
        }
     }
 
-    private List<Patient> syncPatients(UserInfo user) {
+    private void syncAllPatientsInfo(UserInfo user){
+        final List<Patient> patients = Patient.getAll();
+        //get and save Patients' Check-Ins
+        syncPatientsCheckIns(user, patients);
+        //get and save Patients' Medicines
+        syncPatientsMedicines(user, patients);
+    }
+
+    private void syncPatientBaseInfo(UserInfo user) {
+        try {
+            Patient patient = mSymptomClient.findPatientByMedicalRecordNumber(user.getUserIdentification());
+            //patient.save();
+            DAOManager.get().savePatients(Lists.newArrayList(patient),user.getUserIdentification());
+        }catch (RetrofitError e){
+            Log.e(TAG, "Retrofit:" + e.getMessage() + ";" + e.getResponse());
+        }catch (Exception e){
+            Log.e(TAG,"Error syncPatientBaseInfo:" + e.getMessage());
+        }
+    }
+
+
+    private void syncDoctorBaseInfo(UserInfo user){
+        try {
+            Doctor doctor = mSymptomClient.findDoctorByUniqueDoctorID(user.getUserIdentification());
+            //doctor.save();
+            DAOManager.get().saveDoctors(Lists.newArrayList(doctor),user.getUserIdentification());
+        }catch (RetrofitError e){
+            Log.e(TAG, "Retrofit:" + e.getMessage() + ";" + e.getResponse());
+        }catch (Exception e){
+            Log.e(TAG,"Error syncDoctorBaseInfo:" + e.getMessage());
+        }
+    }
+
+    private List<Patient> syncDoctorPatients(UserInfo user) {
         List<Patient> patients = null;
 
         try {
-             patients = (List<Patient>) DownloadHelper.get().withRetrofitClient().findPatientsByDoctor(user.getUserIdentification());
+             patients = (List<Patient>) mSymptomClient.findPatientsByDoctor(user.getUserIdentification());
              DAOManager.get().savePatients(patients,user.getUserIdentification());
         }catch (RetrofitError e){
-            Log.e(TAG, "Retrofit:" + e.getMessage());
+            Log.e(TAG, "Retrofit:" + e.getMessage() + ";" + e.getResponse());
         }catch (Exception e){
             Log.e(TAG,"Error savePatients:" + e.getMessage());
         }
@@ -148,7 +196,7 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
         try {
             if(patients != null){
                 for(Patient patient : patients){
-                    List<CheckIn> checkIns = (List<CheckIn>) DownloadHelper.get().withRetrofitClient().findCheckInsByPatient(patient.getMedicalRecordNumber());
+                    List<CheckIn> checkIns = (List<CheckIn>) mSymptomClient.findCheckInsByPatient(patient.getMedicalRecordNumber());
                     if((checkIns != null)&& (checkIns.size() > 0))
                         DAOManager.get().saveCheckIns(checkIns, patient.getMedicalRecordNumber(),user.getUserIdentification());
                 }
@@ -156,10 +204,33 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
                 Log.e(TAG, "syncPatientsCheckIns=> sync not possible: patients = null!");
             }
         }catch (RetrofitError e){
-            Log.e(TAG, "syncPatientsCheckIns=>Retrofit:" + e.getMessage());
+            Log.e(TAG, "syncPatientsCheckIns=>Retrofit:" + e.getMessage() + ";" + e.getResponse());
             sync = false;
         }catch (Exception e){
             Log.e(TAG,"syncPatientsCheckIns=>Error saveCheckIns:" + e.getMessage());
+            sync = false;
+        }
+        return sync;
+    }
+
+    private boolean syncPatientsMedicines(UserInfo user, List<Patient> patients) {
+        boolean sync = true;
+
+        try {
+            if(patients != null){
+                for(Patient patient : patients){
+                    List<PainMedication> medications = (List<PainMedication>) mSymptomClient.findPainMedicationsByPatient(patient.getMedicalRecordNumber());
+                    if((medications != null)&& (medications.size() > 0))
+                        DAOManager.get().savePainMedications(medications, patient.getMedicalRecordNumber(), user.getUserIdentification());
+                }
+            }else {
+                Log.e(TAG, "syncPatientsMedicines=> sync not possible: patients = null!");
+            }
+        }catch (RetrofitError e){
+            Log.e(TAG, "syncPatientsMedicines=>Retrofit:" + e.getMessage() + ";" + e.getResponse());
+            sync = false;
+        }catch (Exception e){
+            Log.e(TAG,"syncPatientsMedicines=>Error saveCheckIns:" + e.getMessage());
             sync = false;
         }
         return sync;

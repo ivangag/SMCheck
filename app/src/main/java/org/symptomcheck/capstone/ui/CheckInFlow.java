@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.dao.DAOManager;
+import org.symptomcheck.capstone.model.UserInfo;
 
 public class CheckInFlow extends Activity implements ActionBar.TabListener {
 
@@ -41,17 +42,21 @@ public class CheckInFlow extends Activity implements ActionBar.TabListener {
      */
     ViewPager mViewPager;
 
+    UserInfo mUser;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_in_flow);
 
+        mUser = DAOManager.get().getUser();
+
         // Set up the action bar.
         final ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         actionBar.setTitle(
-                DAOManager.get().getUser().getFirstName()
-                + " " + DAOManager.get().getUser().getLastName()
+                mUser.getFirstName()
+                + " " + mUser.getLastName()
                 + " " + "Check-In");
 
         // Create the adapter that will return a fragment for each of the three

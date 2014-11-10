@@ -7,12 +7,19 @@ import android.content.Context;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.common.collect.Lists;
 
+import org.symptomcheck.capstone.dao.DAOManager;
+import org.symptomcheck.capstone.model.Doctor;
+import org.symptomcheck.capstone.model.Patient;
+import org.symptomcheck.capstone.model.UserInfo;
+import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.utils.BuildInfo;
 import org.symptomcheck.capstone.utils.UserPreferencesManager;
 
 import java.io.IOException;
+import java.util.List;
 
 import retrofit.RetrofitError;
 
@@ -92,7 +99,9 @@ public class GcmRegistrationService extends IntentService {
     private void handleDeviceRegistration(String param1, String param2) {
         gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
         regid = getRegistrationId(getApplicationContext());
-        if (regid.isEmpty()) {
+        final boolean hasUserGcmId = this.getRemoteGCMIds().contains(regid);
+        if (regid.isEmpty()
+                || !hasUserGcmId) {
                 /*registerInBackground();*/
             registerInBackground();
         }
@@ -108,10 +117,10 @@ public class GcmRegistrationService extends IntentService {
             regid = gcm.register(SENDER_CAPSTONE_ID);
             msg = "Device registered, registration ID=" + regid;
 
+
             // You should send the registration ID to your server over HTTP, so it
             // can use GCM/HTTP or CCS to send messages to your app.
-             DownloadHelper.get().withRetrofitClient().sendGCMRegistrationId(regid);
-
+            DownloadHelper.get().withRetrofitClient().sendGCMRegistrationId(regid);
             // Persist the regID - no need to register again.
             UserPreferencesManager.get().setGcmRegId(getApplicationContext(), regid);
             UserPreferencesManager.get().setAppVers(getApplicationContext(),
@@ -175,6 +184,25 @@ public class GcmRegistrationService extends IntentService {
             return "";
         }
         return registrationId;
+    }
+
+    public List<String> getRemoteGCMIds(){
+        //Retrieve gcm reg_ids for the current user
+        final UserInfo user = DAOManager.get().getUser();
+        List<String> gcmIds = Lists.newArrayList();
+        if(user.getUserType().equals(UserType.PATIENT)){
+            Patient patient = DownloadHelper.get().withRetrofitClient().findPatientByMedicalRecordNumber(user.getUserIdentification());
+             if(patient != null)
+                gcmIds = patient.getGcmRegistrationIds();
+        }else if(user.getUserType().equals(UserType.DOCTOR)){
+            Doctor doctor = DownloadHelper.get().withRetrofitClient().findDoctorByUniqueDoctorID(user.getUserIdentification());
+            if(doctor != null)
+                gcmIds =  doctor.getGcmRegistrationIds();
+        }
+        for(int i=0; i<gcmIds.size(); i++){
+            gcmIds.set(i,gcmIds.get(i).replace("\"",""));
+        }
+        return gcmIds;
     }
 
 }

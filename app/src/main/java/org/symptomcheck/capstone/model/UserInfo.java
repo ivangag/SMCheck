@@ -13,10 +13,10 @@ public class UserInfo extends Model implements IModelBuilder {
 	private UserType userType = UserType.UNKNOWN;
 
     @Column
-	private boolean isLogged;
+	private boolean logged;
 
     @Column
-	private boolean isAnagPresent;
+	private boolean anagPresent;
 
     @Column
 	private String userIdentification;
@@ -35,12 +35,12 @@ public class UserInfo extends Model implements IModelBuilder {
 		this.userType = userType;
 	}
 	
-	public boolean isLogged() {
-		return isLogged;
+	public boolean getLogged() {
+		return logged;
 	}
 
-	public void setLogged(boolean isLogged) {
-		this.isLogged = isLogged;
+	public void setLogged(boolean logged) {
+		this.logged = logged;
 	}
 
 	public String getFirstName() {
@@ -67,7 +67,7 @@ public class UserInfo extends Model implements IModelBuilder {
 				.append(this.lastName).append("-")
 				.append(this.getUserIdentification()).append("-")
                 .append(this.getAnagPresent()).append("-")
-				.append(this.isLogged)
+				.append(this.logged)
 				.toString();
 	}
 
@@ -80,11 +80,11 @@ public class UserInfo extends Model implements IModelBuilder {
 	}
 
 	public boolean getAnagPresent() {
-		return isAnagPresent;
+		return anagPresent;
 	}
 
-	public void setAnagPresent(boolean isAnagPresent) {
-		this.isAnagPresent = isAnagPresent;
+	public void setAnagPresent(boolean anagPresent) {
+		this.anagPresent = anagPresent;
 	}
 
     @Override

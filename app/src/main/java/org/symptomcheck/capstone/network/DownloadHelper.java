@@ -132,7 +132,7 @@ public class DownloadHelper {
     }).create();
 
 
-    public SymptomManagerSvcApi withRetrofitClient() {
+    public synchronized SymptomManagerSvcApi withRetrofitClient() {
         if(symptomManagerSvcClient == null) {
             symptomManagerSvcClient =
                     builder
