@@ -51,17 +51,31 @@ public class DownloadHelper {
         return userInfo;
     }*/
 
+    /**
+     *
+     * @param userName username for login
+     * N.B. Calling this method invalidate the current client
+     * @return DownloadHelper
+     */
     public DownloadHelper setUserName(String userName) {
         invalidateClient();
         this.userName = userName;
         return this;
     }
 
+    /**
+     *
+     */
     private void invalidateClient() {
         symptomManagerSvcClient = null;
     }
 
 
+    /**
+     *
+     * @param password
+     * @return
+     */
     public DownloadHelper setPassword(String password) {
         invalidateClient();
         this.password = password;

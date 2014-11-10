@@ -68,15 +68,13 @@ public class GcmIntentService extends IntentService {
                 sendNotification("Deleted messages on server: " + extras.toString());
             // If it's a regular GCM message, do some work.
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                // This loop represents the service doing some work.
-    /*            for (int i = 0; i < 5; i++) {
-                    Log.i(TAG, "Working... " + (i + 1)
-                            + "/5 @ " + SystemClock.elapsedRealtime());
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                    }
-                }*/
+
+                final String userType = extras.getString(GcmConstants.GCM_EXTRAS_KEY_USERTYPE);
+                final String userName = extras.getString(GcmConstants.GCM_EXTRAS_KEY_USERNAME);
+                final String action = extras.getString(GcmConstants.GCM_EXTRAS_KEY_ACTION);
+
+                Log.i(TAG, "Message Received: " + action + "-" + userName + "-" + userType);
+
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
                 // Post notification of received message.
                 sendNotification("Received: " + extras.toString());

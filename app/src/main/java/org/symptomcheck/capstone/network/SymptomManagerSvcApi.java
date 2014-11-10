@@ -12,8 +12,10 @@ import java.util.concurrent.Callable;
 
 import retrofit.Callback;
 import retrofit.http.Body;
+import retrofit.http.DELETE;
 import retrofit.http.GET;
 import retrofit.http.POST;
+import retrofit.http.PUT;
 import retrofit.http.Path;
 
 public interface SymptomManagerSvcApi {
@@ -36,6 +38,7 @@ public interface SymptomManagerSvcApi {
 
     public static final String GCM_SVC_PATH = "/userinfo/gcm";
 
+    public static final String GCM_DELETE_PATH = GCM_SVC_PATH + "/clear";
 
 
     //----------------- ADMIN methods ----------------- //
@@ -98,4 +101,7 @@ public interface SymptomManagerSvcApi {
     //----------------- GCM methods ----------------- //
     @POST(GCM_SVC_PATH)
     public boolean sendGCMRegistrationId(@Body String gcmRegistrationId);
+
+    @DELETE(GCM_DELETE_PATH)
+    public boolean clearGCMRegistration(@Body String gcmRegistrationId);
 }

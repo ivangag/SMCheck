@@ -17,7 +17,12 @@ public class PainMedication extends Model implements IModelBuilder {
     private String patientMedicalNumber;
     
     public PainMedication(){}
-    
+
+    public PainMedication(String medicationName, String lastTakingDateTime){
+        this.medicationName = medicationName;
+        this.lastTakingDateTime = lastTakingDateTime;
+    }
+
     public PainMedication(String medicationName, String lastTakingDateTime,
     		String patientMedicalNumber){
     	this.medicationName = medicationName;

@@ -26,23 +26,41 @@ dependencies {
     compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
     compile 'com.google.guava:guava:18.0'
     compile 'com.android.support:appcompat-v7:21.0.0'
+    compile 'com.android.support:support-v13:21.0.0'
     compile 'com.squareup.picasso:picasso:2.3.4'
     compile 'de.greenrobot:eventbus:2.2.1'
-    compile 'com.google.android.gms:play-services:6.1.11'
+    compile 'com.google.android.gms:play-services:6.1.71'
     compile 'com.squareup.retrofit:retrofit:1.7.1'
     compile 'commons-io:commons-io:2.4'
     compile group: 'org.apache.httpcomponents' , name: 'httpclient-android' , version: '4.3.5'
     //compile project(':jackson-mapper-asl-1.9.13')
     //compile project(':jackson-core-asl-1.9.13')
 
-//Core
-    compile 'com.github.gabrielemariotti.cards:cardslib-core:2.0.0-RC1-SNAPSHOT'
+    ///*****CardsLib dependencies
+    //Core
+    compile 'com.github.gabrielemariotti.cards:cardslib-core:2.0.0'
+
+    //Optional for built-in cards
+    compile 'com.github.gabrielemariotti.cards:cardslib-cards:2.0.0'
+
+    //Optional for RecyclerView
+    compile 'com.github.gabrielemariotti.cards:cardslib-recyclerview:2.0.0'
+
+    //Optional for staggered grid view
+    compile 'com.github.gabrielemariotti.cards:cardslib-extra-staggeredgrid:2.0.0'
+
+    //Optional for drag and drop
+    compile 'com.github.gabrielemariotti.cards:cardslib-extra-dragdrop:2.0.0'
+
+    //Optional for twoway  (coming soon)
+    //compile 'com.github.gabrielemariotti.cards:cardslib-extra-twoway:2.0.0'
+    //compile 'com.github.gabrielemariotti.cards:cardslib-core:2.0.0-RC1-SNAPSHOT'
 
     //Optional for RecyclerView
     //compile 'com.github.gabrielemariotti.cards:cardslib-recyclerview:2.0.0-RC1-SNAPSHOT'
 
     //Optional for built-in cards
-    compile 'com.github.gabrielemariotti.cards:cardslib-cards:2.0.0-RC1-SNAPSHOT'
+    //compile 'com.github.gabrielemariotti.cards:cardslib-cards:2.0.0-RC1-SNAPSHOT'
 
     //Optional for staggered grid view
     //compile 'com.github.gabrielemariotti.cards:cardslib-extra-staggeredgrid:2.0.0-RC1-SNAPSHOT'

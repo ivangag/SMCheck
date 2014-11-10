@@ -12,6 +12,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import org.symptomcheck.capstone.R;
+import org.symptomcheck.capstone.ui.CheckInFlow;
 import org.symptomcheck.capstone.ui.LoginActivity;
 import org.symptomcheck.capstone.ui.MainActivity;
 
@@ -116,7 +117,7 @@ public class ReminderSchedulingService extends IntentService {
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, LoginActivity.class),PendingIntent.FLAG_UPDATE_CURRENT);
+                new Intent(this, CheckInFlow.class),PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)

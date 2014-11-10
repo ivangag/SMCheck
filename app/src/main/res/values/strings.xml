@@ -1,4 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">SymptomCheck</string>
     <string name="account_name">FeedSync Service</string>
     <string name="title_entry_detail">Entry Detail</string>
@@ -22,7 +24,6 @@
     <string name="error_incorrect_credentials">The credentials are incorrect</string>
     <string name="login_text">Login...</string>
     <string name="symptom_title_login">SYMPTOM MANAGEMENT LOGIN</string>
-
     <string name="title_activity_login">Sign in</string>
 
     <!-- Strings related to login -->
@@ -38,8 +39,12 @@
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="item_1">item1</string>
-
     <string name="checkin_reminder_title">Symptom Check-In</string>
     <string name="checkin_reminder_text">Please click here to start Check-In</string>
+    <string name="title_activity_check_in_flow">CheckIn</string>
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+    <string name="action_accept_checkin">Submit Checkin</string>
 
 </resources>

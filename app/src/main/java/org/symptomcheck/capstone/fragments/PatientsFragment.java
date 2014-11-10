@@ -60,7 +60,7 @@ import it.gmariotti.cardslib.library.view.CardListView;
  *
  * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
  */
-public class PatientsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class PatientsFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     PatientCursorCardAdapter mAdapter;
     CardListView mListView;
@@ -243,6 +243,11 @@ public class PatientsFragment extends Fragment implements LoaderManager.LoaderCa
         mAdapter.swapCursor(null);
     }
 
+    @Override
+    public int getFragmentType() {
+        return BaseFragment.FRAGMENT_TYPE_PATIENT;
+    }
+
     //-------------------------------------------------------------------------------------------------------------
     // Adapter
     //-------------------------------------------------------------------------------------------------------------
@@ -298,7 +303,7 @@ public class PatientsFragment extends Fragment implements LoaderManager.LoaderCa
             card.setId(""+cursor.getInt(ID_COLUMN));
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.FIRST_NAME));
             card.secondaryTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.LAST_NAME));
-            card.mainHeader= cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.PATIENT_ID));
+            card.mainHeader = cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.PATIENT_ID));
             card.resourceIdThumb=R.drawable.ic_patient_small;
             /*
             card.mainTitle=cursor.getString(CardCursorContract.CardCursor.IndexColumns.TITLE_COLUMN);

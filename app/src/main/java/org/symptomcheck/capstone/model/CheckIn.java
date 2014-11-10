@@ -93,16 +93,18 @@ public class CheckIn extends Model implements IModelBuilder {
 
     }
 
-    public static CheckIn createDummyCheckIn(PainLevel painLevel,
-                                             FeedStatus feedStatus,
-                                             Map<String, String> Medications) {
+    public static CheckIn createCheckIn(PainLevel painLevel,
+                                        FeedStatus feedStatus,
+                                        Map<String, PainMedication> Medications) {
 
         Calendar calendar = Calendar.getInstance();
         Long timestamp = Calendar.getInstance().getTimeInMillis();
         CheckIn checkIn = new CheckIn(timestamp.toString(), painLevel, feedStatus);
-        for (String medication : Medications.keySet()) {
-            Question question = new Question(String.format("Did you Take %s ?", medication), Medications.get(medication),
-                    QuestionType.Medication, timestamp.toString());
+        for (String response : Medications.keySet()) {
+            Question question = new Question(String.format("Did you Take %s ?",
+                    Medications.get(response).getMedicationName()),
+                    response,
+                    QuestionType.Medication, Medications.get(response).getLastTakingDateTime());
             checkIn.addQuestions(question);
         }
         return checkIn;

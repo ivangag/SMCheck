@@ -29,21 +29,20 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-
     <!--
  Creates a custom permission so only this app can receive its messages.
 
  NOTE: the permission *must* be called PACKAGE.permission.C2D_MESSAGE,
        where PACKAGE is the application's package name.
--->
-    <permission android:name="org.symptomcheck.capstone.permission.C2D_MESSAGE"
+    -->
+    <permission
+        android:name="org.symptomcheck.capstone.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
+
     <uses-permission android:name="org.symptomcheck.capstone.permission.C2D_MESSAGE" />
 
     <!-- This app has permission to register and receive data message. -->
-    <uses-permission
-        android:name="com.google.android.c2dm.permission.RECEIVE" />
-
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
     <application
         android:name="org.symptomcheck.capstone.App"
@@ -53,9 +52,9 @@
         android:theme="@style/Theme.Capstone" >
         <activity
             android:name="org.symptomcheck.capstone.ui.LoginActivity"
-            android:label="@string/app_name"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="true"
+            android:label="@string/app_name"
             android:windowSoftInputMode="adjustResize|stateHidden" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -64,8 +63,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:exported="true"
             android:name="org.symptomcheck.capstone.ui.MainActivity"
+            android:exported="true"
             android:label="@string/title_activity_main" >
         </activity>
         <!--
@@ -109,7 +108,7 @@
                 android:resource="@xml/syncadapter" />
         </service>
 
-        <receiver android:name=".alarms.ReminderReceiver" />
+        <receiver android:name="org.symptomcheck.capstone.alarms.ReminderReceiver" />
         <receiver
             android:name="org.symptomcheck.capstone.alarms.SymptomBootReceiver"
             android:enabled="false" >
@@ -148,18 +147,32 @@
 
               The com.google.android.c2dm.permission.SEND permission is necessary
               so only GCM services can send data messages for the app.
-            -->
+        -->
         <receiver
-            android:name=".gcm.GcmBroadcastReceiver"
+            android:name="org.symptomcheck.capstone.gcm.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
+
                 <!-- Receives the actual messages. -->
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
                 <category android:name="org.symptomcheck.capstone" />
             </intent-filter>
         </receiver>
-        <service android:name=".gcm.GcmIntentService" />
 
+        <service android:name="org.symptomcheck.capstone.gcm.GcmIntentService" />
+        <service
+            android:name="org.symptomcheck.capstone.gcm.GcmRegistrationService"
+            android:exported="false" >
+        </service>
+
+        <activity
+            android:uiOptions="splitActionBarWhenNarrow"
+            android:name="org.symptomcheck.capstone.ui.CheckInFlow"
+            android:label="@string/title_activity_check_in_flow" >
+            <meta-data android:name="android.support.UI_OPTIONS"
+                android:value="splitActionBarWhenNarrow" />
+        </activity>
     </application>
 
 </manifest>

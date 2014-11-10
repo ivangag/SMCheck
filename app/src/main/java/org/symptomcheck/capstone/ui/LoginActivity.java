@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -31,22 +32,21 @@ import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.alarms.SymptomAlarmRequest;
 import org.symptomcheck.capstone.dao.DAOManager;
+import org.symptomcheck.capstone.gcm.GcmRegistrationService;
 import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.FeedStatus;
 import org.symptomcheck.capstone.model.PainLevel;
+import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.utils.BuildInfo;
 import org.symptomcheck.capstone.utils.UserPreferencesManager;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 
 /**
@@ -72,15 +72,10 @@ public class LoginActivity extends Activity{
     private CheckBox mCheckInRememberMe;
     private static final String TAG = "LoginActivity";
 
-    /**
-     * Substitute you own sender ID here. This is the project number you got
-     * from the API Console, as described in "Getting Started."
-     * Project ID: spring-mvc-capstone-test Project Number: 412689184727
-     */
-    final String SENDER_CAPSTONE_ID = "412689184727";
+
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    GoogleCloudMessaging gcm;
-    private String regid;
+    //GoogleCloudMessaging gcm;
+    //private String regid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +110,9 @@ public class LoginActivity extends Activity{
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.layout_login_progress);
 
-        if(UserPreferencesManager.get().getLoginRememberMe(this))
+        if(UserPreferencesManager.get().getLoginRememberMe(this)
+                && (DAOManager.get().getUser() !=  null)
+                && (DAOManager.get().getUser().isLogged()))
             attemptLogin();
     }
 
@@ -278,21 +275,26 @@ public class LoginActivity extends Activity{
             try {
                 // Simulate network access.
                 //Thread.sleep(2000);
+
+
                 //test addCheckin patient
-                Map<String,String> meds = new HashMap<String,String>();
-
-                meds.put("XXX","YES");
-                meds.put("YYY","YES");
-                meds.put("ZZZ","NO");
-
-                CheckIn checkIn = CheckIn.createDummyCheckIn(PainLevel.SEVERE, FeedStatus.SOME,meds);
+                /*
+                Long timeMed1 = Calendar.getInstance().getTimeInMillis();
+                Map<String,PainMedication> meds = new HashMap<String,PainMedication>();
+                meds.put("YES", new PainMedication("XXX", timeMed1.toString()));
+                meds.put("YES", new PainMedication("YYY", timeMed1.toString()));
+                meds.put("NO", new PainMedication("ZZZ", timeMed1.toString()));
+                CheckIn checkIn = CheckIn.createCheckIn(PainLevel.SEVERE, FeedStatus.SOME, meds);
                 checkIn = DownloadHelper.get().setUserName("patient002").setPassword("pass").withRetrofitClient().addCheckIn("patient003",checkIn);
-
-                userInfo = DownloadHelper.get().setUserName(mEmail).setPassword(mPassword).withRetrofitClient().verifyUser();
+                */
+                userInfo = DownloadHelper.get().
+                        setUserName(mEmail).
+                        setPassword(mPassword).
+                        withRetrofitClient().verifyUser();
                 userInfo.setLogged(true);
-                //DownloadHelper.get().setUser(userInfo);
+
                 DAOManager.get().saveUser(userInfo);
-                handleGCMRegistrationRequest(getApplicationContext());
+
             } catch (Exception e) {
                 Log.e(TAG,"Error on verifyUser: " + e.getMessage());
                 return false;
@@ -306,6 +308,7 @@ public class LoginActivity extends Activity{
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
 
+            handleGCMRegistrationRequest(getApplicationContext());
             handleAfterLoginAttempt(success,mEmail,mPassword);
         }
 
@@ -317,76 +320,22 @@ public class LoginActivity extends Activity{
         }
     }
 
-    /**
-     * Gets the current registration ID for application on GCM service, if there is one.
-     * <p>
-     * If result is empty, the app needs to register.
-     *
-     * @return registration ID, or empty string if there is no existing
-     *         registration ID.
-     */
-    private String getRegistrationId(Context context) {
-        //final SharedPreferences prefs = getGcmPreferences(context);
-        String registrationId = UserPreferencesManager.get().getGcmRegId(this);
-        if (registrationId.isEmpty()) {
-            Log.i(TAG, "Registration not found.");
-            return "";
-        }
-        // Check if app was updated; if so, it must clear the registration ID
-        // since the existing regID is not guaranteed to work with the new
-        // app version.
-        int registeredVersion = UserPreferencesManager.get().getAppVers(this);
-        int currentVersion = BuildInfo.get().getAppVersion(context);
-        if (registeredVersion != currentVersion) {
-            Log.i(TAG, "App version changed.");
-            return "";
-        }
-        return registrationId;
-    }
+
 
     public void handleGCMRegistrationRequest(Context context) {
         // Check device for Play Services APK. If check succeeds, proceed with GCM registration.
         if (checkPlayServices(context)) {
-            gcm = GoogleCloudMessaging.getInstance(context);
-            regid = getRegistrationId(context);
-             if (regid.isEmpty()) {
-                registerInBackground();
-            }
+            //gcm = GoogleCloudMessaging.getInstance(context);
+            //regid = getRegistrationId(context);
+             //if (regid.isEmpty()) {
+                /*registerInBackground();*/
+                 GcmRegistrationService.startDeviceRegistration(context);
+            //}
         } else {
             Log.i(TAG, "No valid Google Play Services APK found.");
         }
     }
 
-    private void registerInBackground() {
-        String msg;
-        try {
-            if (gcm == null) {
-                gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
-            }
-
-            regid = gcm.register(SENDER_CAPSTONE_ID);
-            msg = "Device registered, registration ID=" + regid;
-
-            // You should send the registration ID to your server over HTTP, so it
-            // can use GCM/HTTP or CCS to send messages to your app.
-            //sendRegistrationIdToBackendViaRetrofit(regid);
-            //sendRegistrationIdToBackend(regid);
-            DownloadHelper.get().withRetrofitClient().sendGCMRegistrationId(regid);
-
-            // For this demo: we don't need to send it because the device will send
-            // upstream messages to a server that echo back the message using the
-            // 'from' address in the message.
-
-            // Persist the regID - no need to register again.
-            UserPreferencesManager.get().setGcmRegId(getApplicationContext(), regid);
-            UserPreferencesManager.get().setAppVers(getApplicationContext(), BuildInfo.get().getAppVersion(getApplicationContext()));
-        } catch (IOException ex) {
-            msg = "Error :" + ex.getMessage();
-            // If there is an error, don't just keep trying to register.
-            // Require the user to click a button again, or perform
-            // exponential back-off.
-        }
-    }
 
 
     /**
@@ -398,6 +347,7 @@ public class LoginActivity extends Activity{
     private boolean checkPlayServices(final Context context) {
         final int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
         if (resultCode != ConnectionResult.SUCCESS) {
+
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
                 if(context instanceof Activity){
                     ((Activity)context).runOnUiThread(
@@ -409,6 +359,8 @@ public class LoginActivity extends Activity{
                                 }
                             }
                     );
+                }else{
+                    Log.e(TAG, "checkPlayServices: " + GooglePlayServicesUtil.getErrorString(resultCode));
                 }
             } else {
                 Log.i(TAG, "This device is not supported.");
@@ -436,6 +388,14 @@ public class LoginActivity extends Activity{
             mPasswordView.setError(getString(R.string.error_incorrect_credentials));
             mPasswordView.requestFocus();
         }
+    }
+
+    public static void startLogin(Context context/*, String param1, String param2*/) {
+        Intent intent = new Intent(context, LoginActivity.class);
+        //intent.setAction(ACTION_GCM_DEVICE_REGISTRATION);
+        //intent.putExtra(EXTRA_PARAM1, param1);
+        //intent.putExtra(EXTRA_PARAM2, param2);
+        context.startService(intent);
     }
 
 }

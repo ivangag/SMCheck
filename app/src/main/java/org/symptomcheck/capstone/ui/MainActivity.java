@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
@@ -28,7 +29,6 @@ import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.fragments.PatientsFragment;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
-import org.symptomcheck.capstone.network.DownloadHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,13 +53,15 @@ public class MainActivity extends Activity {
     private TextView mTextViewUserDetails;
 
     private Fragment mBaseFragment;
-    private int mSelectedFragment;
+    private int mSelectedFragment = -1;
 
     private static final int CASE_DOCTOR_PATIENTS = 0;
     private static final int CASE_DOCTOR_SETTINGS = 1;
+    private static final int CASE_DOCTOR_LOGOUT = 2;
     private static final int CASE_PATIENT_CHECKINS = 0;
     private static final int CASE_PATIENT_DOCTORS = 1;
     private static final int CASE_PATIENT_SETTINGS = 2;
+    private static final int CASE_PATIENT_LOGOUT = 3;
 
     private UserInfo user;
     @Override
@@ -68,27 +70,18 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         mImageView = (ImageView)findViewById(R.id.imageChartApi);
 
-        mTitle = mDrawerTitle = getTitle();
-
-        //final UserType userType = DownloadHelper.get().getUser().getUserType();
-
-        user = DAOManager.get().getUser();
-        final UserType userType = DAOManager.get().getUser().getUserType();
-
-        if(userType == UserType.PATIENT) {
-            mFragmentTitles = getResources().getStringArray(R.array.patient_fragments_array);
-            mDrawerImagesResources = new int[]{R.drawable.ic_patient, R.drawable.ic_doctor,  R.drawable.ic_action_refresh };
-        }
-        else if(userType == UserType.DOCTOR) {
-            mFragmentTitles = getResources().getStringArray(R.array.doctor_fragments_array);
-            mDrawerImagesResources = new int[]{R.drawable.ic_patient,R.drawable.ic_action_search };
-        }
-
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
         mTextViewHeaderUser = (TextView) findViewById(R.id.txt_header_user);
         mTextViewUserDetails = (TextView) findViewById(R.id.txt_header_user_details);
+
+        mTitle = mDrawerTitle = getTitle();
+
+        user = DAOManager.get().getUser();
+
+        initUserResource();
+
 
         //mDrawerList.addHeaderView(mTextViewHeaderUser);
 
@@ -130,14 +123,45 @@ public class MainActivity extends Activity {
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
-        mTextViewHeaderUser.setText(user.getUserType().toString().toUpperCase() + "\n"
-            + "[" + user.getUserIdentification() + "]");
+    }
+
+    private void initUserResource() {
+        final UserType userType = DAOManager.get().getUser().getUserType();
+        String detailUser = "";
+
+        detailUser =   user.getFirstName()
+                + " " + user.getLastName();
+        try {
+            if(userType.equals(UserType.DOCTOR)) {
+                mFragmentTitles = getResources().getStringArray(R.array.doctor_fragments_array);
+                mDrawerImagesResources = new int[]{R.drawable.ic_patient,R.drawable.ic_action_settings,
+                        R.drawable.ic_logout };
+                Picasso.with(this).load(R.drawable.ic_doctor)
+                        //.resize(96, 96)
+                        //.centerCrop()
+                        .into(mImageView);
+            }else if(userType.equals(UserType.PATIENT)) {
+                mFragmentTitles = getResources().getStringArray(R.array.patient_fragments_array);
+                mDrawerImagesResources = new int[]{R.drawable.ic_check_in, R.drawable.ic_doctor,
+                        R.drawable.ic_action_settings ,R.drawable.ic_logout};
+                Picasso.with(this).load(R.drawable.ic_patient)
+                        //.resize(96, 96)
+                        //.centerCrop()
+                        .into(mImageView);
+
+            }
+        }catch (Exception e){
+            Toast.makeText(this, "Picasso error:" + e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
+        }
+        mTextViewHeaderUser.setText(userType.toString().toUpperCase()
+                + "\n"
+                + "[" + user.getUserIdentification() + "]");
         mTextViewUserDetails.setText(
                 user.getUserType().toString().toUpperCase()
                         + "\n"
-                        + user.getFirstName() + " " + user.getLastName());
-
+                       + detailUser);
     }
+
     /* Called whenever we call invalidateOptionsMenu() */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -148,25 +172,32 @@ public class MainActivity extends Activity {
     }
 
 
-    private Fragment selectFragment(int position){
+    private Fragment selectFragment(int position) {
+
         Fragment fragment = null;
-        switch (user.getUserType()){
+        switch (user.getUserType()) {
             case DOCTOR:
-                switch (position){
+                switch (position) {
                     case CASE_DOCTOR_PATIENTS:
                         fragment = new PatientsFragment();
                         break;
                     case CASE_DOCTOR_SETTINGS:
                         break;
+                    case CASE_DOCTOR_LOGOUT:
+                        doLogout();
+                        break;
                 }
                 break;
             case PATIENT:
-                switch (position){
+                switch (position) {
                     case CASE_PATIENT_CHECKINS:
                         break;
                     case CASE_PATIENT_DOCTORS:
                         break;
                     case CASE_PATIENT_SETTINGS:
+                        break;
+                    case CASE_PATIENT_LOGOUT:
+                        doLogout();
                         break;
                 }
                 break;
@@ -174,6 +205,15 @@ public class MainActivity extends Activity {
                 break;
         }
         return fragment;
+    }
+
+    private void doLogout(){
+        DAOManager.get().getUser().delete();
+        //LoginActivity.startLogin(getApplicationContext());
+        //finish();
+        finish();
+        Intent intent = new Intent(getApplicationContext(),LoginActivity.class);
+        startActivity(intent);
     }
 
     private void openFragment(Fragment fragment) {
@@ -261,18 +301,26 @@ public class MainActivity extends Activity {
 
         if(id == R.id.action_test){
             try {
-                Picasso.with(this).load(urlDoctorTest)
-                        //.resize(96, 96)
-                        //.centerCrop()
-                        .into(mImageView);
-            }catch (Exception e){
+                if(DAOManager.get().getUser().getUserType().equals(UserType.DOCTOR)) {
+                    Picasso.with(this).load(R.drawable.ic_doctor)
+                            //.resize(96, 96)
+                            //.centerCrop()
+                            .into(mImageView);
+                }else if(DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)) {
+                    Picasso.with(this).load(R.drawable.ic_patient)
+                            //.resize(96, 96)
+                            //.centerCrop()
+                            .into(mImageView);
+                }
+                }catch (Exception e){
                 Toast.makeText(this, "Picasso error:" + e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
             }
         }
+        /*
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
-        }
+        }*/
 
         /*
         if (id == R.id.action_opencards) {
@@ -286,17 +334,19 @@ public class MainActivity extends Activity {
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView parent, View view, int position, long id) {
-            selectItem(position);
+            selectDrawerItem(position);
         }
     }
 
     /** Swaps fragments in the main content view */
-    private void selectItem(int position) {
+    private void selectDrawerItem(int position) {
 
-        mBaseFragment = selectFragment(position);
-        mSelectedFragment = position;
-        if(mBaseFragment != null)
-            openFragment(mBaseFragment);
+        if(mSelectedFragment != position) {
+            mBaseFragment = selectFragment(position);
+            mSelectedFragment = position;
+            if (mBaseFragment != null)
+                openFragment(mBaseFragment);
+        }
 
         // Highlight the selected item, update the title, and close the drawer
         mDrawerList.setItemChecked(position, true);

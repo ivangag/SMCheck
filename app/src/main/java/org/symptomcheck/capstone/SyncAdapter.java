@@ -54,16 +54,6 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
     public final String TAG = SyncAdapter.this.getClass().getSimpleName();
 
     /**
-     * Network connection timeout, in milliseconds.
-     */
-    private static final int NET_CONNECT_TIMEOUT_MILLIS = 15000;  // 15 seconds
-
-    /**
-     * Network read timeout, in milliseconds.
-     */
-    private static final int NET_READ_TIMEOUT_MILLIS = 10000;  // 10 seconds
-
-    /**
      * Constructor. Obtains handle to content resolver for later use.
      */
     public SyncAdapter(Context context, boolean autoInitialize) {
@@ -113,25 +103,27 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     void updateLocalData(){
        //final UserInfo user = DownloadHelper.get().getUser();
-        final UserInfo user = DAOManager.get().getUser();
-        Log.i(TAG, "updateLocalData with: " + user.toString());
-       if(user.isLogged()){
-           switch (user.getUserType()){
-               case DOCTOR:
-                   //get and save Patients
-                   List<Patient> patients = syncPatients(user);
-                   //get and save Patients' Check-Ins
-                   syncPatientsCheckIns(user, patients);
-                   break;
-               case PATIENT:
-                   // get and save Check-Ins Data
+       final UserInfo user = DAOManager.get().getUser();
+       if(user != null) {
+           Log.i(TAG, "updateLocalData with: " + user.toString());
+           if (user.isLogged()) {
+               switch (user.getUserType()) {
+                   case DOCTOR:
+                       //get and save Patients
+                       List<Patient> patients = syncPatients(user);
+                       //get and save Patients' Check-Ins
+                       syncPatientsCheckIns(user, patients);
+                       break;
+                   case PATIENT:
+                       // get and save Check-Ins Data
 
-                   // get and save Medication
-                   break;
-               case ADMIN:
-                   break;
-               default:
-                   break;
+                       // get and save Medication
+                       break;
+                   case ADMIN:
+                       break;
+                   default:
+                       break;
+               }
            }
        }
     }
