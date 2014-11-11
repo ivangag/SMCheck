@@ -69,7 +69,8 @@ public class DAOManager {
         (new ActiveHandler<Doctor>()).deleteItems(Doctor.class);
     }
 
-    public synchronized void saveCheckIns(List<CheckIn> checkIns, String medicalRecordNumber, String userIdentification) {
+    public synchronized void saveCheckIns(List<CheckIn> checkIns, String medicalRecordNumber,
+                                          String userIdentification, boolean needSync) {
 
         (new ActiveHandler<Question>()).deleteItems(Question.class);
         (new ActiveHandler<CheckIn>()).deleteItems(CheckIn.class);
@@ -88,6 +89,7 @@ public class DAOManager {
                 List<Question> questions = new ArrayList<Question>(checkIns.size());
                 for (CheckIn checkIn : checkIns){
                     checkIn.patient = patient;
+                    checkIn.needSync = needSync ? 1 : 0;
                     for (Question question : checkIn.getQuestions()){
                         question.checkIn = checkIn;
                         questions.add(question);

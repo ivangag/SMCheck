@@ -184,7 +184,16 @@ public class MainActivity extends Activity {
         // If the nav drawer is open, hide action items related to the content view
         boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
         //menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
+
+        MenuItem menuCheckInTest = menu.findItem(R.id.action_test);
+
+        if((menuCheckInTest != null)
+                && (user != null)) {
+            menuCheckInTest.setVisible(user.getUserType().equals(UserType.PATIENT));
+        }
+
         return super.onPrepareOptionsMenu(menu);
+
     }
 
 
@@ -296,6 +305,8 @@ public class MainActivity extends Activity {
         return true;
     }
 
+
+
     String urlPicassoTest = "http://chart.apis.google.com/chart?cht=p3&chs=500x200&chd=e:TNTNTNGa&chts=000000,16&chtt=A+Better+Web&chl=Hello|Hi|anas|Explorer&chco=FF5533,237745,9011D3,335423&chdl=Apple|Mozilla|Google|Microsoft";
 
     String getUrlPicassoTest2 = "http://i.imgur.com/DvpvklR.png";
@@ -397,10 +408,11 @@ public class MainActivity extends Activity {
                     question.save();
                 }
             }
+            questions = Question.getAll();
+            checkIns =  CheckIn.getAllToSync();
             SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_CLOUD_CHECK_IN);
             //checkIn = DownloadHelper.get().setUserName("patient002").setPassword("pass").withRetrofitClient().addCheckIn("patient003", checkIn);
         }
-        questions = Question.getAll();
-        checkIns =  CheckIn.getAllToSync();
+
     }
 }

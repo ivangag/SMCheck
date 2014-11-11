@@ -23,6 +23,8 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SyncResult;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -40,6 +42,7 @@ import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
 import org.symptomcheck.capstone.provider.ActiveContract;
+import org.symptomcheck.capstone.utils.NetworkHelper;
 import org.symptomcheck.capstone.utils.UserPreferencesManager;
 
 import java.util.List;
@@ -109,21 +112,33 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
         }*/
         //android.os.Debug.waitForDebugger();  // this line is key
 
-        Log.i(TAG, "Beginning network synchronization: " + extras.toString());
+        final boolean isOnline =  NetworkHelper.isOnline(getContext());
+        final boolean isOnlineOverWifi =  NetworkHelper.isOnlineOverWifi(getContext());
+        Log.i(TAG, String.format("Beginning network synchronization:%s; isOnline:%b; isOnlineOverWifi:%b",
+                extras.toString(),isOnline,isOnlineOverWifi));
+
         String active_repo_local_to_sync = ActiveContract.SYNC_NONE;
         String active_repo_cloud_to_sync = ActiveContract.SYNC_NONE;
 
 
-        if(extras.containsKey(ContentResolver.SYNC_EXTRAS_MANUAL)
-                && extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL)) {
+         final boolean forceAll = ((extras.containsKey(ContentResolver.SYNC_EXTRAS_MANUAL)
+                                    && extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL))
+                                        || extras.isEmpty());
+        if(forceAll) {
             active_repo_local_to_sync = ActiveContract.SYNC_ALL;
         }else{
             active_repo_local_to_sync = extras.getString(SyncUtils.SYNC_LOCAL_ACTION_PARTIAL, ActiveContract.SYNC_NONE);
             active_repo_cloud_to_sync = extras.getString(SyncUtils.SYNC_CLOUD_ACTION_PARTIAL, ActiveContract.SYNC_NONE);
         }
 
-        updateLocalData(active_repo_local_to_sync);
-        updateCloudData(active_repo_cloud_to_sync);
+        final UserInfo user = DAOManager.get().getUser();
+        if(user != null) {
+            Log.i(TAG, "sync data with: " + user.toString());
+            if (user.getLogged()) {
+                updateLocalData(active_repo_local_to_sync,user);
+                updateCloudData(active_repo_cloud_to_sync,user);
+            }
+        }
 
         EventBus.getDefault().post(new DownloadEvent.Builder().setStatus(true).setValueEvnt(count).Build());
 
@@ -133,30 +148,30 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
     /**
      * Upload local data to remote repository
      * Basically we have to upload new Check-In submitted from the Patient
-     * and medications updated from the Doctor
+     * and Patient Medications list updated from the Doctor
      * @param sync sync type to be performed
      */
-    private void updateCloudData(String sync) {
+    private void updateCloudData(String sync, UserInfo user) {
         String method = new Object(){}.getClass().getEnclosingMethod().getName();
         Log.i(TAG, method);
-        if(sync.equals(ActiveContract.SYNC_NONE)) {
+        //if(sync.equals(ActiveContract.SYNC_NONE)) {
             // if PATIENT
             // 1) look for Check-In to upload N.B Check-in are "marked" with a needSync field set to true
 
             // if DOCTOR
             // 2) look for Medication to upload N.B Medication are "marked" with a needSync field set to true
-        }
+        //}
     }
 
     /**
      * Download data from the cloud in order to sync local repo with the remote one
      * @param sync sync type to be performed
      */
-    void updateLocalData(String sync){
-       final UserInfo user = DAOManager.get().getUser();
-       if(user != null) {
-           Log.i(TAG, "updateLocalData with: " + user.toString());
-           if (user.getLogged()) {
+    void updateLocalData(String sync, UserInfo user){
+       //final UserInfo user = DAOManager.get().getUser();
+       //if(user != null) {
+           //Log.i(TAG, "updateLocalData with: " + user.toString());
+           //if (user.getLogged()) {
                switch (user.getUserType()) {
                    case DOCTOR:
                        if(sync.equals(ActiveContract.SYNC_ALL)) {
@@ -202,8 +217,8 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
                    default:
                        break;
                }
-           }
-       }
+         //  }
+       //}
     }
 
     private List<Doctor> syncPatientDoctors(UserInfo user) {
@@ -276,7 +291,9 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
                 for(Patient patient : patients){
                     List<CheckIn> checkIns = (List<CheckIn>) mSymptomClient.findCheckInsByPatient(patient.getMedicalRecordNumber());
                     if((checkIns != null)&& (checkIns.size() > 0))
-                        DAOManager.get().saveCheckIns(checkIns, patient.getMedicalRecordNumber(),user.getUserIdentification());
+                        DAOManager.get().saveCheckIns(checkIns,
+                                patient.getMedicalRecordNumber(),
+                                user.getUserIdentification(), true);
                 }
             }else {
                 Log.e(TAG, "syncPatientsCheckIns=> sync not possible: patients = null!");
@@ -316,4 +333,5 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
         return sync;
     }
+
 }

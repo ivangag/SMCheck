@@ -361,7 +361,7 @@ public class LoginActivity extends Activity{
     public void handleAfterLoginAttempt(Boolean success, String username, String password) {
         final Context context = getApplicationContext();
         if (success) {
-            SyncUtils.ForceRefresh();
+            //SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_ALL);
             SymptomAlarmRequest.get().setAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_REMINDER);
             UserPreferencesManager.get().setLoginRememberMe(context,mCheckInRememberMe.isChecked());
             UserPreferencesManager.get().setLoginUsername(context,username);

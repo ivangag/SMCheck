@@ -33,7 +33,7 @@ import org.symptomcheck.capstone.provider.ActiveContract;
  * Static helper methods for working with the sync framework.
  */
 public class SyncUtils {
-    private static final long SYNC_FREQUENCY = 60 * 60;  // 1 hour (in seconds)
+    private static final long SYNC_FREQUENCY = 60 * 2;  // 1 hour (in seconds)
     private static final String CONTENT_AUTHORITY = ActiveContract.CONTENT_AUTHORITY;
     private static final String PREF_SETUP_COMPLETE = "setup_complete";
 
@@ -54,6 +54,7 @@ public class SyncUtils {
         // Create account, if it's missing. (Either first run, or user has deleted account.)
         Account account = GenericAccountService.GetAccount();
         AccountManager accountManager = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
+
         if (accountManager.addAccountExplicitly(account, null, null)) {
             // Inform the system that this account supports sync
             ContentResolver.setIsSyncable(account, CONTENT_AUTHORITY, 1);
