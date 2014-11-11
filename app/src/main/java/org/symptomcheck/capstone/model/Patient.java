@@ -14,7 +14,13 @@ import com.activeandroid.query.Select;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
-
+/**
+ * Store Patient's data
+ *
+ * Based on application role
+ * - (for PATIENTS_ROLE) store only the current patient Data
+ * - (for DOCTORS_ROLE) store all the doctor's patients Data
+ */
 @Table(name = "Patients", id = BaseColumns._ID)
 public class Patient extends Model implements IModelBuilder{
 

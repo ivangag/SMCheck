@@ -6,6 +6,9 @@ import android.provider.BaseColumns;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
+import com.activeandroid.query.Select;
+
+import java.util.List;
 
 @Table(name = "Questions", id = BaseColumns._ID)
 public class Question extends Model implements IModelBuilder{
@@ -21,15 +24,19 @@ public class Question extends Model implements IModelBuilder{
 
     @Column(name = "CheckIn")
     public transient CheckIn checkIn;
-	
-	public Question(){}
+    private static List<Question> all;
+
+    public Question(){}
 	public Question(String question, String response, QuestionType questionType, String medicatationTakingTime){
 		this.question = question;
 		this.response = response;
 		this.questionType = questionType;
 		this.medicatationTakingTime = medicatationTakingTime;
 	}
-	public String getQuestion() {
+
+
+
+    public String getQuestion() {
 		return question;
 	}
 	public void setQuestion(String question) {
@@ -58,6 +65,15 @@ public class Question extends Model implements IModelBuilder{
     @Override
     public void buildInternalArray() {
 
+    }
+
+    public static List<Question> getAll() {
+        // This is how you execute a query
+        return new Select()
+                .from(Question.class)
+                        //.where("Category = ?", category.getId())
+                        //.orderBy("Name ASC")
+                .execute();
     }
 }
 

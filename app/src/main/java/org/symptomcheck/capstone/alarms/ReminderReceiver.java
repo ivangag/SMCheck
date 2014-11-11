@@ -42,7 +42,7 @@ public class ReminderReceiver extends WakefulBroadcastReceiver {
         startWakefulService(context, service);
 
         Log.i(TAG,"SymptomAlarmReceiver=>onReceive...");
-        //SyncUtils.TriggerRefresh();
+        //SyncUtils.ForceRefresh();
         // END_INCLUDE(alarm_onreceive)
     }
 }

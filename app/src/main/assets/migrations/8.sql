@@ -1,0 +1,1 @@
+ALTER TABLE CheckIns ADD COLUMN needSync INTEGER;

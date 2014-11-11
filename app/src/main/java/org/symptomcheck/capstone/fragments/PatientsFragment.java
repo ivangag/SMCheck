@@ -21,7 +21,6 @@ package org.symptomcheck.capstone.fragments;
 import android.accounts.Account;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -45,6 +44,7 @@ import com.activeandroid.content.ContentProvider;
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
+import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.provider.ActiveContract;
 
@@ -88,7 +88,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         switch (item.getItemId()) {
             // If the user clicks the "Refresh" button.
             case R.id.menu_refresh:
-                SyncUtils.TriggerRefresh();
+                SyncUtils.ForceRefresh();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -301,9 +301,12 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         private void setCardFromCursor(PatientCursorCard card,Cursor cursor) {
 
             card.setId(""+cursor.getInt(ID_COLUMN));
-            card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.FIRST_NAME));
-            card.secondaryTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.LAST_NAME));
-            card.mainHeader = cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.PATIENT_ID));
+            card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.FIRST_NAME))
+                    + " " + cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.LAST_NAME));
+            card.secondaryTitle =
+                    cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.PATIENT_ID))
+                            + " " + cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.BIRTH_DATE));
+            card.mainHeader = getString(R.string.patient_header);
             card.resourceIdThumb=R.drawable.ic_patient_small;
             /*
             card.mainTitle=cursor.getString(CardCursorContract.CardCursor.IndexColumns.TITLE_COLUMN);

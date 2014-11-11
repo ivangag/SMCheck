@@ -5,6 +5,7 @@ import android.provider.BaseColumns;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
+import com.activeandroid.query.Select;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -27,6 +28,9 @@ public class CheckIn extends Model implements IModelBuilder {
 
     @Column(name = "Patient")
     public transient Patient patient;
+
+    @Column
+    public transient int needSync = 1;
 
     // This method is optional, does not affect the foreign key creation.
     public List<Question> items() {
@@ -95,18 +99,37 @@ public class CheckIn extends Model implements IModelBuilder {
 
     public static CheckIn createCheckIn(PainLevel painLevel,
                                         FeedStatus feedStatus,
-                                        Map<String, PainMedication> Medications) {
+                                        Map<PainMedication,String> Medications) {
 
         Calendar calendar = Calendar.getInstance();
         Long timestamp = Calendar.getInstance().getTimeInMillis();
         CheckIn checkIn = new CheckIn(timestamp.toString(), painLevel, feedStatus);
-        for (String response : Medications.keySet()) {
+        for (PainMedication medication : Medications.keySet()) {
             Question question = new Question(String.format("Did you Take %s ?",
-                    Medications.get(response).getMedicationName()),
-                    response,
-                    QuestionType.Medication, Medications.get(response).getLastTakingDateTime());
+                    medication.getMedicationName()),
+                    Medications.get(medication),
+                    QuestionType.Medication, medication.getLastTakingDateTime());
             checkIn.addQuestions(question);
         }
         return checkIn;
+    }
+
+
+    public static List<CheckIn> getAll() {
+        // This is how you execute a query
+        return new Select()
+                .from(CheckIn.class)
+                        //.where("Category = ?", category.getId())
+                        //.orderBy("Name ASC")
+                .execute();
+    }
+
+    public static List<CheckIn> getAllToSync() {
+        // This is how you execute a query
+        return new Select()
+                .from(CheckIn.class)
+                        .where("needSync = ?", 1)
+                        //.orderBy("Name ASC")
+                .execute();
     }
 }

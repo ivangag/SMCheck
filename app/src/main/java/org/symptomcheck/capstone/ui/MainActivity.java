@@ -22,16 +22,27 @@ import android.widget.Toast;
 import com.squareup.picasso.Picasso;
 
 import org.symptomcheck.capstone.R;
+import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.adapters.DrawerItem;
 import org.symptomcheck.capstone.adapters.DrawerItemAdapter;
 import org.symptomcheck.capstone.bus.DownloadEvent;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.fragments.PatientsFragment;
+import org.symptomcheck.capstone.model.CheckIn;
+import org.symptomcheck.capstone.model.FeedStatus;
+import org.symptomcheck.capstone.model.PainLevel;
+import org.symptomcheck.capstone.model.PainMedication;
+import org.symptomcheck.capstone.model.Patient;
+import org.symptomcheck.capstone.model.Question;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
+import org.symptomcheck.capstone.provider.ActiveContract;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.greenrobot.event.EventBus;
 
@@ -55,13 +66,13 @@ public class MainActivity extends Activity {
     private Fragment mBaseFragment;
     private int mSelectedFragment = -1;
 
-    private static final int CASE_DOCTOR_PATIENTS = 0;
-    private static final int CASE_DOCTOR_SETTINGS = 1;
-    private static final int CASE_DOCTOR_LOGOUT = 2;
-    private static final int CASE_PATIENT_CHECKINS = 0;
-    private static final int CASE_PATIENT_DOCTORS = 1;
-    private static final int CASE_PATIENT_SETTINGS = 2;
-    private static final int CASE_PATIENT_LOGOUT = 3;
+    private static final int CASE_SHOW_DOCTOR_PATIENTS = 0;
+    private static final int CASE_SHOW_DOCTOR_SETTINGS = 1;
+    private static final int CASE_SHOW_DOCTOR_LOGOUT = 2;
+    private static final int CASE_SHOW_PATIENT_CHECKINS = 0;
+    private static final int CASE_SHOW_PATIENT_DOCTORS = 1;
+    private static final int CASE_SHOW_PATIENT_SETTINGS = 2;
+    private static final int CASE_SHOW_PATIENT_LOGOUT = 3;
 
     private UserInfo user;
     @Override
@@ -123,6 +134,11 @@ public class MainActivity extends Activity {
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
+        if(user.getUserType().equals(UserType.DOCTOR)) {
+            selectDrawerItem(CASE_SHOW_DOCTOR_PATIENTS);
+        }else if(user.getUserType().equals(UserType.PATIENT)){
+            //selectDrawerItem(CASE_SHOW_PATIENT_CHECKINS);
+        }
     }
 
     private void initUserResource() {
@@ -178,25 +194,25 @@ public class MainActivity extends Activity {
         switch (user.getUserType()) {
             case DOCTOR:
                 switch (position) {
-                    case CASE_DOCTOR_PATIENTS:
+                    case CASE_SHOW_DOCTOR_PATIENTS:
                         fragment = new PatientsFragment();
                         break;
-                    case CASE_DOCTOR_SETTINGS:
+                    case CASE_SHOW_DOCTOR_SETTINGS:
                         break;
-                    case CASE_DOCTOR_LOGOUT:
+                    case CASE_SHOW_DOCTOR_LOGOUT:
                         doLogout();
                         break;
                 }
                 break;
             case PATIENT:
                 switch (position) {
-                    case CASE_PATIENT_CHECKINS:
+                    case CASE_SHOW_PATIENT_CHECKINS:
                         break;
-                    case CASE_PATIENT_DOCTORS:
+                    case CASE_SHOW_PATIENT_DOCTORS:
                         break;
-                    case CASE_PATIENT_SETTINGS:
+                    case CASE_SHOW_PATIENT_SETTINGS:
                         break;
-                    case CASE_PATIENT_LOGOUT:
+                    case CASE_SHOW_PATIENT_LOGOUT:
                         doLogout();
                         break;
                 }
@@ -262,15 +278,14 @@ public class MainActivity extends Activity {
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(getApplicationContext(),"EventBus downloadEvent: " + msgEvent + " at " + TAG,Toast.LENGTH_LONG).show();
+                //Toast.makeText(getApplicationContext(),"EventBus downloadEvent: " + msgEvent + " at " + TAG,Toast.LENGTH_LONG).show();
             }
         });
 
     }
-
     public void onEventMainThread(DownloadEvent downloadEvent){
         String msgEvent = downloadEvent.toString();
-        Toast.makeText(this,"EventBusMainThread downloadEvent: " + msgEvent + " at " + TAG,Toast.LENGTH_LONG).show();
+        //Toast.makeText(this,"EventBusMainThread downloadEvent: " + msgEvent + " at " + TAG,Toast.LENGTH_LONG).show();
     }
 
 
@@ -315,6 +330,7 @@ public class MainActivity extends Activity {
                 }catch (Exception e){
                 Toast.makeText(this, "Picasso error:" + e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
             }
+            testAddCheckIn();
         }
         /*
         //noinspection SimplifiableIfStatement
@@ -359,5 +375,32 @@ public class MainActivity extends Activity {
         mTitle = title;
         if(getActionBar() != null)
             getActionBar().setTitle(mTitle);
+    }
+
+    private void testAddCheckIn(){
+        //test addCheckin patient
+        Patient patient = Patient.getAll().get(0);
+        List<Question>  questions = Question.getAll();
+        List<CheckIn>  checkIns =  CheckIn.getAllToSync();
+        if(patient != null) {
+            Long timeMed1 = Calendar.getInstance().getTimeInMillis();
+            Map<PainMedication,String> meds = new HashMap<PainMedication,String>();
+            meds.put(new PainMedication("XXX", timeMed1.toString()),"YES");
+            meds.put(new PainMedication("YYY", timeMed1.toString()),"YES");
+            meds.put( new PainMedication("ZZZ", timeMed1.toString()),"NO");
+            CheckIn checkIn = CheckIn.createCheckIn(PainLevel.SEVERE, FeedStatus.SOME, meds);
+
+            checkIn.patient = patient;
+            if ( checkIn.save() > 0) {
+                for (Question question : checkIn.getQuestions()) {
+                    question.checkIn = checkIn;
+                    question.save();
+                }
+            }
+            SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_CLOUD_CHECK_IN);
+            //checkIn = DownloadHelper.get().setUserName("patient002").setPassword("pass").withRetrofitClient().addCheckIn("patient003", checkIn);
+        }
+        questions = Question.getAll();
+        checkIns =  CheckIn.getAllToSync();
     }
 }

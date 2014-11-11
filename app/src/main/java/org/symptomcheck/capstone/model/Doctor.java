@@ -12,6 +12,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Store Patient's data
+ *
+ * Based on application role
+ * - (for PATIENTS_ROLE) store all the patient's doctors Data
+ * - (for DOCTORS_ROLE) store only the current doctor Data
+ */
 @Table(name = "Doctors", id = BaseColumns._ID)
 public class Doctor extends Model implements IModelBuilder {
 

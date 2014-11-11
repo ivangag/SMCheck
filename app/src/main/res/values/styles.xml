@@ -19,5 +19,12 @@
         <item name="android:layout_height">wrap_content</item>
     </style>
 
+    <style name="capstone_list_card" parent="list_card">
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:paddingTop">0dp</item>
+    </style>
+
 
 </resources>

@@ -20,6 +20,7 @@ import android.accounts.Account;
 import android.annotation.TargetApi;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SyncResult;
 import android.os.Build;
@@ -38,6 +39,7 @@ import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
+import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.utils.UserPreferencesManager;
 
 import java.util.List;
@@ -106,33 +108,94 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         }*/
         //android.os.Debug.waitForDebugger();  // this line is key
-        Log.i(TAG, "Beginning network synchronization");
-        updateLocalData();
+
+        Log.i(TAG, "Beginning network synchronization: " + extras.toString());
+        String active_repo_local_to_sync = ActiveContract.SYNC_NONE;
+        String active_repo_cloud_to_sync = ActiveContract.SYNC_NONE;
+
+
+        if(extras.containsKey(ContentResolver.SYNC_EXTRAS_MANUAL)
+                && extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL)) {
+            active_repo_local_to_sync = ActiveContract.SYNC_ALL;
+        }else{
+            active_repo_local_to_sync = extras.getString(SyncUtils.SYNC_LOCAL_ACTION_PARTIAL, ActiveContract.SYNC_NONE);
+            active_repo_cloud_to_sync = extras.getString(SyncUtils.SYNC_CLOUD_ACTION_PARTIAL, ActiveContract.SYNC_NONE);
+        }
+
+        updateLocalData(active_repo_local_to_sync);
+        updateCloudData(active_repo_cloud_to_sync);
+
         EventBus.getDefault().post(new DownloadEvent.Builder().setStatus(true).setValueEvnt(count).Build());
 
         Log.i(TAG, "Network synchronization complete");
     }
 
-    void updateLocalData(){
-       //final UserInfo user = DownloadHelper.get().getUser();
+    /**
+     * Upload local data to remote repository
+     * Basically we have to upload new Check-In submitted from the Patient
+     * and medications updated from the Doctor
+     * @param sync sync type to be performed
+     */
+    private void updateCloudData(String sync) {
+        String method = new Object(){}.getClass().getEnclosingMethod().getName();
+        Log.i(TAG, method);
+        if(sync.equals(ActiveContract.SYNC_NONE)) {
+            // if PATIENT
+            // 1) look for Check-In to upload N.B Check-in are "marked" with a needSync field set to true
+
+            // if DOCTOR
+            // 2) look for Medication to upload N.B Medication are "marked" with a needSync field set to true
+        }
+    }
+
+    /**
+     * Download data from the cloud in order to sync local repo with the remote one
+     * @param sync sync type to be performed
+     */
+    void updateLocalData(String sync){
        final UserInfo user = DAOManager.get().getUser();
        if(user != null) {
            Log.i(TAG, "updateLocalData with: " + user.toString());
            if (user.getLogged()) {
                switch (user.getUserType()) {
                    case DOCTOR:
-                       // get and save Doctor detail
-                       syncDoctorBaseInfo(user);
-                       //get and save Doctor's Patients
-                       syncDoctorPatients(user);
-                       //sync All Patients's information
-                       syncAllPatientsInfo(user);
+                       if(sync.equals(ActiveContract.SYNC_ALL)) {
+                           // get and save Doctor detail
+                           syncDoctorBaseInfo(user);
+                           //get and save Doctor' Patients
+                           syncDoctorPatients(user);
+                           //sync All Patients' information
+                           //get and save Patients' Check-Ins
+                           syncPatientsCheckIns(user);
+                           //get and save Patients' Medicines
+                           syncPatientsMedicines(user);
+                       }else if(sync.equals(ActiveContract.SYNC_LOCAL_PATIENTS)){
+                           syncDoctorPatients(user);
+                       }else if(sync.equals(ActiveContract.SYNC_LOCAL_CHECK_IN)){
+                           syncDoctorBaseInfo(user);
+                           syncPatientsCheckIns(user);
+                       }else if(sync.equals(ActiveContract.SYNC_LOCAL_DOCTORS)){
+                           syncDoctorBaseInfo(user);
+                       }
                        break;
                    case PATIENT:
-                       // get and save Patient detail
-                       syncPatientBaseInfo(user);
-                       //sync All Patient's information
-                       syncAllPatientsInfo(user);
+                       if(sync.equals(ActiveContract.SYNC_ALL)) {
+                           // get and save Patient detail
+                           syncPatientBaseInfo(user);
+                           //sync All Patient' information
+                           //get and save Patient' Doctors
+                           syncPatientDoctors(user);
+                           //get and save Patients' Check-Ins
+                           syncPatientsCheckIns(user);
+                           //get and save Patients' Medicines
+                           syncPatientsMedicines(user);
+                       }else if(sync.equals(ActiveContract.SYNC_LOCAL_MEDICINES)) {
+                           syncPatientsMedicines(user);
+                       }else if(sync.equals(ActiveContract.SYNC_LOCAL_CHECK_IN)) {
+                           syncPatientsCheckIns(user);
+                       }else if(sync.equals(ActiveContract.SYNC_LOCAL_PATIENTS)) {
+                           syncPatientBaseInfo(user);
+                       }
                        break;
                    case ADMIN:
                        break;
@@ -143,18 +206,27 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
        }
     }
 
-    private void syncAllPatientsInfo(UserInfo user){
-        final List<Patient> patients = Patient.getAll();
-        //get and save Patients' Check-Ins
-        syncPatientsCheckIns(user, patients);
-        //get and save Patients' Medicines
-        syncPatientsMedicines(user, patients);
+    private List<Doctor> syncPatientDoctors(UserInfo user) {
+        String method = new Object(){}.getClass().getEnclosingMethod().getName();
+        Log.i(TAG, method);
+        List<Doctor> doctors = null;
+        try {
+            doctors = (List<Doctor>) mSymptomClient.findDoctorsByPatient(user.getUserIdentification());
+            DAOManager.get().saveDoctors(doctors, user.getUserIdentification());
+        }catch (RetrofitError e){
+            Log.e(TAG, "Retrofit:" + e.getMessage() + ";" + e.getResponse());
+        }catch (Exception e){
+            Log.e(TAG,"Error saveDoctors:" + e.getMessage());
+        }
+        return doctors;
     }
 
+
     private void syncPatientBaseInfo(UserInfo user) {
+        String method = new Object(){}.getClass().getEnclosingMethod().getName();
+        Log.i(TAG, method);
         try {
-            Patient patient = mSymptomClient.findPatientByMedicalRecordNumber(user.getUserIdentification());
-            //patient.save();
+            Patient patient = mSymptomClient.findPatientByMedicalRecordNumber(user.getUserIdentification());;
             DAOManager.get().savePatients(Lists.newArrayList(patient),user.getUserIdentification());
         }catch (RetrofitError e){
             Log.e(TAG, "Retrofit:" + e.getMessage() + ";" + e.getResponse());
@@ -165,9 +237,10 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 
     private void syncDoctorBaseInfo(UserInfo user){
+        String method = new Object(){}.getClass().getEnclosingMethod().getName();
+        Log.i(TAG, method);
         try {
             Doctor doctor = mSymptomClient.findDoctorByUniqueDoctorID(user.getUserIdentification());
-            //doctor.save();
             DAOManager.get().saveDoctors(Lists.newArrayList(doctor),user.getUserIdentification());
         }catch (RetrofitError e){
             Log.e(TAG, "Retrofit:" + e.getMessage() + ";" + e.getResponse());
@@ -177,6 +250,9 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private List<Patient> syncDoctorPatients(UserInfo user) {
+        String method = new Object(){}.getClass().getEnclosingMethod().getName();
+        Log.i(TAG, method);
+
         List<Patient> patients = null;
 
         try {
@@ -190,9 +266,11 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
         return patients;
     }
 
-    private boolean syncPatientsCheckIns(UserInfo user, List<Patient> patients) {
+    private boolean syncPatientsCheckIns(UserInfo user) {
+        String method = new Object(){}.getClass().getEnclosingMethod().getName();
+        Log.i(TAG, method);
         boolean sync = true;
-
+        List<Patient> patients = Patient.getAll();
         try {
             if(patients != null){
                 for(Patient patient : patients){
@@ -213,9 +291,12 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
         return sync;
     }
 
-    private boolean syncPatientsMedicines(UserInfo user, List<Patient> patients) {
-        boolean sync = true;
+    private boolean syncPatientsMedicines(UserInfo user) {
+        String method = new Object(){}.getClass().getEnclosingMethod().getName();
+        Log.i(TAG, method);
 
+        boolean sync = true;
+        List<Patient> patients = Patient.getAll();
         try {
             if(patients != null){
                 for(Patient patient : patients){

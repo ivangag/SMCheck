@@ -3,6 +3,7 @@ package org.symptomcheck.capstone.model;
 import android.provider.BaseColumns;
 
 import com.activeandroid.Model;
+import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 
 
@@ -10,10 +11,13 @@ import com.activeandroid.annotation.Table;
 public class PainMedication extends Model implements IModelBuilder {
 
 
+    @Column
 	private String medicationName;
 
+    @Column
 	private String lastTakingDateTime;
 
+    @Column
     private String patientMedicalNumber;
     
     public PainMedication(){}

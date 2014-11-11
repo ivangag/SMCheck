@@ -6,10 +6,10 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.PathEffect;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -26,7 +26,6 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
@@ -37,12 +36,13 @@ import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.FeedStatus;
 import org.symptomcheck.capstone.model.PainLevel;
 import org.symptomcheck.capstone.model.PainMedication;
+import org.symptomcheck.capstone.model.Patient;
+import org.symptomcheck.capstone.model.Question;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.network.DownloadHelper;
-import org.symptomcheck.capstone.utils.BuildInfo;
+import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.utils.UserPreferencesManager;
 
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -279,16 +279,6 @@ public class LoginActivity extends Activity{
                 //Thread.sleep(2000);
 
 
-                //test addCheckin patient
-                /*
-                Long timeMed1 = Calendar.getInstance().getTimeInMillis();
-                Map<String,PainMedication> meds = new HashMap<String,PainMedication>();
-                meds.put("YES", new PainMedication("XXX", timeMed1.toString()));
-                meds.put("YES", new PainMedication("YYY", timeMed1.toString()));
-                meds.put("NO", new PainMedication("ZZZ", timeMed1.toString()));
-                CheckIn checkIn = CheckIn.createCheckIn(PainLevel.SEVERE, FeedStatus.SOME, meds);
-                checkIn = DownloadHelper.get().setUserName("patient002").setPassword("pass").withRetrofitClient().addCheckIn("patient003",checkIn);
-                */
                 userInfo = DownloadHelper.get().
                         setUserName(mEmail).
                         setPassword(mPassword).
@@ -361,7 +351,7 @@ public class LoginActivity extends Activity{
                 }
             } else {
                 Log.i(TAG, "This device is not supported.");
-                finish();
+                //finish();
             }
             return false;
         }
@@ -371,7 +361,7 @@ public class LoginActivity extends Activity{
     public void handleAfterLoginAttempt(Boolean success, String username, String password) {
         final Context context = getApplicationContext();
         if (success) {
-            SyncUtils.TriggerRefresh();
+            SyncUtils.ForceRefresh();
             SymptomAlarmRequest.get().setAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_REMINDER);
             UserPreferencesManager.get().setLoginRememberMe(context,mCheckInRememberMe.isChecked());
             UserPreferencesManager.get().setLoginUsername(context,username);

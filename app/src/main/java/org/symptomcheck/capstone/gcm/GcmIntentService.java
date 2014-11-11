@@ -30,8 +30,9 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
+import org.symptomcheck.capstone.model.UserType;
+import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.ui.LoginActivity;
-import org.symptomcheck.capstone.ui.MainActivity;
 
 /**
  * This {@code IntentService} does the actual handling of the GCM message.
@@ -81,8 +82,21 @@ public class GcmIntentService extends IntentService {
                 sendNotification("Received: " + extras.toString());
                 Log.i(TAG, "Received: " + extras.toString());
 
-                //!!!!!!!!!!!!!!!!ONLY FOR TEST PURPOSE!!!!!!!!!!!!!!!!///
-                SyncUtils.TriggerRefresh();
+                UserType userOriginMsg = UserType.valueOf(userType);
+                switch (userOriginMsg){
+                    case PATIENT:
+                        if(action.equals(GcmConstants.GCM_ACTION_CHECKIN_RX)) {
+                            SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_LOCAL_CHECK_IN);
+                        }
+                        break;
+                    case DOCTOR:
+                        break;
+                    case ADMIN:
+                        break;
+                    case UNKNOWN:
+                        break;
+                }
+
             }
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.

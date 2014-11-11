@@ -25,8 +25,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
-import com.activeandroid.ActiveAndroid;
-
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.provider.ActiveContract;
 
@@ -38,6 +36,9 @@ public class SyncUtils {
     private static final long SYNC_FREQUENCY = 60 * 60;  // 1 hour (in seconds)
     private static final String CONTENT_AUTHORITY = ActiveContract.CONTENT_AUTHORITY;
     private static final String PREF_SETUP_COMPLETE = "setup_complete";
+
+    public static final String SYNC_LOCAL_ACTION_PARTIAL = "sync_local_partial";
+    public static final String SYNC_CLOUD_ACTION_PARTIAL = "sync_cloud_partial";
 
     /**
      * Create an entry for this application in the system account list, if it isn't already there.
@@ -69,7 +70,7 @@ public class SyncUtils {
         // data has been deleted. (Note that it's possible to clear app data WITHOUT affecting
         // the account list, so wee need to check both.)
         if (newAccount || !setupComplete) {
-            //TriggerRefresh();
+            //ForceRefresh();
             PreferenceManager.getDefaultSharedPreferences(context).edit()
                     .putBoolean(PREF_SETUP_COMPLETE, true).commit();
         }
@@ -86,7 +87,7 @@ public class SyncUtils {
      * but the user is not actively waiting for that data, you should omit this flag; this will give
      * the OS additional freedom in scheduling your sync request.
      */
-    public static void TriggerRefresh() {
+    public static void ForceRefresh() {
         Bundle b = new Bundle();
         // Disable sync backoff and ignore sync preferences. In other words...perform sync NOW!
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
@@ -95,5 +96,33 @@ public class SyncUtils {
                 GenericAccountService.GetAccount(),      // Sync account
                 ActiveContract.CONTENT_AUTHORITY, // Content authority
                 b);                                      // Extras
+    }
+
+    /**
+     * Trigger partial sync
+     * @param repoToUpdate constant defines the table / db source to sync
+     * @see org.symptomcheck.capstone.provider.ActiveContract
+     */
+    public static void TriggerRefreshPartialLocal(String repoToUpdate){
+        Bundle b = new Bundle();
+        b.putString(SYNC_LOCAL_ACTION_PARTIAL,repoToUpdate);
+        ContentResolver.requestSync(
+                GenericAccountService.GetAccount(),      // Sync account
+                ActiveContract.CONTENT_AUTHORITY, // Content authority
+                b);
+    }
+
+    /**
+     * Trigger partial sync
+     * @param repoToUpdate constant defines the table / db source to sync
+     * @see org.symptomcheck.capstone.provider.ActiveContract
+     */
+    public static void TriggerRefreshPartialCloud(String repoToUpdate){
+        Bundle b = new Bundle();
+        b.putString(SYNC_CLOUD_ACTION_PARTIAL,repoToUpdate);
+        ContentResolver.requestSync(
+                GenericAccountService.GetAccount(),      // Sync account
+                ActiveContract.CONTENT_AUTHORITY, // Content authority
+                b);
     }
 }

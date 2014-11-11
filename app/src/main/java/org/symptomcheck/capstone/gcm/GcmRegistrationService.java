@@ -190,17 +190,19 @@ public class GcmRegistrationService extends IntentService {
         //Retrieve gcm reg_ids for the current user
         final UserInfo user = DAOManager.get().getUser();
         List<String> gcmIds = Lists.newArrayList();
-        if(user.getUserType().equals(UserType.PATIENT)){
-            Patient patient = DownloadHelper.get().withRetrofitClient().findPatientByMedicalRecordNumber(user.getUserIdentification());
-             if(patient != null)
-                gcmIds = patient.getGcmRegistrationIds();
-        }else if(user.getUserType().equals(UserType.DOCTOR)){
-            Doctor doctor = DownloadHelper.get().withRetrofitClient().findDoctorByUniqueDoctorID(user.getUserIdentification());
-            if(doctor != null)
-                gcmIds =  doctor.getGcmRegistrationIds();
-        }
-        for(int i=0; i<gcmIds.size(); i++){
-            gcmIds.set(i,gcmIds.get(i).replace("\"",""));
+        if(user != null) {
+            if (user.getUserType().equals(UserType.PATIENT)) {
+                Patient patient = DownloadHelper.get().withRetrofitClient().findPatientByMedicalRecordNumber(user.getUserIdentification());
+                if (patient != null)
+                    gcmIds = patient.getGcmRegistrationIds();
+            } else if (user.getUserType().equals(UserType.DOCTOR)) {
+                Doctor doctor = DownloadHelper.get().withRetrofitClient().findDoctorByUniqueDoctorID(user.getUserIdentification());
+                if (doctor != null)
+                    gcmIds = doctor.getGcmRegistrationIds();
+            }
+            for (int i = 0; i < gcmIds.size(); i++) {
+                gcmIds.set(i, gcmIds.get(i).replace("\"", ""));
+            }
         }
         return gcmIds;
     }
