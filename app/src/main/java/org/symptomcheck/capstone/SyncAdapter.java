@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 
+import com.activeandroid.query.Update;
 import com.google.common.collect.Lists;
 
 import org.symptomcheck.capstone.bus.DownloadEvent;
@@ -38,11 +39,14 @@ import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.Doctor;
 import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.Patient;
+import org.symptomcheck.capstone.model.Question;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
 import org.symptomcheck.capstone.provider.ActiveContract;
+import org.symptomcheck.capstone.ui.LoginActivity;
 import org.symptomcheck.capstone.utils.NetworkHelper;
+import org.symptomcheck.capstone.utils.NotificationHelper;
 import org.symptomcheck.capstone.utils.UserPreferencesManager;
 
 import java.util.List;
@@ -102,44 +106,57 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
 
-        String username = UserPreferencesManager.get().getLoginUsername(getContext());
-        String password = UserPreferencesManager.get().getLoginPassword(getContext());
+        //String username = UserPreferencesManager.get().getLoginUsername(getContext());
+        //String password = UserPreferencesManager.get().getLoginPassword(getContext());
 
-        mSymptomClient = DownloadHelper.get().setUserName(username).setPassword(password).withRetrofitClient();
-        /*
-        if(BuildInfo.get().IsDebug(getContext())) {
-
-        }*/
-        //android.os.Debug.waitForDebugger();  // this line is key
+        //mSymptomClient = DownloadHelper.get().setUserName(username).setPassword(password).withRetrofitClient(getContext());
 
         final boolean isOnline =  NetworkHelper.isOnline(getContext());
         final boolean isOnlineOverWifi =  NetworkHelper.isOnlineOverWifi(getContext());
         Log.i(TAG, String.format("Beginning network synchronization:%s; isOnline:%b; isOnlineOverWifi:%b",
                 extras.toString(),isOnline,isOnlineOverWifi));
 
-        String active_repo_local_to_sync = ActiveContract.SYNC_NONE;
-        String active_repo_cloud_to_sync = ActiveContract.SYNC_NONE;
+        boolean isLogged = UserPreferencesManager.get().IsLogged(getContext());
+        if(isLogged) {
+            mSymptomClient = DownloadHelper.get().setUserName("").setPassword("").withRetrofitClient(getContext());
+            try {
+                mSymptomClient.verifyUser();
+            } catch (Exception error) {
+                isLogged = false;
+            }
+            if (isLogged) {
+                //android.os.Debug.waitForDebugger();  // this line is key
+                String active_repo_local_to_sync = ActiveContract.SYNC_NONE;
+                String active_repo_cloud_to_sync = ActiveContract.SYNC_NONE;
 
 
-         final boolean forceAll = ((extras.containsKey(ContentResolver.SYNC_EXTRAS_MANUAL)
-                                    && extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL))
-                                        || extras.isEmpty());
-        if(forceAll) {
-            active_repo_local_to_sync = ActiveContract.SYNC_ALL;
-        }else{
-            active_repo_local_to_sync = extras.getString(SyncUtils.SYNC_LOCAL_ACTION_PARTIAL, ActiveContract.SYNC_NONE);
-            active_repo_cloud_to_sync = extras.getString(SyncUtils.SYNC_CLOUD_ACTION_PARTIAL, ActiveContract.SYNC_NONE);
-        }
+                final boolean forceAll = ((extras.containsKey(ContentResolver.SYNC_EXTRAS_MANUAL)
+                        && extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL))
+                        || extras.isEmpty());
+                if (forceAll) {
+                    active_repo_local_to_sync = ActiveContract.SYNC_ALL;
+                } else {
+                    active_repo_local_to_sync = extras.getString(SyncUtils.SYNC_LOCAL_ACTION_PARTIAL, ActiveContract.SYNC_NONE);
+                    active_repo_cloud_to_sync = extras.getString(SyncUtils.SYNC_CLOUD_ACTION_PARTIAL, ActiveContract.SYNC_NONE);
+                }
 
-        final UserInfo user = DAOManager.get().getUser();
-        if(user != null) {
-            Log.i(TAG, "sync data with: " + user.toString());
-            if (user.getLogged()) {
-                updateLocalData(active_repo_local_to_sync,user);
-                updateCloudData(active_repo_cloud_to_sync,user);
+                final UserInfo user = DAOManager.get().getUser();
+                if (user != null) {
+                    Log.i(TAG, "sync data with: " + user.toString());
+                    if (user.getLogged()) {
+                        updateLocalData(active_repo_local_to_sync, user);
+                        updateCloudData(active_repo_cloud_to_sync, user);
+                    }
+                }
+            } else {
+                UserPreferencesManager.get().setLogged(getContext(), false);
+                UserInfo user = DAOManager.get().getUser();
+                if (user != null)
+                    user.delete();
+                NotificationHelper.sendNotification(getContext(), 2,
+                        "Login", "Please re-enter credential:your session is expired", LoginActivity.class, true);
             }
         }
-
         EventBus.getDefault().post(new DownloadEvent.Builder().setStatus(true).setValueEvnt(count).Build());
 
         Log.i(TAG, "Network synchronization complete");
@@ -155,11 +172,37 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
         String method = new Object(){}.getClass().getEnclosingMethod().getName();
         Log.i(TAG, method);
         //if(sync.equals(ActiveContract.SYNC_NONE)) {
-            // if PATIENT
+        switch (user.getUserType()) {
+               // if PATIENT
             // 1) look for Check-In to upload N.B Check-in are "marked" with a needSync field set to true
+            case PATIENT:
+                // get CheckIn to sync
+                List<CheckIn> checkIns = CheckIn.getAllToSync();
+                if(checkIns.size() > 0) {
+                    for (CheckIn checkIn : checkIns) {
+                        checkIn.setQuestions(Question.getAll(checkIn));
+                        try {
+                            CheckIn checkInRes = mSymptomClient.addCheckIn(user.getUserIdentification(), checkIn);
+                            checkIn.needSync = 0;
+                            new Update(CheckIn.class)
+                                    .set("needSync = 0")
+                                    .where("_id = ?", checkIn.getId())
+                                    .execute();
+                            Log.i(TAG, "upload checkin: " + checkIn.getId());
+                        }catch (RetrofitError error){
+                            Log.e(TAG, method + "::addCheckIn error: " +  error.getMessage() );
+                        }
+                    }
 
+                }
+
+                break;
             // if DOCTOR
             // 2) look for Medication to upload N.B Medication are "marked" with a needSync field set to true
+            case DOCTOR:
+                break;
+
+        }
         //}
     }
 
@@ -293,7 +336,7 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
                     if((checkIns != null)&& (checkIns.size() > 0))
                         DAOManager.get().saveCheckIns(checkIns,
                                 patient.getMedicalRecordNumber(),
-                                user.getUserIdentification(), true);
+                                user.getUserIdentification(), false);
                 }
             }else {
                 Log.e(TAG, "syncPatientsCheckIns=> sync not possible: patients = null!");

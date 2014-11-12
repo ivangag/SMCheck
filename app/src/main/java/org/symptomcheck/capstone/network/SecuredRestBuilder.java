@@ -6,12 +6,17 @@
  */
 package org.symptomcheck.capstone.network;
 
+import android.content.Context;
+
 import com.google.common.io.BaseEncoding;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import org.apache.commons.io.IOUtils;
+import org.symptomcheck.capstone.dao.DAOManager;
+import org.symptomcheck.capstone.utils.UserPreferencesManager;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -60,7 +65,9 @@ import retrofit.mime.FormUrlEncodedTypedOutput;
  */
 public class SecuredRestBuilder extends RestAdapter.Builder {
 
-	private class OAuthHandler implements RequestInterceptor {
+    private WeakReference<Context> mContext;
+
+    private class OAuthHandler implements RequestInterceptor {
 
 		private boolean loggedIn;
 		private Client client;
@@ -97,10 +104,11 @@ public class SecuredRestBuilder extends RestAdapter.Builder {
 		public void intercept(final RequestFacade request) {
 			// If we're not logged in, login and store the authentication token.
              ExecutorService executor = Executors.newSingleThreadExecutor();
-
-
+            final Context ctx = mContext.get();
+            if(ctx != null) {
+                loggedIn = UserPreferencesManager.get().IsLogged(ctx);
+            }
 			if (!loggedIn) {
-
                 final Future<?> future  = executor.submit(new Runnable() {
                       @Override
                       public void run() {
@@ -158,6 +166,10 @@ public class SecuredRestBuilder extends RestAdapter.Builder {
                                   // header.
                                   request.addHeader("Authorization", "Bearer " + accessToken);
 
+                                  if(ctx != null) {
+                                      UserPreferencesManager.get().setBearerToken(ctx, accessToken);
+                                  }
+
                                   // Let future calls know we've already fetched the access token
                                   loggedIn = true;
                               }
@@ -178,8 +190,14 @@ public class SecuredRestBuilder extends RestAdapter.Builder {
 			else {
 				// Add the access_token that we previously obtained to this request as 
 				// the "Authorization" header.
+                if(ctx != null) {
+                    accessToken = UserPreferencesManager.get().getBearerToken(mContext.get());
+                }
 				request.addHeader("Authorization", "Bearer " + accessToken );
 			}
+            if(ctx != null) {
+                UserPreferencesManager.get().setLogged(ctx, loggedIn);
+            }
         }
 
 	}
@@ -283,6 +301,11 @@ public class SecuredRestBuilder extends RestAdapter.Builder {
 		this.clientSecret = clientSecret;
 		return this;
 	}
+
+    public SecuredRestBuilder setContext(Context context){
+        this.mContext = new WeakReference<Context>(context);
+        return this;
+    }
 	
 		
 

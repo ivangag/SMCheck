@@ -67,11 +67,29 @@ public class Question extends Model implements IModelBuilder{
 
     }
 
+    /**
+     *
+     * @return all stored Question
+     */
     public static List<Question> getAll() {
         // This is how you execute a query
         return new Select()
                 .from(Question.class)
                         //.where("Category = ?", category.getId())
+                        //.orderBy("Name ASC")
+                .execute();
+    }
+
+    /**
+     *
+     * @param checkIn CheckIn owner of Question(s)
+     * @return all stored Question owned by Checkin
+     */
+    public static List<Question> getAll(CheckIn checkIn) {
+        // This is how you execute a query
+        return new Select()
+                .from(Question.class)
+                        .where("CheckIn = ?", checkIn.getId())
                         //.orderBy("Name ASC")
                 .execute();
     }

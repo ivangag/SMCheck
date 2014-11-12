@@ -23,14 +23,12 @@ public class CheckIn extends Model implements IModelBuilder {
     private String issueDateTime;
     @Column
     private String patientMedicalNumber;
-
-    private List<Question> questions = new ArrayList<Question>();
-
     @Column(name = "Patient")
     public transient Patient patient;
-
     @Column
     public transient int needSync = 1;
+
+    private List<Question> questions = new ArrayList<Question>();
 
     // This method is optional, does not affect the foreign key creation.
     public List<Question> items() {

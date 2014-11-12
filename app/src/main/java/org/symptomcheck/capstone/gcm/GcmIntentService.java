@@ -17,6 +17,7 @@
 package org.symptomcheck.capstone.gcm;
 
 import android.app.IntentService;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -33,6 +34,8 @@ import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.ui.LoginActivity;
+import org.symptomcheck.capstone.ui.MainActivity;
+import org.symptomcheck.capstone.utils.NotificationHelper;
 
 /**
  * This {@code IntentService} does the actual handling of the GCM message.
@@ -65,64 +68,46 @@ public class GcmIntentService extends IntentService {
              * not interested in, or that you don't recognize.
              */
             if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-                sendNotification("Send error: " + extras.toString());
+                NotificationHelper.sendNotification(getApplicationContext(),NOTIFICATION_ID,
+                        "Gcm message","Send error: " + extras.toString(),MainActivity.class,false);
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
-                sendNotification("Deleted messages on server: " + extras.toString());
+                NotificationHelper.sendNotification(getApplicationContext(),NOTIFICATION_ID,
+                        "Gcm message","Deleted messages on server: " + extras.toString(),MainActivity.class,false);
             // If it's a regular GCM message, do some work.
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
 
                 final String userType = extras.getString(GcmConstants.GCM_EXTRAS_KEY_USERTYPE);
                 final String userName = extras.getString(GcmConstants.GCM_EXTRAS_KEY_USERNAME);
                 final String action = extras.getString(GcmConstants.GCM_EXTRAS_KEY_ACTION);
-
-                Log.i(TAG, "Message Received: " + action + "-" + userName + "-" + userType);
-
-                Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
-                // Post notification of received message.
-                sendNotification("Received: " + extras.toString());
-                Log.i(TAG, "Received: " + extras.toString());
+                Log.i(TAG, "GCMMessage Received: " + extras.toString() + "=> " + action + "-" + userName + "-" + userType);
 
                 UserType userOriginMsg = UserType.valueOf(userType);
-                switch (userOriginMsg){
-                    case PATIENT:
-                        if(action.equals(GcmConstants.GCM_ACTION_CHECKIN_RX)) {
-                            SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_LOCAL_CHECK_IN);
-                        }
-                        break;
-                    case DOCTOR:
-                        break;
-                    case ADMIN:
-                        break;
-                    case UNKNOWN:
-                        break;
-                }
+                handleTriggerSync(action, userOriginMsg);
 
+                // Post notification of received message.
+                NotificationHelper.sendNotification(getApplicationContext(),NOTIFICATION_ID,
+                        "Gcm message", "Received: " + extras.toString(), MainActivity.class,false);
             }
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.
         GcmBroadcastReceiver.completeWakefulIntent(intent);
     }
 
-    // Put the message into a notification and post it.
-    // This is just one simple example of what you might choose to do with
-    // a GCM message.
-    private void sendNotification(String msg) {
-        NotificationManager mNotificationManager = (NotificationManager)
-                this.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, LoginActivity.class), 0);
-
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-                    .setSmallIcon(R.drawable.ic_doctor)
-                    .setContentTitle("GCM Notification")
-                    .setStyle(new NotificationCompat.BigTextStyle()
-                            .bigText(msg))
-                    .setAutoCancel(true)
-                    .setContentText(msg);
-
-        mBuilder.setContentIntent(contentIntent);
-        mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+    private void handleTriggerSync(String action, UserType userTypeSender) {
+        switch (userTypeSender){
+            case PATIENT:
+                if(action.equals(GcmConstants.GCM_ACTION_CHECKIN_RX)) {
+                    SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_LOCAL_CHECK_IN);
+                }
+                break;
+            case DOCTOR:
+                break;
+            case ADMIN:
+                break;
+            case UNKNOWN:
+                break;
+        }
     }
+
+
 }

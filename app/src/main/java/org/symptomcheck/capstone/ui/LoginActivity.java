@@ -135,11 +135,15 @@ public class LoginActivity extends Activity{
         // Store values at the time of the login attempt.
         final String email;
         final String password;
+        boolean skipCheckField = false;
         if(UserPreferencesManager.get().getLoginRememberMe(this)
                 && (DAOManager.get().getUser() !=  null)
                 && (DAOManager.get().getUser().getLogged())){
-            email = UserPreferencesManager.get().getLoginUsername(this);
-            password = UserPreferencesManager.get().getLoginPassword(this);
+            email = "";
+            password = "";
+            skipCheckField = true;
+            //email = UserPreferencesManager.get().getLoginUsername(this);
+            //password = UserPreferencesManager.get().getLoginPassword(this);
         }else{
             email = mEmailView.getText().toString();
             password = mPasswordView.getText().toString();
@@ -150,14 +154,16 @@ public class LoginActivity extends Activity{
 
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)
+                && !skipCheckField) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
+        if (TextUtils.isEmpty(email)
+                && !skipCheckField) {
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
@@ -282,7 +288,7 @@ public class LoginActivity extends Activity{
                 userInfo = DownloadHelper.get().
                         setUserName(mEmail).
                         setPassword(mPassword).
-                        withRetrofitClient().verifyUser();
+                        withRetrofitClient(getApplicationContext()).verifyUser();
                 userInfo.setLogged(true);
 
                 DAOManager.get().saveUser(userInfo);
@@ -364,8 +370,8 @@ public class LoginActivity extends Activity{
             //SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_ALL);
             SymptomAlarmRequest.get().setAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_REMINDER);
             UserPreferencesManager.get().setLoginRememberMe(context,mCheckInRememberMe.isChecked());
-            UserPreferencesManager.get().setLoginUsername(context,username);
-            UserPreferencesManager.get().setLoginPassword(context,password);
+            //UserPreferencesManager.get().setLoginUsername(context,username);
+            //UserPreferencesManager.get().setLoginPassword(context,password);
 
             finish();
             Intent intent = new Intent(getApplicationContext(),MainActivity.class);

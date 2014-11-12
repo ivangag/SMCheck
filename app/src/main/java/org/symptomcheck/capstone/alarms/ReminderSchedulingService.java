@@ -117,7 +117,7 @@ public class ReminderSchedulingService extends IntentService {
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, CheckInFlow.class),PendingIntent.FLAG_UPDATE_CURRENT);
+                new Intent(this, CheckInFlow.class),0);
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
@@ -125,8 +125,9 @@ public class ReminderSchedulingService extends IntentService {
                         .setContentTitle(getString(R.string.checkin_reminder_title))
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(msg))
-                        .setContentText(msg)
-                .setAutoCancel(true);
+                        .setAutoCancel(true)
+                        .setContentText(msg);
+
 
 
         mBuilder.setContentIntent(contentIntent);

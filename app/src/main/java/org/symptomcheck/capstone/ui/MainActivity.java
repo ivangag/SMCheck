@@ -37,6 +37,7 @@ import org.symptomcheck.capstone.model.Question;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
+import org.symptomcheck.capstone.utils.UserPreferencesManager;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -91,91 +92,103 @@ public class MainActivity extends Activity {
 
         user = DAOManager.get().getUser();
 
-        initUserResource();
+        if(user != null) {
+            initUserResource();
 
 
-        //mDrawerList.addHeaderView(mTextViewHeaderUser);
+            //mDrawerList.addHeaderView(mTextViewHeaderUser);
 
-        // set a custom shadow that overlays the main content when the drawer opens
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-        // Set the adapter for the list view
-        List<DrawerItem> drawerItems = new ArrayList<DrawerItem>();
-        for(int idx=0; idx < mFragmentTitles.length; idx++){
-            drawerItems.add(new DrawerItem(mFragmentTitles[idx],mDrawerImagesResources[idx]));
-        }
-        final DrawerItemAdapter mDrawerItemAdapter = new DrawerItemAdapter(getApplicationContext(),drawerItems);
-
-        //mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                //R.layout.drawer_list_item, mFragmentTitles));
-        mDrawerList.setAdapter(mDrawerItemAdapter);
-        // Set the list's click listener
-        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-
-        // enable ActionBar app icon to behave as action to toggle nav drawer
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
-
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                R.string.drawer_open, R.string.drawer_close) {
-
-            /** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View view) {
-                super.onDrawerClosed(view);
-                getActionBar().setTitle(mTitle);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            // set a custom shadow that overlays the main content when the drawer opens
+            mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+            // Set the adapter for the list view
+            List<DrawerItem> drawerItems = new ArrayList<DrawerItem>();
+            for (int idx = 0; idx < mFragmentTitles.length; idx++) {
+                drawerItems.add(new DrawerItem(mFragmentTitles[idx], mDrawerImagesResources[idx]));
             }
+            final DrawerItemAdapter mDrawerItemAdapter = new DrawerItemAdapter(getApplicationContext(), drawerItems);
 
-            /** Called when a drawer has settled in a completely open state. */
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                getActionBar().setTitle(mDrawerTitle);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            //mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+            //R.layout.drawer_list_item, mFragmentTitles));
+            mDrawerList.setAdapter(mDrawerItemAdapter);
+            // Set the list's click listener
+            mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+            // enable ActionBar app icon to behave as action to toggle nav drawer
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setHomeButtonEnabled(true);
+
+            mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+                    R.string.drawer_open, R.string.drawer_close) {
+
+                /**
+                 * Called when a drawer has settled in a completely closed state.
+                 */
+                public void onDrawerClosed(View view) {
+                    super.onDrawerClosed(view);
+                    getActionBar().setTitle(mTitle);
+                    invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                }
+
+                /**
+                 * Called when a drawer has settled in a completely open state.
+                 */
+                public void onDrawerOpened(View drawerView) {
+                    super.onDrawerOpened(drawerView);
+                    getActionBar().setTitle(mDrawerTitle);
+                    invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                }
+            };
+            mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+            if (user.getUserType().equals(UserType.DOCTOR)) {
+                selectDrawerItem(CASE_SHOW_DOCTOR_PATIENTS);
+            } else if (user.getUserType().equals(UserType.PATIENT)) {
+                //selectDrawerItem(CASE_SHOW_PATIENT_CHECKINS);
             }
-        };
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-
-        if(user.getUserType().equals(UserType.DOCTOR)) {
-            selectDrawerItem(CASE_SHOW_DOCTOR_PATIENTS);
-        }else if(user.getUserType().equals(UserType.PATIENT)){
-            //selectDrawerItem(CASE_SHOW_PATIENT_CHECKINS);
+        }else{
+            Toast.makeText(this,"User not more Logged!!!!!",Toast.LENGTH_LONG).show();
+            finish();
         }
     }
 
     private void initUserResource() {
-        final UserType userType = DAOManager.get().getUser().getUserType();
-        String detailUser = "";
 
-        detailUser =   user.getFirstName()
-                + " " + user.getLastName();
-        try {
-            if(userType.equals(UserType.DOCTOR)) {
-                mFragmentTitles = getResources().getStringArray(R.array.doctor_fragments_array);
-                mDrawerImagesResources = new int[]{R.drawable.ic_patient,R.drawable.ic_action_settings,
-                        R.drawable.ic_logout };
-                Picasso.with(this).load(R.drawable.ic_doctor)
-                        //.resize(96, 96)
-                        //.centerCrop()
-                        .into(mImageView);
-            }else if(userType.equals(UserType.PATIENT)) {
-                mFragmentTitles = getResources().getStringArray(R.array.patient_fragments_array);
-                mDrawerImagesResources = new int[]{R.drawable.ic_check_in, R.drawable.ic_doctor,
-                        R.drawable.ic_action_settings ,R.drawable.ic_logout};
-                Picasso.with(this).load(R.drawable.ic_patient)
-                        //.resize(96, 96)
-                        //.centerCrop()
-                        .into(mImageView);
+        if(user != null) {
+            final UserType userType = user.getUserType();
+            String detailUser = "";
 
+            detailUser = user.getFirstName()
+                    + " " + user.getLastName();
+            try {
+                if (userType.equals(UserType.DOCTOR)) {
+                    mFragmentTitles = getResources().getStringArray(R.array.doctor_fragments_array);
+                    mDrawerImagesResources = new int[]{R.drawable.ic_patient, R.drawable.ic_action_settings,
+                            R.drawable.ic_logout};
+                    Picasso.with(this).load(R.drawable.ic_doctor)
+                            //.resize(96, 96)
+                            //.centerCrop()
+                            .into(mImageView);
+                } else if (userType.equals(UserType.PATIENT)) {
+                    mFragmentTitles = getResources().getStringArray(R.array.patient_fragments_array);
+                    mDrawerImagesResources = new int[]{R.drawable.ic_check_in, R.drawable.ic_doctor,
+                            R.drawable.ic_action_settings, R.drawable.ic_logout};
+                    Picasso.with(this).load(R.drawable.ic_patient)
+                            //.resize(96, 96)
+                            //.centerCrop()
+                            .into(mImageView);
+
+                }
+            } catch (Exception e) {
+                Toast.makeText(this, "Picasso error:" + e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
             }
-        }catch (Exception e){
-            Toast.makeText(this, "Picasso error:" + e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
+            mTextViewHeaderUser.setText(userType.toString().toUpperCase()
+                    + "\n"
+                    + "[" + user.getUserIdentification() + "]");
+            mTextViewUserDetails.setText(
+                    user.getUserType().toString().toUpperCase()
+                            + "\n"
+                            + detailUser);
         }
-        mTextViewHeaderUser.setText(userType.toString().toUpperCase()
-                + "\n"
-                + "[" + user.getUserIdentification() + "]");
-        mTextViewUserDetails.setText(
-                user.getUserType().toString().toUpperCase()
-                        + "\n"
-                       + detailUser);
     }
 
     /* Called whenever we call invalidateOptionsMenu() */
@@ -234,6 +247,7 @@ public class MainActivity extends Activity {
 
     private void doLogout(){
         DAOManager.get().getUser().delete();
+        UserPreferencesManager.get().setLogged(this,false);
         //LoginActivity.startLogin(getApplicationContext());
         //finish();
         finish();

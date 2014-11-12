@@ -120,14 +120,19 @@ public class GcmRegistrationService extends IntentService {
 
             // You should send the registration ID to your server over HTTP, so it
             // can use GCM/HTTP or CCS to send messages to your app.
-            DownloadHelper.get().withRetrofitClient().sendGCMRegistrationId(regid);
-            // Persist the regID - no need to register again.
-            UserPreferencesManager.get().setGcmRegId(getApplicationContext(), regid);
-            UserPreferencesManager.get().setAppVers(getApplicationContext(),
-                    BuildInfo.get().getAppVersion(getApplicationContext()));
-            Log.i(TAG,msg);
+            try {
+                DownloadHelper.get().withRetrofitClient(getApplicationContext()).sendGCMRegistrationId(regid);
+                // Persist the regID - no need to register again.
+                UserPreferencesManager.get().setGcmRegId(getApplicationContext(), regid);
+                UserPreferencesManager.get().setAppVers(getApplicationContext(),
+                        BuildInfo.get().getAppVersion(getApplicationContext()));
+                Log.i(TAG,msg);
+            }catch (Exception exc){
+                Log.e(TAG,"registerInBackground error: " + exc.getMessage());
+            }
+
         } catch (IOException ex) {
-            msg = "Error :" + ex.getMessage();
+            msg = "registerInBackground Error :" + ex.getMessage();
             // If there is an error, don't just keep trying to register.
             // Require the user to click a button again, or perform
             // exponential back-off.
@@ -148,7 +153,7 @@ public class GcmRegistrationService extends IntentService {
         boolean res = true;
         try {
             String regId = UserPreferencesManager.get().getGcmRegId(getApplicationContext());
-            DownloadHelper.get().withRetrofitClient().clearGCMRegistration(regId);
+            DownloadHelper.get().withRetrofitClient(getApplicationContext()).clearGCMRegistration(regId);
         }catch (RetrofitError error){
             Log.e(TAG,"Gcm unregistration:" + error.getMessage());
             res = false;
@@ -190,19 +195,25 @@ public class GcmRegistrationService extends IntentService {
         //Retrieve gcm reg_ids for the current user
         final UserInfo user = DAOManager.get().getUser();
         List<String> gcmIds = Lists.newArrayList();
-        if(user != null) {
-            if (user.getUserType().equals(UserType.PATIENT)) {
-                Patient patient = DownloadHelper.get().withRetrofitClient().findPatientByMedicalRecordNumber(user.getUserIdentification());
-                if (patient != null)
-                    gcmIds = patient.getGcmRegistrationIds();
-            } else if (user.getUserType().equals(UserType.DOCTOR)) {
-                Doctor doctor = DownloadHelper.get().withRetrofitClient().findDoctorByUniqueDoctorID(user.getUserIdentification());
-                if (doctor != null)
-                    gcmIds = doctor.getGcmRegistrationIds();
+        try {
+            if (user != null) {
+                if (user.getUserType().equals(UserType.PATIENT)) {
+                    Patient patient = DownloadHelper.get().withRetrofitClient(getApplicationContext()).findPatientByMedicalRecordNumber(user.getUserIdentification());
+                    if (patient != null)
+                        gcmIds = patient.getGcmRegistrationIds();
+                } else if (user.getUserType().equals(UserType.DOCTOR)) {
+                    Doctor doctor = DownloadHelper.get().withRetrofitClient(getApplicationContext()).findDoctorByUniqueDoctorID(user.getUserIdentification());
+                    if (doctor != null)
+                        gcmIds = doctor.getGcmRegistrationIds();
+                }
+                for (int i = 0; i < gcmIds.size(); i++) {
+                    gcmIds.set(i, gcmIds.get(i).replace("\"", ""));
+                }
             }
-            for (int i = 0; i < gcmIds.size(); i++) {
-                gcmIds.set(i, gcmIds.get(i).replace("\"", ""));
-            }
+        }catch (RetrofitError error){
+            Log.e(TAG, "RetrofitError=>getRemoteGCMIds: " + error.getMessage());
+        }catch (Exception exc){
+            Log.e(TAG, "Exception=>getRemoteGCMIds: " + exc.getMessage());
         }
         return gcmIds;
     }

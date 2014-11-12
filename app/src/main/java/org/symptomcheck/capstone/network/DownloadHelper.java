@@ -2,6 +2,8 @@ package org.symptomcheck.capstone.network;
 
 
 
+import android.content.Context;
+
 import com.activeandroid.Model;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
@@ -132,7 +134,7 @@ public class DownloadHelper {
     }).create();
 
 
-    public synchronized SymptomManagerSvcApi withRetrofitClient() {
+    public synchronized SymptomManagerSvcApi withRetrofitClient(Context context) {
         if(symptomManagerSvcClient == null) {
             symptomManagerSvcClient =
                     builder
@@ -141,6 +143,7 @@ public class DownloadHelper {
                             .setErrorHandler(error)
                             //.setExecutors(executor,null)
                             .setConverter(new GsonConverter(GSON))
+                            .setContext(context)
                             .build()
                             .create(SymptomManagerSvcApi.class);
         }
