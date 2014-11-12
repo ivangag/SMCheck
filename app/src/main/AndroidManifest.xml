@@ -171,6 +171,7 @@
         <activity
             android:uiOptions="splitActionBarWhenNarrow"
             android:name="org.symptomcheck.capstone.ui.CheckInFlow"
+            android:exported="true"
             android:label="@string/title_activity_check_in_flow" >
             <meta-data android:name="android.support.UI_OPTIONS"
                 android:value="splitActionBarWhenNarrow" />
