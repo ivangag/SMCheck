@@ -3,6 +3,7 @@ package org.symptomcheck.capstone.network;
 
 
 import android.content.Context;
+import android.util.Log;
 
 import com.activeandroid.Model;
 import com.google.gson.ExclusionStrategy;
@@ -11,7 +12,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.symptomcheck.capstone.converter.JacksonConverter;
+import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.UserInfo;
+import org.symptomcheck.capstone.ui.LoginActivity;
+import org.symptomcheck.capstone.utils.NotificationHelper;
+import org.symptomcheck.capstone.utils.UserPreferencesManager;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -30,10 +35,12 @@ import retrofit.converter.GsonConverter;
 public class DownloadHelper {
 
 
+    private static final String TAG = "DownloadHelper";
     private String userName;
     private String password;
     private static DownloadHelper downloadHelper = new DownloadHelper();
     private UserInfo userInfo;
+    private String accessToken;
 
     private DownloadHelper() {
         if(userInfo == null)
@@ -69,6 +76,7 @@ public class DownloadHelper {
      *
      */
     private void invalidateClient() {
+        //this.accessToken = "";
         symptomManagerSvcClient = null;
     }
 
@@ -84,7 +92,11 @@ public class DownloadHelper {
         return this;
     }
 
-
+    public DownloadHelper setAccessToken(String accessToken) {
+        invalidateClient();
+        this.accessToken = accessToken;
+        return this;
+    }
 
     private static class ErrorRecorder implements ErrorHandler {
 
@@ -140,6 +152,7 @@ public class DownloadHelper {
                     builder
                             .setUsername(this.userName)
                             .setPassword(this.password)
+                            .setAccessToken(this.accessToken)
                             .setErrorHandler(error)
                             //.setExecutors(executor,null)
                             .setConverter(new GsonConverter(GSON))
@@ -150,24 +163,17 @@ public class DownloadHelper {
         return symptomManagerSvcClient;
     }
 
-
-/*
-    public static class WithRetrofitClient {
-        private String userName;
-        private String password;
-
-        public WithRetrofitClient setUserName(String userName){
-            this.userName = userName;
-            return this;
+    public synchronized void handleRetrofitError(Context context, RetrofitError error){
+        // unauthorized client
+        Log.i(TAG,String.format("handleRetrofitError. Status:%d", error.getResponse().getStatus()));
+        if(error.getResponse().getStatus() == 401){
+            UserInfo user = DAOManager.get().getUser();
+            if (user != null)
+                user.delete();
+            UserPreferencesManager.get().setLogged(context,false);
+            UserPreferencesManager.get().setBearerToken(context, "");
+            NotificationHelper.sendNotification(context, 2,
+                    "Login", "Your session is expired. Please re-enter credential", LoginActivity.class, true);
         }
-        public WithRetrofitClient setPassword(String password){
-            this.password = password;
-            return this;
-        }
-
-        public SymptomManagerSvcApi Build(){
-
-            return makeRetrofitClient(userName,password);
-        }
-    }*/
+    }
 }

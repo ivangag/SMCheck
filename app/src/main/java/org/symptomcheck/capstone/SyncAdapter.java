@@ -106,8 +106,9 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
 
-        //String username = UserPreferencesManager.get().getLoginUsername(getContext());
-        //String password = UserPreferencesManager.get().getLoginPassword(getContext());
+        //final String username = UserPreferencesManager.get().getLoginUsername(getContext());
+        //final String password = UserPreferencesManager.get().getLoginPassword(getContext());
+        final String accessToken = UserPreferencesManager.get().getBearerToken(getContext());
 
         //mSymptomClient = DownloadHelper.get().setUserName(username).setPassword(password).withRetrofitClient(getContext());
 
@@ -116,50 +117,54 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
         Log.i(TAG, String.format("Beginning network synchronization:%s; isOnline:%b; isOnlineOverWifi:%b",
                 extras.toString(),isOnline,isOnlineOverWifi));
 
-        boolean isLogged = UserPreferencesManager.get().IsLogged(getContext());
-        if(isLogged) {
-            mSymptomClient = DownloadHelper.get().setUserName("").setPassword("").withRetrofitClient(getContext());
-            try {
-                mSymptomClient.verifyUser();
-            } catch (Exception error) {
-                isLogged = false;
-            }
-            if (isLogged) {
-                //android.os.Debug.waitForDebugger();  // this line is key
-                String active_repo_local_to_sync = ActiveContract.SYNC_NONE;
-                String active_repo_cloud_to_sync = ActiveContract.SYNC_NONE;
+        if(!accessToken.isEmpty()) {
+            mSymptomClient = DownloadHelper.get().setAccessToken(accessToken).withRetrofitClient(getContext());
+
+//        boolean isLogged = UserPreferencesManager.get().IsLogged(getContext());
+//        if(isLogged) {
+//            mSymptomClient = DownloadHelper.get().setUserName("").setPassword("").withRetrofitClient(getContext());
+//            try {
+//                mSymptomClient.verifyUser();
+//            } catch (Exception error) {
+//                isLogged = false;
+//            }
+//            if (isLogged) {
+            //android.os.Debug.waitForDebugger();  // this line is key
+            String active_repo_local_to_sync = ActiveContract.SYNC_NONE;
+            String active_repo_cloud_to_sync = ActiveContract.SYNC_NONE;
 
 
-                final boolean forceAll = ((extras.containsKey(ContentResolver.SYNC_EXTRAS_MANUAL)
-                        && extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL))
-                        || extras.isEmpty());
-                if (forceAll) {
-                    active_repo_local_to_sync = ActiveContract.SYNC_ALL;
-                } else {
-                    active_repo_local_to_sync = extras.getString(SyncUtils.SYNC_LOCAL_ACTION_PARTIAL, ActiveContract.SYNC_NONE);
-                    active_repo_cloud_to_sync = extras.getString(SyncUtils.SYNC_CLOUD_ACTION_PARTIAL, ActiveContract.SYNC_NONE);
-                }
-
-                final UserInfo user = DAOManager.get().getUser();
-                if (user != null) {
-                    Log.i(TAG, "sync data with: " + user.toString());
-                    if (user.getLogged()) {
-                        updateLocalData(active_repo_local_to_sync, user);
-                        updateCloudData(active_repo_cloud_to_sync, user);
-                    }
-                }
+            final boolean forceAll = ((extras.containsKey(ContentResolver.SYNC_EXTRAS_MANUAL)
+                    && extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL))
+                    || extras.isEmpty());
+            if (forceAll) {
+                active_repo_local_to_sync = ActiveContract.SYNC_ALL;
             } else {
-                UserPreferencesManager.get().setLogged(getContext(), false);
-                UserInfo user = DAOManager.get().getUser();
-                if (user != null)
-                    user.delete();
-                NotificationHelper.sendNotification(getContext(), 2,
-                        "Login", "Please re-enter credential:your session is expired", LoginActivity.class, true);
+                active_repo_local_to_sync = extras.getString(SyncUtils.SYNC_LOCAL_ACTION_PARTIAL, ActiveContract.SYNC_NONE);
+                active_repo_cloud_to_sync = extras.getString(SyncUtils.SYNC_CLOUD_ACTION_PARTIAL, ActiveContract.SYNC_NONE);
             }
+
+            final UserInfo user = DAOManager.get().getUser();
+            if (user != null) {
+                Log.i(TAG, "sync data with: " + user.toString());
+                if (user.getLogged()) {
+                    updateLocalData(active_repo_local_to_sync, user);
+                    updateCloudData(active_repo_cloud_to_sync, user);
+                }
+            }
+//            } else {
+//                UserPreferencesManager.get().setLogged(getContext(), false);
+//                UserInfo user = DAOManager.get().getUser();
+//                if (user != null)
+//                    user.delete();
+//                NotificationHelper.sendNotification(getContext(), 2,
+//                        "Login", "Your session is expired. Please re-enter credential", LoginActivity.class, true);
+//            }
+//        }
         }
         EventBus.getDefault().post(new DownloadEvent.Builder().setStatus(true).setValueEvnt(count).Build());
 
-        Log.i(TAG, "Network synchronization complete");
+        Log.i(TAG, "Network synchronization completed");
     }
 
     /**
@@ -182,15 +187,21 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
                     for (CheckIn checkIn : checkIns) {
                         checkIn.setQuestions(Question.getAll(checkIn));
                         try {
-                            CheckIn checkInRes = mSymptomClient.addCheckIn(user.getUserIdentification(), checkIn);
-                            checkIn.needSync = 0;
+                            mSymptomClient.addCheckIn(user.getUserIdentification(), checkIn);
                             new Update(CheckIn.class)
                                     .set("needSync = 0")
                                     .where("_id = ?", checkIn.getId())
                                     .execute();
                             Log.i(TAG, "upload checkin: " + checkIn.getId());
                         }catch (RetrofitError error){
-                            Log.e(TAG, method + "::addCheckIn error: " +  error.getMessage() );
+                            DownloadHelper.get().handleRetrofitError(getContext(),error);
+                            Log.e(TAG, method + "::addCheckIn error: " +  error.getMessage() +
+                                    "; Status: " + error.getResponse().getStatus());
+                        }catch (Exception e){
+                            if(e.getCause().getClass().equals(RetrofitError.class)){
+                                DownloadHelper.get().handleRetrofitError(getContext(), (RetrofitError) e.getCause());
+                            }
+                            Log.e(TAG,"Error " + method + e.getMessage());
                         }
                     }
 
@@ -272,8 +283,12 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
             doctors = (List<Doctor>) mSymptomClient.findDoctorsByPatient(user.getUserIdentification());
             DAOManager.get().saveDoctors(doctors, user.getUserIdentification());
         }catch (RetrofitError e){
-            Log.e(TAG, "Retrofit:" + e.getMessage() + ";" + e.getResponse());
+            DownloadHelper.get().handleRetrofitError(getContext(),e);
+            Log.e(TAG, "Retrofit:" + e.getMessage() + "; Status: " + e.getResponse().getStatus());
         }catch (Exception e){
+            if(e.getCause().getClass().equals(RetrofitError.class)){
+                DownloadHelper.get().handleRetrofitError(getContext(), (RetrofitError) e.getCause());
+            }
             Log.e(TAG,"Error saveDoctors:" + e.getMessage());
         }
         return doctors;
@@ -287,8 +302,12 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
             Patient patient = mSymptomClient.findPatientByMedicalRecordNumber(user.getUserIdentification());;
             DAOManager.get().savePatients(Lists.newArrayList(patient),user.getUserIdentification());
         }catch (RetrofitError e){
-            Log.e(TAG, "Retrofit:" + e.getMessage() + ";" + e.getResponse());
+            DownloadHelper.get().handleRetrofitError(getContext(),e);
+            Log.e(TAG, "Retrofit:" + e.getMessage() + "; Status: " + e.getResponse().getStatus());
         }catch (Exception e){
+            if(e.getCause().getClass().equals(RetrofitError.class)){
+                DownloadHelper.get().handleRetrofitError(getContext(), (RetrofitError) e.getCause());
+            }
             Log.e(TAG,"Error syncPatientBaseInfo:" + e.getMessage());
         }
     }
@@ -301,8 +320,12 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
             Doctor doctor = mSymptomClient.findDoctorByUniqueDoctorID(user.getUserIdentification());
             DAOManager.get().saveDoctors(Lists.newArrayList(doctor),user.getUserIdentification());
         }catch (RetrofitError e){
-            Log.e(TAG, "Retrofit:" + e.getMessage() + ";" + e.getResponse());
+            DownloadHelper.get().handleRetrofitError(getContext(),e);
+            Log.e(TAG, "Retrofit:" + e.getMessage() + "; Status: " + e.getResponse().getStatus());
         }catch (Exception e){
+            if(e.getCause().getClass().equals(RetrofitError.class)){
+                DownloadHelper.get().handleRetrofitError(getContext(), (RetrofitError) e.getCause());
+            }
             Log.e(TAG,"Error syncDoctorBaseInfo:" + e.getMessage());
         }
     }
@@ -317,9 +340,13 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
              patients = (List<Patient>) mSymptomClient.findPatientsByDoctor(user.getUserIdentification());
              DAOManager.get().savePatients(patients,user.getUserIdentification());
         }catch (RetrofitError e){
-            Log.e(TAG, "Retrofit:" + e.getMessage() + ";" + e.getResponse());
+            DownloadHelper.get().handleRetrofitError(getContext(),e);
+            Log.e(TAG, "Retrofit:" + e.getMessage() + "; Status: " + e.getResponse().getStatus());
         }catch (Exception e){
             Log.e(TAG,"Error savePatients:" + e.getMessage());
+            if(e.getCause().getClass().equals(RetrofitError.class)){
+                DownloadHelper.get().handleRetrofitError(getContext(), (RetrofitError) e.getCause());
+            }
         }
         return patients;
     }
@@ -342,10 +369,14 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
                 Log.e(TAG, "syncPatientsCheckIns=> sync not possible: patients = null!");
             }
         }catch (RetrofitError e){
-            Log.e(TAG, "syncPatientsCheckIns=>Retrofit:" + e.getMessage() + ";" + e.getResponse());
+            DownloadHelper.get().handleRetrofitError(getContext(),e);
+            Log.e(TAG, "syncPatientsCheckIns=>Retrofit:" + e.getMessage() + "; Status: " + e.getResponse().getStatus());
             sync = false;
         }catch (Exception e){
             Log.e(TAG,"syncPatientsCheckIns=>Error saveCheckIns:" + e.getMessage());
+            if(e.getCause().getClass().equals(RetrofitError.class)){
+                DownloadHelper.get().handleRetrofitError(getContext(), (RetrofitError) e.getCause());
+            }
             sync = false;
         }
         return sync;
@@ -368,9 +399,13 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
                 Log.e(TAG, "syncPatientsMedicines=> sync not possible: patients = null!");
             }
         }catch (RetrofitError e){
-            Log.e(TAG, "syncPatientsMedicines=>Retrofit:" + e.getMessage() + ";" + e.getResponse());
+            DownloadHelper.get().handleRetrofitError(getContext(),e);
+            Log.e(TAG, "syncPatientsMedicines=>Retrofit:" + e.getMessage() + "; Status: " + e.getResponse().getStatus());
             sync = false;
         }catch (Exception e){
+            if(e.getCause().getClass().equals(RetrofitError.class)){
+                DownloadHelper.get().handleRetrofitError(getContext(), (RetrofitError) e.getCause());
+            }
             Log.e(TAG,"syncPatientsMedicines=>Error saveCheckIns:" + e.getMessage());
             sync = false;
         }

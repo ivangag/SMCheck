@@ -79,7 +79,7 @@ public class SecuredRestBuilder extends RestAdapter.Builder {
 		private String accessToken;
 
 		public OAuthHandler(Client client, String tokenIssuingEndpoint, String username,
-				String password, String clientId, String clientSecret) {
+				String password, String accessToken, String clientId, String clientSecret) {
 			super();
 			this.client = client;
 			this.tokenIssuingEndpoint = tokenIssuingEndpoint;
@@ -87,6 +87,7 @@ public class SecuredRestBuilder extends RestAdapter.Builder {
 			this.password = password;
 			this.clientId = clientId;
 			this.clientSecret = clientSecret;
+            this.accessToken = accessToken;
 		}
 
 		/**
@@ -103,12 +104,12 @@ public class SecuredRestBuilder extends RestAdapter.Builder {
 		@Override
 		public void intercept(final RequestFacade request) {
 			// If we're not logged in, login and store the authentication token.
-             ExecutorService executor = Executors.newSingleThreadExecutor();
+            ExecutorService executor = Executors.newSingleThreadExecutor();
             final Context ctx = mContext.get();
             if(ctx != null) {
                 loggedIn = UserPreferencesManager.get().IsLogged(ctx);
             }
-			if (!loggedIn) {
+			if (!loggedIn && (accessToken == null || accessToken.isEmpty())) {
                 final Future<?> future  = executor.submit(new Runnable() {
                       @Override
                       public void run() {
@@ -137,7 +138,7 @@ public class SecuredRestBuilder extends RestAdapter.Builder {
                               // the "Authorization" header and the value is set to "Basic "
                               // concatenated with the Base64 client_id:client_secret value described
                               // above.
-                              String base64Auth = BaseEncoding.base64().encode(new String(clientId + ":" + clientSecret).getBytes());
+                              String base64Auth = BaseEncoding.base64().encode((clientId + ":" + clientSecret).getBytes());
                               // Add the basic authorization header
                               List<Header> headers = new ArrayList<Header>();
                               headers.add(new Header("Authorization", "Basic " + base64Auth));
@@ -191,7 +192,7 @@ public class SecuredRestBuilder extends RestAdapter.Builder {
 				// Add the access_token that we previously obtained to this request as 
 				// the "Authorization" header.
                 if(ctx != null) {
-                    accessToken = UserPreferencesManager.get().getBearerToken(mContext.get());
+                    //accessToken = UserPreferencesManager.get().getBearerToken(mContext.get());
                 }
 				request.addHeader("Authorization", "Bearer " + accessToken );
 			}
@@ -208,6 +209,7 @@ public class SecuredRestBuilder extends RestAdapter.Builder {
 	private String clientId;
 	private String clientSecret = "";
 	private Client client;
+    private String accessToken = "";
 	
 	public SecuredRestBuilder setLoginEndpoint(String endpoint){
 		loginUrl = endpoint;
@@ -282,6 +284,11 @@ public class SecuredRestBuilder extends RestAdapter.Builder {
 		return (SecuredRestBuilder) super.setLogLevel(logLevel);
 	}
 
+    public SecuredRestBuilder setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+        return this;
+    }
+
 	public SecuredRestBuilder setUsername(String username) {
 		this.username = username;
 		return this;
@@ -312,15 +319,17 @@ public class SecuredRestBuilder extends RestAdapter.Builder {
 	@Override
 	public RestAdapter build() {
 		if (username == null || password == null) {
-			throw new SecuredRestException(
-					"You must specify both a username and password for a "
-							+ "SecuredRestBuilder before calling the build() method.");
+            if(accessToken.isEmpty()) {
+                throw new SecuredRestException(
+                        "You must specify both a username and password OR a (supposed valid) bearer token for a "
+                                + "SecuredRestBuilder before calling the build() method.");
+            }
 		}
 
 		if (client == null) {
 			client = new OkClient();
 		}
-		OAuthHandler hdlr = new OAuthHandler(client, loginUrl, username, password, clientId, clientSecret);
+		OAuthHandler hdlr = new OAuthHandler(client, loginUrl, username, password, accessToken, clientId, clientSecret);
 		setRequestInterceptor(hdlr);
 
 		return super.build();

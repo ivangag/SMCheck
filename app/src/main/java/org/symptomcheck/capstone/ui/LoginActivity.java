@@ -137,8 +137,11 @@ public class LoginActivity extends Activity{
         final String password;
         boolean skipCheckField = false;
         if(UserPreferencesManager.get().getLoginRememberMe(this)
-                && (DAOManager.get().getUser() !=  null)
-                && (DAOManager.get().getUser().getLogged())){
+                && UserPreferencesManager.get().IsLogged(this)
+                //&& (DAOManager.get().getUser() !=  null)
+                //&& (DAOManager.get().getUser().getLogged())
+                        )
+                    {
             email = "";
             password = "";
             skipCheckField = true;
@@ -294,7 +297,7 @@ public class LoginActivity extends Activity{
                 DAOManager.get().saveUser(userInfo);
 
             } catch (Exception e) {
-                Log.e(TAG,"Error on verifyUser: " + e.getMessage());
+                Log.e(TAG,String.format("Error on verifyUser:%s; User:%s Pw:%s ", e.getMessage(),mEmail,mPassword));
                 return false;
             }
 
