@@ -46,14 +46,9 @@ import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
-import org.symptomcheck.capstone.model.CheckIn;
-import org.symptomcheck.capstone.model.Question;
+import org.symptomcheck.capstone.model.Doctor;
 import org.symptomcheck.capstone.provider.ActiveContract;
 
-import java.util.List;
-import java.util.TimeZone;
-
-import hirondelle.date4j.DateTime;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 import it.gmariotti.cardslib.library.internal.CardHeader;
@@ -67,9 +62,9 @@ import it.gmariotti.cardslib.library.view.CardListView;
  *
  * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
  */
-public class CheckInFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class DoctorFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    CheckinCursorCardAdapter mAdapter;
+    DoctorCursorCardAdapter mAdapter;
     CardListView mListView;
     /**
      * Handle to a SyncObserver. The ProgressBar element is visible until the SyncObserver reports
@@ -84,7 +79,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root= inflater.inflate(R.layout.fragment_card_checkins_list_cursor, container, false);
+        View root= inflater.inflate(R.layout.fragment_card_doctors_list_cursor, container, false);
         //setupListFragment(root);
         setHasOptionsMenu(true);
         return root;
@@ -95,7 +90,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         switch (item.getItemId()) {
             // If the user clicks the "Refresh" button.
             case R.id.menu_refresh:
-                SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_CHECK_IN);
+                SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_DOCTORS);
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -151,9 +146,9 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         //Vehicle vehicle = new Vehicle();
         //vehicle.setVIN("VIN" + count);
         //long count = vehicle.save();
-        mAdapter = new CheckinCursorCardAdapter(getActivity());
+        mAdapter = new DoctorCursorCardAdapter(getActivity());
 
-        mListView = (CardListView) getActivity().findViewById(R.id.card_checkins_list_cursor);
+        mListView = (CardListView) getActivity().findViewById(R.id.card_doctors_list_cursor);
         if (mListView != null) {
             mListView.setAdapter(mAdapter);
         }
@@ -169,7 +164,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
         Loader<Cursor> loader = null;
         loader = new CursorLoader(getActivity(),
-                ContentProvider.createUri(CheckIn.class, null),
+                ContentProvider.createUri(Doctor.class, null),
                 null, null, null, null
         );
         return loader;
@@ -253,23 +248,23 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
     @Override
     public int getFragmentType() {
-        return BaseFragment.FRAGMENT_TYPE_CHECKIN;
+        return BaseFragment.FRAGMENT_TYPE_DOCTORS;
     }
 
     //-------------------------------------------------------------------------------------------------------------
     // Adapter
     //-------------------------------------------------------------------------------------------------------------
-    public class CheckinCursorCardAdapter extends CardCursorAdapter {
+    public class DoctorCursorCardAdapter extends CardCursorAdapter {
 
-        private String mDetailedCheckInInfo;
+        private String mDetailedInfo;
 
-        public CheckinCursorCardAdapter(Context context) {
+        public DoctorCursorCardAdapter(Context context) {
             super(context);
         }
 
         @Override
         protected Card getCardFromCursor(Cursor cursor) {
-            CheckinCursorCard card = new CheckinCursorCard(super.getContext());
+            DoctorCursorCard card = new DoctorCursorCard(super.getContext());
             setCardFromCursor(card,cursor);
 
 
@@ -329,7 +324,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             })*/
 
             //This provides a simple (and useless) expand area
-            CustomExpandCard expand = new CustomExpandCard(super.getContext(),mDetailedCheckInInfo);
+            CustomExpandCard expand = new CustomExpandCard(super.getContext(), mDetailedInfo);
             expand.setTitle("Check-In Details");
             //Add Expand Area to Card
             card.addCardExpand(expand);
@@ -337,41 +332,20 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             return card;
         }
 
-        private void setCardFromCursor(CheckinCursorCard card,Cursor cursor) {
+        private void setCardFromCursor(DoctorCursorCard card,Cursor cursor) {
 
-            final int checkInId = cursor.getInt(ID_COLUMN);
-            card.setId(""+ checkInId);
-            card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL));
-            //cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS))
-            final String instantIssueTime = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME));
-
-            // DateTime fromMilliseconds = DateTime.forInstant(31313121L, aTimeZone);
-            DateTime fromMilliseconds = DateTime.forInstant(Long.valueOf(instantIssueTime), TimeZone.getDefault());
-
-            card.mainHeader = getString(R.string.checkin_header);
-            card.resourceIdThumb=R.drawable.ic_check_in;
-            card.secondaryTitle =  fromMilliseconds.format("YYYY-MM-DD hh:ss");
+            card.setId(""+cursor.getInt(ID_COLUMN));
+            card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.DOCTORS_COLUMNS.FIRST_NAME))
+                    + " " + cursor.getString(cursor.getColumnIndex(ActiveContract.DOCTORS_COLUMNS.LAST_NAME));
+            card.secondaryTitle =
+                    cursor.getString(cursor.getColumnIndex(ActiveContract.DOCTORS_COLUMNS.DOCTOR_ID))
+                            /*+ " " + cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.BIRTH_DATE))*/
+            ;
+            card.mainHeader = getString(R.string.doctor_header);
+            card.resourceIdThumb=R.drawable.ic_doctor;
 
             //build detailed info to be shown in expand area
-            // retrieve questions from checkin
-            final CheckIn checkIn = CheckIn.getById(checkInId);
-            if(checkIn != null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Pain Level: " + checkIn.getIssuePainLevel()).append("\n");
-                sb.append("Feed Status: " + checkIn.getIssueFeedStatus()).append("\n");
-
-                List<Question> questions = checkIn.getItemsQuestion();
-
-                for (Question question : questions) {
-
-                    sb.append(question.getQuestion()).append(" ").append(question.getResponse())
-                            .append(" ").append(DateTime.forInstant(Long.valueOf(question.getMedicatationTakingTime()), TimeZone.getDefault()).format("YYYY-MM-DD hh:ss"))
-                            .append("\n");
-
-                }
-
-                mDetailedCheckInInfo = sb.toString();
-            }
+             mDetailedInfo = "";
         }
     }
 
@@ -392,7 +366,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
     //-------------------------------------------------------------------------------------------------------------
     // Cards
     //-------------------------------------------------------------------------------------------------------------
-    public class CheckinCursorCard extends Card {
+    public class DoctorCursorCard extends Card {
 
         String mainTitle;
         String secondaryTitle;
@@ -400,7 +374,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         int resourceIdThumb;
         private ImageButton mButtonExpandCustom;
 
-        public CheckinCursorCard(Context context) {
+        public DoctorCursorCard(Context context) {
             super(context, R.layout.carddemo_cursor_inner_content);
         }
 

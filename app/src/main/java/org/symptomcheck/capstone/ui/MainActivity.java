@@ -28,6 +28,7 @@ import org.symptomcheck.capstone.adapters.DrawerItemAdapter;
 import org.symptomcheck.capstone.bus.DownloadEvent;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.fragments.CheckInFragment;
+import org.symptomcheck.capstone.fragments.DoctorFragment;
 import org.symptomcheck.capstone.fragments.PatientsFragment;
 import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.FeedStatus;
@@ -233,6 +234,7 @@ public class MainActivity extends Activity {
                         fragment = new CheckInFragment();
                         break;
                     case CASE_SHOW_PATIENT_DOCTORS:
+                        fragment = new DoctorFragment();
                         break;
                     case CASE_SHOW_PATIENT_SETTINGS:
                         break;
@@ -250,8 +252,6 @@ public class MainActivity extends Activity {
     private void doLogout(){
         DAOManager.get().getUser().delete();
         UserPreferencesManager.get().setLogged(this,false);
-        //LoginActivity.startLogin(getApplicationContext());
-        //finish();
         finish();
         Intent intent = new Intent(getApplicationContext(),LoginActivity.class);
         startActivity(intent);

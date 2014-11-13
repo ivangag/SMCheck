@@ -260,6 +260,8 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
                            syncPatientsCheckIns(user);
                        }else if(sync.equals(ActiveContract.SYNC_PATIENTS)) {
                            syncPatientBaseInfo(user);
+                       }else if(sync.equals(ActiveContract.SYNC_DOCTORS)) {
+                           syncPatientDoctors(user);
                        }
                        break;
                    case ADMIN:
