@@ -16,6 +16,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,7 +67,7 @@ public class MainActivity extends Activity {
     private CharSequence mDrawerTitle;
     private TextView mTextViewHeaderUser;
     private TextView mTextViewUserDetails;
-
+    private ShareActionProvider mShareActionProvider;
     private Fragment mBaseFragment;
     private int mSelectedFragment = -1;
 
@@ -78,6 +80,7 @@ public class MainActivity extends Activity {
     private static final int CASE_SHOW_PATIENT_LOGOUT = 3;
 
     private UserInfo user;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -321,6 +324,59 @@ public class MainActivity extends Activity {
         return true;
     }
 
+    private void setupMenuActions(Menu menu) {
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        MenuItem shareItem = menu.findItem(R.id.action_share);
+        mShareActionProvider = (ShareActionProvider)shareItem.getActionProvider();
+        mShareActionProvider.setShareHistoryFileName(ShareActionProvider.DEFAULT_SHARE_HISTORY_FILE_NAME);
+
+        /*
+        mShareActionProvider.setShareIntent(getDefaultIntent());
+        if(mIsShareIntentPending)
+            updateShareIntentWithText();
+            */
+        mShareActionProvider.setOnShareTargetSelectedListener(new ShareActionProvider.OnShareTargetSelectedListener() {
+            @Override
+            public boolean onShareTargetSelected(ShareActionProvider source, Intent intent) {
+                return false;
+            }
+        });
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //Toast.makeText(getActivity().getApplicationContext(), "onQueryTextSubmit:" + query, Toast.LENGTH_SHORT).show();
+                //mNetAdapter.update(query.toUpperCase());
+                IFragmentNotification notifier = getCurrentDisplayedFragment();
+                if (notifier != null)
+                    notifier.OnFilterData(query.toUpperCase());
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //Toast.makeText(getActivity().getApplicationContext(), "onQueryTextChange:" + newText,Toast.LENGTH_SHORT).show();
+                IFragmentNotification notifier = getCurrentDisplayedFragment();
+                if(notifier != null)
+                    notifier.OnFilterData(newText.toUpperCase());
+                return true;
+            }
+        });
+
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                //mNetAdapter.getFilter().filter(getResources().getString(R.string.filterALL));
+                return true;
+            }
+        });
+    }
 
 
     String urlPicassoTest = "http://chart.apis.google.com/chart?cht=p3&chs=500x200&chd=e:TNTNTNGa&chts=000000,16&chtt=A+Better+Web&chl=Hello|Hi|anas|Explorer&chco=FF5533,237745,9011D3,335423&chdl=Apple|Mozilla|Google|Microsoft";
@@ -372,6 +428,10 @@ public class MainActivity extends Activity {
         }*/
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public Fragment getCurrentDisplayedFragment() {
+        return mBaseFragment;
     }
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
