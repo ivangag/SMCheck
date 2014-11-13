@@ -23,8 +23,6 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SyncResult;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -44,9 +42,7 @@ import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
 import org.symptomcheck.capstone.provider.ActiveContract;
-import org.symptomcheck.capstone.ui.LoginActivity;
 import org.symptomcheck.capstone.utils.NetworkHelper;
-import org.symptomcheck.capstone.utils.NotificationHelper;
 import org.symptomcheck.capstone.utils.UserPreferencesManager;
 
 import java.util.List;
@@ -238,12 +234,12 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
                            syncPatientsCheckIns(user);
                            //get and save Patients' Medicines
                            syncPatientsMedicines(user);
-                       }else if(sync.equals(ActiveContract.SYNC_LOCAL_PATIENTS)){
+                       }else if(sync.equals(ActiveContract.SYNC_PATIENTS)){
                            syncDoctorPatients(user);
-                       }else if(sync.equals(ActiveContract.SYNC_LOCAL_CHECK_IN)){
+                       }else if(sync.equals(ActiveContract.SYNC_CHECK_IN)){
                            syncDoctorBaseInfo(user);
                            syncPatientsCheckIns(user);
-                       }else if(sync.equals(ActiveContract.SYNC_LOCAL_DOCTORS)){
+                       }else if(sync.equals(ActiveContract.SYNC_DOCTORS)){
                            syncDoctorBaseInfo(user);
                        }
                        break;
@@ -258,11 +254,11 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
                            syncPatientsCheckIns(user);
                            //get and save Patients' Medicines
                            syncPatientsMedicines(user);
-                       }else if(sync.equals(ActiveContract.SYNC_LOCAL_MEDICINES)) {
+                       }else if(sync.equals(ActiveContract.SYNC_MEDICINES)) {
                            syncPatientsMedicines(user);
-                       }else if(sync.equals(ActiveContract.SYNC_LOCAL_CHECK_IN)) {
+                       }else if(sync.equals(ActiveContract.SYNC_CHECK_IN)) {
                            syncPatientsCheckIns(user);
-                       }else if(sync.equals(ActiveContract.SYNC_LOCAL_PATIENTS)) {
+                       }else if(sync.equals(ActiveContract.SYNC_PATIENTS)) {
                            syncPatientBaseInfo(user);
                        }
                        break;

@@ -1,5 +1,7 @@
 package org.symptomcheck.capstone.provider;
 
+import android.provider.BaseColumns;
+
 /**
  * Created by igaglioti on 04/11/2014.
  */
@@ -13,16 +15,19 @@ public class ActiveContract {
     // CLOUD suffix means update cloud data by uploading the "fresh" from the local DB to remote DB (Upload)
     public static final String SYNC_NONE = "SYNC_NONE";
     public static final String SYNC_ALL = "SYNC_ALL";
-    public static final String SYNC_CLOUD_CHECK_IN = "SYNC_CLOUD_CHECK_IN";
-    public static final String SYNC_LOCAL_CHECK_IN = "SYNC_LOCAL_CHECK_IN";
-    public static final String SYNC_LOCAL_PATIENTS = "SYNC_LOCAL_PATIENTS";
-    public static final String SYNC_CLOUD_PATIENTS = "SYNC_REMOTE_PATIENTS";
-    public static final String SYNC_LOCAL_DOCTORS = "SYNC_LOCAL_DOCTORS";
-    public static final String SYNC_CLOUD_DOCTORS = "SYNC_REMOTE_DOCTORS";
-    public static final String SYNC_LOCAL_MEDICINES = "SYNC_LOCAL_MEDICINES";
-    public static final String SYNC_CLOUD_MEDICINES = "SYNC_REMOTE_MEDICINES";
+    //public static final String SYNC_CLOUD_CHECK_IN = "SYNC_CLOUD_CHECK_IN";
+    public static final String SYNC_CHECK_IN = "SYNC_CHECK_IN";
+    public static final String SYNC_PATIENTS = "SYNC_PATIENTS";
+    //public static final String SYNC_CLOUD_PATIENTS = "SYNC_REMOTE_PATIENTS";
+    public static final String SYNC_DOCTORS = "SYNC_DOCTORS";
+    //public static final String SYNC_CLOUD_DOCTORS = "SYNC_REMOTE_DOCTORS";
+    public static final String SYNC_MEDICINES = "SYNC_MEDICINES";
+    //public static final String SYNC_CLOUD_MEDICINES = "SYNC_REMOTE_MEDICINES";
 
 
+    public static class ALL_TABLE_COLUMNS{
+        public static final String ID = BaseColumns._ID;
+    }
 
     public static class PATIENT_COLUMNS{
         public static final String PATIENT_ID = "patientId";
@@ -34,5 +39,11 @@ public class ActiveContract {
         public static final String DOCTOR_ID = "doctorId";
         public static final String FIRST_NAME = "firstName";
         public static final String LAST_NAME = "lastName";
+    }
+
+    public static class CHECKIN_COLUMNS{
+        public static final String PAIN_LEVEL = "issuePainLevel";
+        public static final String FEED_STATUS = "issueFeedStatus";
+        public static final String ISSUE_TIME = "issueDateTime";
     }
 }

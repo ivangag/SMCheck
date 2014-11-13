@@ -47,5 +47,8 @@
     <string name="title_section3">Section 3</string>
     <string name="action_accept_checkin">Submit Checkin</string>
     <string name="patient_header">Patient</string>
+    <string name="error_login_header">Login Error\n%s</string>
+    <string name="checkin_header">Check-In</string>
+
 
 </resources>

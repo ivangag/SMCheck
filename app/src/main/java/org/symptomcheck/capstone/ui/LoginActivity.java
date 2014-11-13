@@ -49,6 +49,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+
 
 /**
  * A login screen that offers login via email/password and via Google+ sign in.
@@ -66,10 +69,12 @@ public class LoginActivity extends Activity{
     private UserLoginTask mAuthTask = null;
 
     // UI references.
+    private TextView mErrorLoginMsg;
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private View mErrorFormView;
     private CheckBox mCheckInRememberMe;
     private static final String TAG = "LoginActivity";
 
@@ -84,6 +89,7 @@ public class LoginActivity extends Activity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         // Set up the login form.
+        mErrorLoginMsg = (TextView) findViewById(R.id.txt_login_error);
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         mCheckInRememberMe = (CheckBox) findViewById(R.id.checkBoxRememberMe);
         mCheckInRememberMe.setChecked(UserPreferencesManager.get().getLoginRememberMe(this));
@@ -110,6 +116,7 @@ public class LoginActivity extends Activity{
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.layout_login_progress);
+        mErrorFormView = findViewById(R.id.layout_login_error);
 
         if(UserPreferencesManager.get().getLoginRememberMe(this)
                 && (DAOManager.get().getUser() !=  null)
@@ -184,7 +191,7 @@ public class LoginActivity extends Activity{
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            showProgress(true);
+            showProgress(true,false);
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);
 /*
@@ -223,7 +230,7 @@ public class LoginActivity extends Activity{
      * Shows the progress UI and hides the login form.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    public void showProgress(final boolean show) {
+    public void showProgress(final boolean show, final boolean errorOnLogin) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
@@ -247,11 +254,20 @@ public class LoginActivity extends Activity{
                     mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
                 }
             });
+            mErrorFormView.setVisibility(errorOnLogin ? View.VISIBLE : View.GONE);
+            mErrorFormView.animate().setDuration(shortAnimTime).alpha(
+                    errorOnLogin ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mErrorFormView.setVisibility(errorOnLogin ? View.VISIBLE : View.GONE);
+                }
+            });
         } else {
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mErrorFormView.setVisibility(errorOnLogin ? View.VISIBLE : View.GONE);
         }
     }
 
@@ -269,11 +285,12 @@ public class LoginActivity extends Activity{
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTask<Void, Void, ErrorLogin> {
 
         private final String mEmail;
         private final String mPassword;
         private UserInfo userInfo;
+        final private ErrorLogin errorLogin = new ErrorLogin();
 
         UserLoginTask(String email, String password) {
             mEmail = email;
@@ -281,8 +298,9 @@ public class LoginActivity extends Activity{
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
+        protected ErrorLogin doInBackground(Void... params) {
+            // Attempt authentication against a network service.
+            errorLogin.onSuccess = true;
             final String token = UserPreferencesManager.get().getBearerToken(getApplicationContext());
             try {
                 // Simulate network access.
@@ -308,29 +326,30 @@ public class LoginActivity extends Activity{
                 DAOManager.get().saveUser(userInfo);
 
             } catch (Exception e) {
+                errorLogin.onSuccess = false;
+                errorLogin.error = e;
                 Log.e(TAG,String.format("Error on verifyUser:%s; User:%s Pw:%s Token:%s. ", e.getMessage(),mEmail,mPassword,token));
-                UserPreferencesManager.get().setLogged(getApplicationContext(),false);
-                UserPreferencesManager.get().setBearerToken(getApplicationContext(), "");
-                return false;
             }
 
            // TODO: register the new account here.
-            return true;
+            return errorLogin;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(final ErrorLogin login) {
             mAuthTask = null;
 
-            handleGCMRegistrationRequest(getApplicationContext());
-            handleAfterLoginAttempt(success,mEmail,mPassword);
+            if(login.onSuccess) {
+                handleGCMRegistrationRequest(getApplicationContext());
+            }
+            handleAfterLoginAttempt(login,mEmail,mPassword);
         }
 
 
         @Override
         protected void onCancelled() {
             mAuthTask = null;
-            showProgress(false);
+            showProgress(false,false);
         }
     }
 
@@ -380,9 +399,12 @@ public class LoginActivity extends Activity{
         return true;
     }
 
-    public void handleAfterLoginAttempt(Boolean success, String username, String password) {
+    public void handleAfterLoginAttempt(ErrorLogin result, String username, String password) {
+
         final Context context = getApplicationContext();
-        if (success) {
+        boolean showFormError = !result.onSuccess;
+        String errorMsg = "";
+        if (result.onSuccess) {
             //SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_ALL);
             SymptomAlarmRequest.get().setAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_REMINDER);
             UserPreferencesManager.get().setLoginRememberMe(context,mCheckInRememberMe.isChecked());
@@ -393,9 +415,23 @@ public class LoginActivity extends Activity{
             Intent intent = new Intent(getApplicationContext(),MainActivity.class);
             startActivity(intent);
         } else {
-            showProgress(false);
-            mPasswordView.setError(getString(R.string.error_incorrect_credentials));
-            mPasswordView.requestFocus();
+            final Throwable errorCause = result.error.getCause();
+            if(errorCause.getClass().equals(RetrofitError.class)){
+                final Response response = ((RetrofitError)(errorCause)).getResponse();
+                if(response.getStatus() == DownloadHelper.HTTP_UNAUTHORIZED){
+                    showFormError = false;
+                    UserPreferencesManager.get().setLogged(getApplicationContext(),false);
+                    UserPreferencesManager.get().setBearerToken(getApplicationContext(), "");
+                    mPasswordView.setError(getString(R.string.error_incorrect_credentials));
+                    mPasswordView.requestFocus();
+
+                    errorMsg =  String.format(getString(R.string.error_login_header),String.valueOf(response.getStatus()));
+                }
+            }else{
+                errorMsg =  String.format(getString(R.string.error_login_header),errorCause.getMessage());
+            }
+            mErrorLoginMsg.setText(errorMsg);
+            showProgress(false,showFormError);
         }
     }
 
@@ -405,6 +441,11 @@ public class LoginActivity extends Activity{
         //intent.putExtra(EXTRA_PARAM1, param1);
         //intent.putExtra(EXTRA_PARAM2, param2);
         context.startService(intent);
+    }
+
+    private static class ErrorLogin {
+        public Throwable error;
+        public boolean onSuccess;
     }
 
 }

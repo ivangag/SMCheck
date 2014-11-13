@@ -5,7 +5,7 @@
     android:layout_width="match_parent" android:layout_height="match_parent">
 
     <FrameLayout
-        android:id="@+id/carddemo_listContainer"
+        android:id="@+id/card_patients_listContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:ignore="UselessParent">
@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             card:list_card_layout_resourceID="@layout/cards_list_cursor_layout"
-            android:id="@+id/carddemo_list_cursor"/>
+            android:id="@+id/card_patients_list_cursor"/>
 
     </FrameLayout>
 

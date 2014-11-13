@@ -17,23 +17,16 @@
 package org.symptomcheck.capstone.gcm;
 
 import android.app.IntentService;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
-import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
-import org.symptomcheck.capstone.ui.LoginActivity;
 import org.symptomcheck.capstone.ui.MainActivity;
 import org.symptomcheck.capstone.utils.NotificationHelper;
 
@@ -97,7 +90,7 @@ public class GcmIntentService extends IntentService {
         switch (userTypeSender){
             case PATIENT:
                 if(action.equals(GcmConstants.GCM_ACTION_CHECKIN_RX)) {
-                    SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_LOCAL_CHECK_IN);
+                    SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_CHECK_IN);
                 }
                 break;
             case DOCTOR:

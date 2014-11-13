@@ -36,6 +36,13 @@ dependencies {
     //compile project(':jackson-mapper-asl-1.9.13')
     //compile project(':jackson-core-asl-1.9.13')
 
+    ///****** date4j. It's an alternative to Date, Calendar, and related Java classes.
+    //The main goals of date4j are:
+    //      easy manipulation of dates/times in the Gregorian calendar (the civil calendar used in almost all countries).
+    //      easy storage and retrieval of such dates/times from a relational database.
+    //      a simplified model of civil timekeeping, similar to the model used by many databases.
+    compile 'com.darwinsys:hirondelle-date4j:1.5.1'
+
     ///*****CardsLib dependencies
     //Core
     compile 'com.github.gabrielemariotti.cards:cardslib-core:2.0.1'

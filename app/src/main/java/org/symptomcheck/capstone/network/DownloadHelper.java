@@ -34,6 +34,9 @@ import retrofit.converter.GsonConverter;
  */
 public class DownloadHelper {
 
+    public final static int HTTP_UNAUTHORIZED = 401;
+    public final static int HTTP_BAD_REQUEST = 403;
+    public final static int HTTP_OK = 200;
 
     private static final String TAG = "DownloadHelper";
     private String userName;

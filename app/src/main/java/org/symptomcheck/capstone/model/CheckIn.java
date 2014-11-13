@@ -31,7 +31,7 @@ public class CheckIn extends Model implements IModelBuilder {
     private List<Question> questions = new ArrayList<Question>();
 
     // This method is optional, does not affect the foreign key creation.
-    public List<Question> items() {
+    public List<Question> getItemsQuestion() {
         return getMany(Question.class, "CheckIn");
     }
 
@@ -112,6 +112,15 @@ public class CheckIn extends Model implements IModelBuilder {
         return checkIn;
     }
 
+
+    public static CheckIn getById(int id) {
+        // This is how you execute a query
+        return new Select()
+                .from(CheckIn.class)
+                        .where("_id = ?", id)
+                        //.orderBy("Name ASC")
+                .executeSingle();
+    }
 
     public static List<CheckIn> getAll() {
         // This is how you execute a query

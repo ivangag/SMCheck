@@ -100,7 +100,7 @@ public class SyncUtils {
     }
 
     /**
-     * Trigger partial sync
+     * Trigger partial sync by download
      * @param repoToUpdate constant defines the table / db source to sync
      * @see org.symptomcheck.capstone.provider.ActiveContract
      */

@@ -19,35 +19,47 @@
   -->
 
 
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_marginStart="3dp"
                 android:layout_marginLeft="3dp"
-                android:layout_height="60dp"
+                android:layout_height="75dp"
     >
 
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-    <TextView
-        android:id="@+id/carddemo_cursor_main_inner_title"
-        android:layout_width="wrap_content"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/holo_green_light"
-        android:layout_marginStart="5dp"
-        android:layout_marginLeft="5dp"
-        android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/carddemo_cursor_main_inner_title"
+            android:layout_width="wrap_content"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/holo_green_light"
+            android:layout_marginStart="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_height="wrap_content"/>
 
-    <TextView
-        android:id="@+id/carddemo_cursor_main_inner_subtitle"
-        android:textSize="12sp"
-        android:textColor="#BBB"
-        android:layout_marginStart="5dp"
-        android:layout_marginLeft="5dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/carddemo_cursor_main_inner_subtitle"
+            android:textSize="14sp"
+            android:textColor="#BBB"
+            android:layout_marginStart="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginBottom="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
+        <ImageButton
+            android:id="@+id/card_rds_expand_button_info"
+            android:layout_marginRight="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end" />
+    </LinearLayout>
 
 </RelativeLayout>
 

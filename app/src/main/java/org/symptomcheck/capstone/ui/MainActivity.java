@@ -27,6 +27,7 @@ import org.symptomcheck.capstone.adapters.DrawerItem;
 import org.symptomcheck.capstone.adapters.DrawerItemAdapter;
 import org.symptomcheck.capstone.bus.DownloadEvent;
 import org.symptomcheck.capstone.dao.DAOManager;
+import org.symptomcheck.capstone.fragments.CheckInFragment;
 import org.symptomcheck.capstone.fragments.PatientsFragment;
 import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.FeedStatus;
@@ -143,7 +144,7 @@ public class MainActivity extends Activity {
             if (user.getUserType().equals(UserType.DOCTOR)) {
                 selectDrawerItem(CASE_SHOW_DOCTOR_PATIENTS);
             } else if (user.getUserType().equals(UserType.PATIENT)) {
-                //selectDrawerItem(CASE_SHOW_PATIENT_CHECKINS);
+                selectDrawerItem(CASE_SHOW_PATIENT_CHECKINS);
             }
         }else{
             Toast.makeText(this,"User not more Logged!!!!!",Toast.LENGTH_LONG).show();
@@ -194,7 +195,7 @@ public class MainActivity extends Activity {
     /* Called whenever we call invalidateOptionsMenu() */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        // If the nav drawer is open, hide action items related to the content view
+        // If the nav drawer is open, hide action getItemsQuestion related to the content view
         boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
         //menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
 
@@ -229,6 +230,7 @@ public class MainActivity extends Activity {
             case PATIENT:
                 switch (position) {
                     case CASE_SHOW_PATIENT_CHECKINS:
+                        fragment = new CheckInFragment();
                         break;
                     case CASE_SHOW_PATIENT_DOCTORS:
                         break;
@@ -314,7 +316,7 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+        // Inflate the menu; this adds getItemsQuestion to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
@@ -424,7 +426,7 @@ public class MainActivity extends Activity {
             }
             questions = Question.getAll();
             checkIns =  CheckIn.getAllToSync();
-            SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_CLOUD_CHECK_IN);
+            SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_CHECK_IN);
             //checkIn = DownloadHelper.get().setUserName("patient002").setPassword("pass").withRetrofitClient().addCheckIn("patient003", checkIn);
         }
 
