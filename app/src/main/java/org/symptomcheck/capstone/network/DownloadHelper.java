@@ -76,7 +76,7 @@ public class DownloadHelper {
      *
      */
     private void invalidateClient() {
-        //this.accessToken = "";
+        this.accessToken = "";
         symptomManagerSvcClient = null;
     }
 

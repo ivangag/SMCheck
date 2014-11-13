@@ -40,6 +40,7 @@ import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.Question;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.network.DownloadHelper;
+import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
 import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.utils.UserPreferencesManager;
 
@@ -282,22 +283,34 @@ public class LoginActivity extends Activity{
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-
+            final String token = UserPreferencesManager.get().getBearerToken(getApplicationContext());
             try {
                 // Simulate network access.
                 //Thread.sleep(2000);
 
 
-                userInfo = DownloadHelper.get().
-                        setUserName(mEmail).
-                        setPassword(mPassword).
-                        withRetrofitClient(getApplicationContext()).verifyUser();
+                SymptomManagerSvcApi client;
+                if(mEmail.isEmpty()
+                        || mPassword.isEmpty()){
+                    client = DownloadHelper.get()
+                            .setAccessToken(token)
+                            .withRetrofitClient(getApplicationContext());
+                }else{
+                    client = DownloadHelper.get().
+                            setUserName(mEmail).
+                            setPassword(mPassword).
+                            withRetrofitClient(getApplicationContext());
+                }
+
+                userInfo = client.verifyUser();
                 userInfo.setLogged(true);
 
                 DAOManager.get().saveUser(userInfo);
 
             } catch (Exception e) {
-                Log.e(TAG,String.format("Error on verifyUser:%s; User:%s Pw:%s ", e.getMessage(),mEmail,mPassword));
+                Log.e(TAG,String.format("Error on verifyUser:%s; User:%s Pw:%s Token:%s. ", e.getMessage(),mEmail,mPassword,token));
+                UserPreferencesManager.get().setLogged(getApplicationContext(),false);
+                UserPreferencesManager.get().setBearerToken(getApplicationContext(), "");
                 return false;
             }
 
