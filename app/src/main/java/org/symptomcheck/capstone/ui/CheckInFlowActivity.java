@@ -1,5 +1,6 @@
 package org.symptomcheck.capstone.ui;
 
+import java.util.List;
 import java.util.Locale;
 
 import android.app.ActionBar;
@@ -17,9 +18,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.google.common.collect.Lists;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.dao.DAOManager;
+import org.symptomcheck.capstone.model.PainMedication;
+import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.utils.NotificationHelper;
 
@@ -44,6 +50,13 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
 
     private boolean checkInPermitted = true;
 
+    List<PainMedication> mMedicines = Lists.newArrayList();
+
+    private enum FragmentType{
+        FRAGMENT_TYPE_PAIN_LEVEL,
+        FRAGMENT_TYPE_FEED_STATUS,
+        FRAGMENT_TYPE_MEDICINES,
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +65,9 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         mUser = DAOManager.get().getUser();
 
         if(mUser != null) {
+
+            mMedicines = PainMedication.getAll(mUser.getUserIdentification());
+
             // Set up the action bar.
             final ActionBar actionBar = getActionBar();
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -89,6 +105,8 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                                 .setText(mSectionsPagerAdapter.getPageTitle(i))
                                 .setTabListener(this));
             }
+
+
         } else{
             checkInPermitted = false;
         }
@@ -104,8 +122,9 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
 
     @Override
     protected void onResume() {
-        if(!checkInPermitted)
-            NotificationHelper.showAlertDialog(this, NotificationHelper.AlertType.ALERT_GO_TO_LOGIN, getActionBar().getTitle().toString(),"");
+        if(!checkInPermitted) {
+            NotificationHelper.showAlertDialog(this, NotificationHelper.AlertType.ALERT_GO_TO_LOGIN, getActionBar().getTitle().toString(), "");
+        }
         super.onResume();
     }
 
@@ -157,29 +176,53 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
 
         @Override
         public Fragment getItem(int position) {
+            int totalItem = getCount();
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
+            if (position == 0) {
+                return PainQuestionFragment.newInstance(position + 1, FragmentType.FRAGMENT_TYPE_PAIN_LEVEL);
+            } else if (position == getCount() - 1) {
+                return PainQuestionFragment.newInstance(position + 1,FragmentType.FRAGMENT_TYPE_FEED_STATUS);
+            } else {
+                if (mMedicines.size() > 0) {
+                    // for each medicine we have to instantiate a Fragment question
+                }
+                return PainQuestionFragment.newInstance(position + 1,FragmentType.FRAGMENT_TYPE_MEDICINES);
+            }
         }
 
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 3;
+            final int totalMedicines = mMedicines.size();
+            return 1 + totalMedicines + 1;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
             Locale l = Locale.getDefault();
+            String title = null;
+            /*
             switch (position) {
                 case 0:
-                    return getString(R.string.title_section1).toUpperCase(l);
+                    return getString(R.string.pain_status).toUpperCase(l);
                 case 1:
-                    return getString(R.string.title_section2).toUpperCase(l);
+                    return getString(R.string.feed_status).toUpperCase(l);
                 case 2:
                     return getString(R.string.title_section3).toUpperCase(l);
             }
             return null;
+            */
+            if (position == 0) {
+                title = getString(R.string.pain_status).toUpperCase(l);
+            } else if (position == getCount() - 1) {
+                title = getString(R.string.feed_status).toUpperCase(l);
+            } else {
+                if (mMedicines.size() > 0) {
+                    title = mMedicines.get(position - 1).getMedicationName();
+                }
+            }
+            return title;
         }
     }
 
@@ -194,33 +237,75 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class PainQuestionFragment extends Fragment {
+
+        View rootView;
         /**
          * The fragment argument representing the section number for this
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
+        private static String ARG_FRAGMENT_TYPE = "frg_tpe";
 
         /**
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
+        public static PainQuestionFragment newInstance(int sectionNumber,FragmentType fragmentType) {
+            PainQuestionFragment fragment = new PainQuestionFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            args.putString(ARG_FRAGMENT_TYPE,fragmentType.toString());
             fragment.setArguments(args);
             return fragment;
         }
 
-        public PlaceholderFragment() {
+        public PainQuestionFragment() {
+
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_check_in_flow, container, false);
+
+            final FragmentType fragmentType = FragmentType.valueOf(getArguments().getString(ARG_FRAGMENT_TYPE));
+            switch (fragmentType){
+                case FRAGMENT_TYPE_PAIN_LEVEL:
+                    rootView = inflater.inflate(R.layout.fragment_check_in_question_pain, container, false);
+                    break;
+                case FRAGMENT_TYPE_FEED_STATUS:
+                    rootView = inflater.inflate(R.layout.fragment_check_in_question_feed_status, container, false);
+                    break;
+                case FRAGMENT_TYPE_MEDICINES:
+                    rootView = inflater.inflate(R.layout.fragment_check_in_question_medicine, container, false);
+                    break;
+            }
+
             return rootView;
+        }
+
+        @Override
+        public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+
+            TextView title = (TextView) rootView.findViewById(R.id.txt_check_in_header_question);
+            final int positionFragment = getArguments().getInt(ARG_SECTION_NUMBER);
+
+            final FragmentType fragmentType = FragmentType.valueOf(getArguments().getString(ARG_FRAGMENT_TYPE));
+            switch (fragmentType){
+                case FRAGMENT_TYPE_PAIN_LEVEL:
+                    title.setText(getString(R.string.pain_title_question));
+                    break;
+                case FRAGMENT_TYPE_FEED_STATUS:
+                    title.setText(getString(R.string.feed_status_title_question));
+                    break;
+                case FRAGMENT_TYPE_MEDICINES:
+                    title.setText(String.format(getString(R.string.medicine_title_question),
+                            ((CheckInFlowActivity)getActivity()).mMedicines.get(positionFragment - 2).getMedicationName()));
+                    break;
+            }
+
+
         }
     }
 

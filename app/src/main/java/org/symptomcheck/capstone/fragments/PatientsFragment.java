@@ -37,14 +37,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
 import android.widget.FilterQueryProvider;
-import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.activeandroid.ActiveAndroid;
 import com.activeandroid.content.ContentProvider;
 
 import org.symptomcheck.capstone.R;
@@ -163,22 +160,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
             public Cursor runQuery(CharSequence charSequence) {
-               Cursor cursor;
-               final String filterPattern = charSequence.toString();
-                if(!filterPattern.isEmpty()) {
-                    cursor = getActivity().getContentResolver()
-                            .query(mUriContentProvider,
-                                    ActiveContract.PATIENT_TABLE_PROJECTION,
-                                    ActiveContract.PATIENT_COLUMNS.LAST_NAME + " LIKE ? OR " +
-                                    ActiveContract.PATIENT_COLUMNS.FIRST_NAME + " LIKE ?",
-                                    new String[]{"%" + filterPattern + "%","%" + filterPattern + "%" }
-                                    , ActiveContract.PATIENT_COLUMNS.FIRST_NAME + " asc");
-                }else{
-                    cursor = getActivity().getContentResolver()
-                            .query(mUriContentProvider,
-                                    ActiveContract.PATIENT_TABLE_PROJECTION,null,null,null);
-                }
-                return cursor;
+                return queryAllField(charSequence.toString());
             }
         });
         // Force start background query to load sessions

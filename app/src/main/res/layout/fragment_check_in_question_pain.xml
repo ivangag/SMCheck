@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+
+
+    <LinearLayout
+        android:weightSum="1.0"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_weight="0.75"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+          <TextView
+                android:id="@+id/txt_check_in_header_question"
+                android:layout_gravity="fill"
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:text="Pain Question ?"
+                style="@style/Theme.Capstone"
+                android:textColor="@android:color/white"
+                android:background="@drawable/ab_solid_capstone" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_weight="0.25"
+            android:layout_width="0dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_height="match_parent">
+            <ImageView
+                android:id="@+id/imageCheckInPain"
+                android:src="@drawable/ic_check_in"
+                android:layout_gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/picasso" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:background="@color/card_foreground_activated"
+        android:orientation="vertical">
+
+        <RadioGroup
+            android:layout_marginTop="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <RadioButton
+                android:layout_marginTop="30dp"
+                android:gravity="center"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Well Controlled"
+                android:id="@+id/radioBtnPainWellControlled"
+                android:layout_gravity="center_horizontal" />
+
+            <RadioButton
+                android:layout_marginTop="30dp"
+                android:gravity="center"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Moderate"
+                android:id="@+id/radioBtnPainModerate"
+                android:layout_gravity="center_horizontal" />
+
+            <RadioButton
+                android:layout_marginTop="30dp"
+                android:gravity="center"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Severe"
+                android:id="@+id/radioBtnPainSevere"
+                android:layout_gravity="center_horizontal" />
+        </RadioGroup>
+        <ImageView
+            android:id="@+id/imageThroatPhoto"
+            android:src="@drawable/throat_demo"
+            android:layout_marginTop="60dp"
+            android:layout_gravity="center"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:contentDescription="@string/picasso" />
+    </LinearLayout>
+</LinearLayout>

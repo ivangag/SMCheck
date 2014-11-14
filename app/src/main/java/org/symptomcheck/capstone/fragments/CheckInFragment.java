@@ -36,6 +36,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FilterQueryProvider;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -157,7 +158,12 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         if (mListView != null) {
             mListView.setAdapter(mAdapter);
         }
-
+        mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+            @Override
+            public Cursor runQuery(CharSequence charSequence) {
+                return queryAllField(charSequence.toString());
+            }
+        });
         // Force start background query to load sessions
         getLoaderManager().restartLoader(0, null, this);
 
@@ -258,7 +264,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
     @Override
     public void OnFilterData(String textToSearch) {
-
+        mAdapter.getFilter().filter(textToSearch);
     }
 
     //-------------------------------------------------------------------------------------------------------------

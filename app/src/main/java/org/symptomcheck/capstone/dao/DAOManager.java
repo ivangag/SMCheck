@@ -106,6 +106,7 @@ public class DAOManager {
     }
 
     public synchronized void savePainMedications(List<PainMedication> medications, String medicalRecordNumber, String userIdentification) {
+        new ActiveHandler<PainMedication>().deleteItems(PainMedication.class);
         new ActiveHandler<PainMedication>().saveItems(medications);
     }
 

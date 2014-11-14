@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+
+
+    <LinearLayout
+        android:weightSum="1.0"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_weight="0.75"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+          <TextView
+                android:id="@+id/txt_check_in_header_question"
+                android:layout_gravity="fill"
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:text="Feeed Status Question ?"
+                style="@style/Theme.Capstone"
+                android:textColor="@android:color/white"
+                android:background="@drawable/ab_solid_capstone" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_weight="0.25"
+            android:layout_width="0dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_height="match_parent">
+            <ImageView
+                android:id="@+id/imageCheckInPain"
+                android:src="@drawable/ic_check_in"
+                android:layout_gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/picasso" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:background="@color/card_foreground_activated"
+        android:orientation="vertical">
+
+        <RadioGroup
+            android:layout_marginTop="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <RadioButton
+                android:layout_marginTop="30dp"
+                android:gravity="center"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="No"
+                android:id="@+id/radioBtnFeedNo"
+                android:layout_gravity="center_horizontal" />
+
+            <RadioButton
+                android:layout_marginTop="30dp"
+                android:gravity="center"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Some"
+                android:id="@+id/radioBtnFeedSome"
+                android:layout_gravity="center_horizontal" />
+
+            <RadioButton
+                android:layout_marginTop="30dp"
+                android:gravity="center"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="I can't eat"
+                android:id="@+id/radioBtnFeedCannotEat"
+                android:layout_gravity="center_horizontal" />
+        </RadioGroup>
+    </LinearLayout>
+</LinearLayout>

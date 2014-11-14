@@ -1,10 +1,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="org.symptomcheck.capstone.ui.CheckInFlowActivity">
+
+
     <item android:id="@+id/action_submit_checkin"
         android:icon="@drawable/ic_action_accept"
         android:title="@string/action_accept_checkin"
         android:orderInCategory="100"
+        android:showAsAction="always" />
+
+    <item android:id="@+id/action_submit_photo"
+        android:icon="@drawable/ic_action_camera"
+        android:title="@string/action_take_photo"
+        android:orderInCategory="101"
         android:showAsAction="always" />
 </menu>

@@ -36,6 +36,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FilterQueryProvider;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -154,6 +155,13 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
             mListView.setAdapter(mAdapter);
         }
 
+        mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+            @Override
+            public Cursor runQuery(CharSequence charSequence) {
+                return queryAllField(charSequence.toString());
+            }
+        });
+
         // Force start background query to load sessions
         getLoaderManager().restartLoader(0, null, this);
 
@@ -254,7 +262,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
 
     @Override
     public void OnFilterData(String textToSearch) {
-
+        mAdapter.getFilter().filter(textToSearch);
     }
 
     //-------------------------------------------------------------------------------------------------------------

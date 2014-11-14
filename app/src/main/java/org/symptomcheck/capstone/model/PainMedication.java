@@ -5,6 +5,9 @@ import android.provider.BaseColumns;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
+import com.activeandroid.query.Select;
+
+import java.util.List;
 
 
 @Table(name = "PainMedications", id = BaseColumns._ID)
@@ -61,5 +64,14 @@ public class PainMedication extends Model implements IModelBuilder {
     @Override
     public void buildInternalArray() {
 
+    }
+
+    public static List<PainMedication> getAll(String patientMedicalNumber) {
+        // This is how you execute a query
+        return new Select()
+                .from(PainMedication.class)
+                .where("patientMedicalNumber = ?", patientMedicalNumber)
+                        //.orderBy("Name ASC")
+                .execute();
     }
 }

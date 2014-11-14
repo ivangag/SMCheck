@@ -170,9 +170,9 @@
 
         <activity
             android:uiOptions="splitActionBarWhenNarrow"
+            android:label="@string/title_check_in_flow"
             android:name=".ui.CheckInFlowActivity"
-            android:exported="true"
-            android:label="@string/title_activity_check_in_flow" >
+            android:exported="true">
             <meta-data android:name="android.support.UI_OPTIONS"
                 android:value="splitActionBarWhenNarrow" />
         </activity>

@@ -2,10 +2,7 @@ package org.symptomcheck.capstone.gcm;
 
 public class GcmConstants {
 
-	public final static String GCM_PROJECT_AUTHORIZATION_KEY = "key=AIzaSyCACHOdod_qk6e1uiBtJT_MFufGroa45AA";
-	
 	public final static String GCM_MESSAGING_URL = "https://android.googleapis.com/gcm";
-
 
     public final static String GCM_EXTRAS_KEY_ACTION = "action";
     public final static String GCM_EXTRAS_KEY_USERNAME = "userName";

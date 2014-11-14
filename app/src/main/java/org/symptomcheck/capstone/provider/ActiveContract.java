@@ -22,17 +22,36 @@ public class ActiveContract {
     public static final String SYNC_DOCTORS = "SYNC_DOCTORS";
     //public static final String SYNC_CLOUD_DOCTORS = "SYNC_REMOTE_DOCTORS";
     public static final String SYNC_MEDICINES = "SYNC_MEDICINES";
+
     //public static final String SYNC_CLOUD_MEDICINES = "SYNC_REMOTE_MEDICINES";
 
+    public static final String[] DOCTOR_TABLE_PROJECTION = new String[]{
+            BaseColumns._ID + ","
+                    + DOCTORS_COLUMNS.DOCTOR_ID + ","
+                    + DOCTORS_COLUMNS.FIRST_NAME + ","
+                    + DOCTORS_COLUMNS.LAST_NAME
+    };
 
-
-    public static String[] PATIENT_TABLE_PROJECTION = new String[]
-            {
+    public static String[] PATIENT_TABLE_PROJECTION = new String[]{
                     BaseColumns._ID + ","
                     + PATIENT_COLUMNS.PATIENT_ID + ","
                             + PATIENT_COLUMNS.FIRST_NAME + ","
                             + PATIENT_COLUMNS.LAST_NAME + ","
                             + PATIENT_COLUMNS.BIRTH_DATE
+            };
+
+    public static String[] CHECK_IN_TABLE_PROJECTION = new String[]{
+                    BaseColumns._ID + ","
+                            + CHECKIN_COLUMNS.PAIN_LEVEL + ","
+                            + CHECKIN_COLUMNS.FEED_STATUS + ","
+                            + CHECKIN_COLUMNS.ISSUE_TIME
+            };
+
+    public static String[] MEDICINES_TABLE_PROJECTION = new String[]{
+                    BaseColumns._ID + ","
+                            + MEDICINES_COLUMNS.NAME + ","
+                            + MEDICINES_COLUMNS.PATIENT_ID + ","
+                            + MEDICINES_COLUMNS.TAKING_TIME
             };
 
     public static class PATIENT_COLUMNS{
@@ -51,5 +70,10 @@ public class ActiveContract {
         public static final String PAIN_LEVEL = "issuePainLevel";
         public static final String FEED_STATUS = "issueFeedStatus";
         public static final String ISSUE_TIME = "issueDateTime";
+    }
+    public static class MEDICINES_COLUMNS{
+        public static final String NAME = "medicationName";
+        public static final String TAKING_TIME = "lastTakingDateTime";
+        public static final String PATIENT_ID = "patientMedicalNumber";
     }
 }

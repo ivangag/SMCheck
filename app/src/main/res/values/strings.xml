@@ -4,7 +4,7 @@
     <string name="app_name">SymptomCheck</string>
     <string name="account_name">FeedSync Service</string>
     <string name="title_entry_detail">Entry Detail</string>
-    <string name="loading">Waiting for sync...</string>
+    <string name="loading">Waiting for sync…</string>
     <string name="description_refresh">Refresh</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -20,7 +20,7 @@
     <string name="remember_me">Remember me</string>
     <string name="header_text_symptom_patient">PATIENT</string>
     <string name="error_incorrect_credentials">The credentials are incorrect</string>
-    <string name="login_text">Login...</string>
+    <string name="login_text">Login…</string>
     <string name="symptom_title_login">SYMPTOM MANAGEMENT LOGIN</string>
     <string name="title_activity_login">Sign in</string>
     <string name="title_activity_main">Symptom Management</string>
@@ -40,7 +40,7 @@
     <string name="item_1">item1</string>
     <string name="checkin_reminder_title">Symptom Check-In</string>
     <string name="checkin_reminder_text">Please click here to start Check-In</string>
-    <string name="title_activity_check_in_flow">CheckIn</string>
+    <string name="title_check_in_flow">CheckIn</string>
     <string name="title_section1">Section 1</string>
     <string name="title_section2">Section 2</string>
     <string name="title_section3">Section 3</string>
@@ -51,6 +51,12 @@
     <string name="checkin_header">Check-In</string>
     <string name="action_search">Search</string>
     <string name="share">Share</string>
+    <string name="action_take_photo">Take Throat Picture</string>
+    <string name="pain_status">Pain Status</string>
+    <string name="feed_status">Feed Status</string>
+    <string name="medicine_title_question">Did you take your %s?</string>
+    <string name="pain_title_question">How bad is your mouth pain/sore throat?</string>
+    <string name="feed_status_title_question">Does your pain stop you from eating/drinking?</string>
 
 
 </resources>
