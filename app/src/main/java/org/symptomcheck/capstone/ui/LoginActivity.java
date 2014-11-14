@@ -42,6 +42,7 @@ import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
 import org.symptomcheck.capstone.provider.ActiveContract;
+import org.symptomcheck.capstone.utils.NotificationHelper;
 import org.symptomcheck.capstone.utils.UserPreferencesManager;
 
 import java.util.Calendar;
@@ -83,10 +84,17 @@ public class LoginActivity extends Activity{
     //GoogleCloudMessaging gcm;
     //private String regid;
 
+    private int mNextActivityToLaunch;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        Intent intent = getIntent();
+        mNextActivityToLaunch = getIntent().getIntExtra(NotificationHelper.NEXT_ACTIVITY_TO_LAUNCH, NotificationHelper.GO_TO_MAIN);
+
+
         setContentView(R.layout.activity_login);
         // Set up the login form.
         mErrorLoginMsg = (TextView) findViewById(R.id.txt_login_error);
@@ -412,8 +420,10 @@ public class LoginActivity extends Activity{
             //UserPreferencesManager.get().setLoginPassword(context,password);
 
             finish();
-            Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+
+            Intent intent = new Intent(getApplicationContext(),getNextActivityToLaunch());
             startActivity(intent);
+
         } else {
             final Throwable errorCause = result.error.getCause();
             if(errorCause.getClass().equals(RetrofitError.class)){
@@ -433,6 +443,19 @@ public class LoginActivity extends Activity{
             mErrorLoginMsg.setText(errorMsg);
             showProgress(false,showFormError);
         }
+
+    }
+
+    private Class<?> getNextActivityToLaunch() {
+        Class<?> activityToLaunch;
+        if(mNextActivityToLaunch == NotificationHelper.GO_TO_CHECK_IN){
+            activityToLaunch = CheckInFlowActivity.class;
+        }else if(mNextActivityToLaunch == NotificationHelper.GO_TO_MAIN){
+            activityToLaunch = MainActivity.class;
+        }else {
+            activityToLaunch = MainActivity.class;
+        }
+        return activityToLaunch;
     }
 
     public static void startLogin(Context context/*, String param1, String param2*/) {

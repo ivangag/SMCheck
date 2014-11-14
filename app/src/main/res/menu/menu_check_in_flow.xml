@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="org.symptomcheck.capstone.ui.CheckInFlow">
+    tools:context="org.symptomcheck.capstone.ui.CheckInFlowActivity">
     <item android:id="@+id/action_submit_checkin"
         android:icon="@drawable/ic_action_accept"
         android:title="@string/action_accept_checkin"

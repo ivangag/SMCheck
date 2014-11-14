@@ -31,6 +31,7 @@ import org.symptomcheck.capstone.bus.DownloadEvent;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.fragments.CheckInFragment;
 import org.symptomcheck.capstone.fragments.DoctorFragment;
+import org.symptomcheck.capstone.fragments.IFragmentNotification;
 import org.symptomcheck.capstone.fragments.PatientsFragment;
 import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.FeedStatus;
@@ -321,6 +322,7 @@ public class MainActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds getItemsQuestion to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        setupMenuActions(menu);
         return true;
     }
 
@@ -348,18 +350,18 @@ public class MainActivity extends Activity {
             public boolean onQueryTextSubmit(String query) {
                 //Toast.makeText(getActivity().getApplicationContext(), "onQueryTextSubmit:" + query, Toast.LENGTH_SHORT).show();
                 //mNetAdapter.update(query.toUpperCase());
-                IFragmentNotification notifier = getCurrentDisplayedFragment();
+                IFragmentNotification notifier = (IFragmentNotification) getCurrentDisplayedFragment();
                 if (notifier != null)
-                    notifier.OnFilterData(query.toUpperCase());
+                    notifier.OnFilterData(query);
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 //Toast.makeText(getActivity().getApplicationContext(), "onQueryTextChange:" + newText,Toast.LENGTH_SHORT).show();
-                IFragmentNotification notifier = getCurrentDisplayedFragment();
+                IFragmentNotification notifier = (IFragmentNotification) getCurrentDisplayedFragment();
                 if(notifier != null)
-                    notifier.OnFilterData(newText.toUpperCase());
+                    notifier.OnFilterData(newText);
                 return true;
             }
         });

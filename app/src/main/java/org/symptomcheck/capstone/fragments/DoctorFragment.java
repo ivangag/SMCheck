@@ -62,7 +62,8 @@ import it.gmariotti.cardslib.library.view.CardListView;
  *
  * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
  */
-public class DoctorFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class DoctorFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>
+,IFragmentNotification{
 
     DoctorCursorCardAdapter mAdapter;
     CardListView mListView;
@@ -251,6 +252,11 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
         return BaseFragment.FRAGMENT_TYPE_DOCTORS;
     }
 
+    @Override
+    public void OnFilterData(String textToSearch) {
+
+    }
+
     //-------------------------------------------------------------------------------------------------------------
     // Adapter
     //-------------------------------------------------------------------------------------------------------------
@@ -325,7 +331,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
 
             //This provides a simple (and useless) expand area
             CustomExpandCard expand = new CustomExpandCard(super.getContext(), mDetailedInfo);
-            expand.setTitle("Check-In Details");
+            expand.setTitle("Doctor Details");
             //Add Expand Area to Card
             card.addCardExpand(expand);
 

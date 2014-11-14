@@ -67,7 +67,7 @@ import it.gmariotti.cardslib.library.view.CardListView;
  *
  * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
  */
-public class CheckInFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class CheckInFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>, IFragmentNotification{
 
     CheckinCursorCardAdapter mAdapter;
     CardListView mListView;
@@ -256,6 +256,11 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         return BaseFragment.FRAGMENT_TYPE_CHECKIN;
     }
 
+    @Override
+    public void OnFilterData(String textToSearch) {
+
+    }
+
     //-------------------------------------------------------------------------------------------------------------
     // Adapter
     //-------------------------------------------------------------------------------------------------------------
@@ -423,7 +428,8 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
                 mButtonExpandCustom.setClickable(true);
 
                 ViewToClickToExpand extraCustomButtonExpand =
-                        ViewToClickToExpand.builder().highlightView(false)
+                        ViewToClickToExpand.builder()
+                                .highlightView(false)
                                 .setupView(mButtonExpandCustom);
 
                 setViewToClickToExpand(extraCustomButtonExpand);

@@ -12,20 +12,18 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.internal.app.ToolbarActionBar;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.UserInfo;
+import org.symptomcheck.capstone.utils.NotificationHelper;
 
-public class CheckInFlow extends Activity implements ActionBar.TabListener {
+public class CheckInFlowActivity extends Activity implements ActionBar.TabListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -44,6 +42,8 @@ public class CheckInFlow extends Activity implements ActionBar.TabListener {
 
     UserInfo mUser;
 
+    private boolean checkInPermitted = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,42 +51,46 @@ public class CheckInFlow extends Activity implements ActionBar.TabListener {
 
         mUser = DAOManager.get().getUser();
 
-        // Set up the action bar.
-        final ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        actionBar.setTitle(
-                mUser.getFirstName()
-                + " " + mUser.getLastName()
-                + " " + "Check-In");
+        if(mUser != null) {
+            // Set up the action bar.
+            final ActionBar actionBar = getActionBar();
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+            actionBar.setTitle(
+                    mUser.getFirstName()
+                            + " " + mUser.getLastName()
+                            + " " + "Check-In");
 
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
+            // Create the adapter that will return a fragment for each of the three
+            // primary sections of the activity.
+            mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
 
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+            // Set up the ViewPager with the sections adapter.
+            mViewPager = (ViewPager) findViewById(R.id.pager);
+            mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        // When swiping between different sections, select the corresponding
-        // tab. We can also use ActionBar.Tab#select() to do this if we have
-        // a reference to the Tab.
-        mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            @Override
-            public void onPageSelected(int position) {
-                actionBar.setSelectedNavigationItem(position);
+            // When swiping between different sections, select the corresponding
+            // tab. We can also use ActionBar.Tab#select() to do this if we have
+            // a reference to the Tab.
+            mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+                @Override
+                public void onPageSelected(int position) {
+                    actionBar.setSelectedNavigationItem(position);
+                }
+            });
+
+            // For each of the sections in the app, add a tab to the action bar.
+            for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
+                // Create a tab with text corresponding to the page title defined by
+                // the adapter. Also specify this Activity object, which implements
+                // the TabListener interface, as the callback (listener) for when
+                // this tab is selected.
+                actionBar.addTab(
+                        actionBar.newTab()
+                                .setText(mSectionsPagerAdapter.getPageTitle(i))
+                                .setTabListener(this));
             }
-        });
-
-        // For each of the sections in the app, add a tab to the action bar.
-        for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
-            // Create a tab with text corresponding to the page title defined by
-            // the adapter. Also specify this Activity object, which implements
-            // the TabListener interface, as the callback (listener) for when
-            // this tab is selected.
-            actionBar.addTab(
-                    actionBar.newTab()
-                            .setText(mSectionsPagerAdapter.getPageTitle(i))
-                            .setTabListener(this));
+        } else{
+            checkInPermitted = false;
         }
     }
 
@@ -96,6 +100,18 @@ public class CheckInFlow extends Activity implements ActionBar.TabListener {
         // Inflate the menu; this adds getItemsQuestion to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_check_in_flow, menu);
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        if(!checkInPermitted)
+            NotificationHelper.showAlertDialog(this, NotificationHelper.AlertType.ALERT_GO_TO_LOGIN, getActionBar().getTitle().toString(),"");
+        super.onResume();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -168,7 +184,7 @@ public class CheckInFlow extends Activity implements ActionBar.TabListener {
     }
 
     public static void startCheckInFlow(Context context/*, String param1, String param2*/) {
-        Intent intent = new Intent(context, CheckInFlow.class);
+        Intent intent = new Intent(context, CheckInFlowActivity.class);
         //intent.setAction(ACTION_GCM_DEVICE_REGISTRATION);
         //intent.putExtra(EXTRA_PARAM1, param1);
         //intent.putExtra(EXTRA_PARAM2, param2);

@@ -1,6 +1,7 @@
 package org.symptomcheck.capstone.fragments;
 
 import android.app.Fragment;
+import android.widget.Filterable;
 
 import org.symptomcheck.capstone.R;
 

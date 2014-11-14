@@ -28,6 +28,7 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.content.SyncStatusObserver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -36,14 +37,20 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.FilterQueryProvider;
+import android.widget.Filterable;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.activeandroid.ActiveAndroid;
 import com.activeandroid.content.ContentProvider;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
+import org.symptomcheck.capstone.cardsui.CustomExpandCard;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.provider.ActiveContract;
 
@@ -51,6 +58,7 @@ import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.CardThumbnail;
+import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
 import it.gmariotti.cardslib.library.internal.base.BaseCard;
 import it.gmariotti.cardslib.library.view.CardListView;
 
@@ -59,7 +67,8 @@ import it.gmariotti.cardslib.library.view.CardListView;
  *
  * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
  */
-public class PatientsFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class PatientsFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>
+    ,IFragmentNotification {
 
     PatientCursorCardAdapter mAdapter;
     CardListView mListView;
@@ -138,6 +147,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
     }
 
     static int count = 0;
+    private final Uri mUriContentProvider = ContentProvider.createUri(Patient.class, null);
     private void init() {
 
         //Vehicle vehicle = new Vehicle();
@@ -150,6 +160,27 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
             mListView.setAdapter(mAdapter);
         }
 
+        mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+            @Override
+            public Cursor runQuery(CharSequence charSequence) {
+               Cursor cursor;
+               final String filterPattern = charSequence.toString();
+                if(!filterPattern.isEmpty()) {
+                    cursor = getActivity().getContentResolver()
+                            .query(mUriContentProvider,
+                                    ActiveContract.PATIENT_TABLE_PROJECTION,
+                                    ActiveContract.PATIENT_COLUMNS.LAST_NAME + " LIKE ? OR " +
+                                    ActiveContract.PATIENT_COLUMNS.FIRST_NAME + " LIKE ?",
+                                    new String[]{"%" + filterPattern + "%","%" + filterPattern + "%" }
+                                    , ActiveContract.PATIENT_COLUMNS.FIRST_NAME + " asc");
+                }else{
+                    cursor = getActivity().getContentResolver()
+                            .query(mUriContentProvider,
+                                    ActiveContract.PATIENT_TABLE_PROJECTION,null,null,null);
+                }
+                return cursor;
+            }
+        });
         // Force start background query to load sessions
         getLoaderManager().restartLoader(0, null, this);
 
@@ -161,7 +192,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
 
         Loader<Cursor> loader = null;
         loader = new CursorLoader(getActivity(),
-                ContentProvider.createUri(Patient.class, null),
+                mUriContentProvider,
                 null, null, null, null
         );
         return loader;
@@ -248,10 +279,19 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         return BaseFragment.FRAGMENT_TYPE_PATIENT;
     }
 
+    @Override
+    public void OnFilterData(String textToSearch) {
+        mAdapter.getFilter().filter(textToSearch);
+    }
+
+
     //-------------------------------------------------------------------------------------------------------------
     // Adapter
     //-------------------------------------------------------------------------------------------------------------
     public class PatientCursorCardAdapter extends CardCursorAdapter {
+
+
+        private String mDetailedInfo;
 
         public PatientCursorCardAdapter(Context context) {
             super(context);
@@ -294,6 +334,12 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
             });
 
 
+            //This provides a simple (and useless) expand area
+            CustomExpandCard expand = new CustomExpandCard(super.getContext(), mDetailedInfo);
+            expand.setTitle("Patient Details");
+            //Add Expand Area to Card
+            card.addCardExpand(expand);
+
             return card;
         }
 
@@ -307,30 +353,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
                             + " " + cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.BIRTH_DATE));
             card.mainHeader = getString(R.string.patient_header);
             card.resourceIdThumb=R.drawable.ic_patient_small;
-            /*
-            card.mainTitle=cursor.getString(CardCursorContract.CardCursor.IndexColumns.TITLE_COLUMN);
 
-
-
-            //Only for test, use different images
-            int thumb = cursor.getInt(CardCursorContract.CardCursor.IndexColumns.THUMBNAIL_COLUMN);
-            switch (thumb){
-                case 0:
-                    card.resourceIdThumb=R.drawable.ic_ic_launcher_web;
-                    break;
-                case 1:
-                    card.resourceIdThumb=R.drawable.ic_ic_dh_net;
-                    break;
-                case 2:
-                    card.resourceIdThumb=R.drawable.ic_tris;
-                    break;
-                case 3:
-                    card.resourceIdThumb=R.drawable.ic_info;
-                    break;
-                case 4:
-                    card.resourceIdThumb=R.drawable.ic_smile;
-                    break;
-            }*/
 
         }
     }
@@ -358,6 +381,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         String secondaryTitle;
         String mainHeader;
         int resourceIdThumb;
+        private ImageButton mButtonExpandCustom;
 
         public PatientCursorCard(Context context) {
             super(context, R.layout.carddemo_cursor_inner_content);
@@ -368,6 +392,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
             //Retrieve elements
             TextView mTitleTextView = (TextView) parent.findViewById(R.id.carddemo_cursor_main_inner_title);
             TextView mSecondaryTitleTextView = (TextView) parent.findViewById(R.id.carddemo_cursor_main_inner_subtitle);
+            mButtonExpandCustom = (ImageButton)parent.findViewById(R.id.card_rds_expand_button_info);
 
             if (mTitleTextView != null)
                 mTitleTextView.setText(mainTitle);
@@ -375,6 +400,18 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
             if (mSecondaryTitleTextView != null)
                 mSecondaryTitleTextView.setText(secondaryTitle);
 
+
+            if(mButtonExpandCustom != null) {
+                mButtonExpandCustom.setBackgroundResource(R.drawable.card_menu_button_expand);
+
+                mButtonExpandCustom.setClickable(true);
+
+                ViewToClickToExpand extraCustomButtonExpand =
+                        ViewToClickToExpand.builder().highlightView(false)
+                                .setupView(mButtonExpandCustom);
+
+                setViewToClickToExpand(extraCustomButtonExpand);
+            }
         }
     }
 }

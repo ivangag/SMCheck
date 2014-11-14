@@ -1,20 +1,15 @@
 package org.symptomcheck.capstone.alarms;
 
-import android.annotation.TargetApi;
 import android.app.IntentService;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.Context;
-import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import org.symptomcheck.capstone.R;
-import org.symptomcheck.capstone.ui.CheckInFlow;
-import org.symptomcheck.capstone.ui.LoginActivity;
-import org.symptomcheck.capstone.ui.MainActivity;
+import org.symptomcheck.capstone.ui.CheckInFlowActivity;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -117,7 +112,7 @@ public class ReminderSchedulingService extends IntentService {
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, CheckInFlow.class),0);
+                new Intent(this, CheckInFlowActivity.class),0);
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)

@@ -25,9 +25,15 @@ public class ActiveContract {
     //public static final String SYNC_CLOUD_MEDICINES = "SYNC_REMOTE_MEDICINES";
 
 
-    public static class ALL_TABLE_COLUMNS{
-        public static final String ID = BaseColumns._ID;
-    }
+
+    public static String[] PATIENT_TABLE_PROJECTION = new String[]
+            {
+                    BaseColumns._ID + ","
+                    + PATIENT_COLUMNS.PATIENT_ID + ","
+                            + PATIENT_COLUMNS.FIRST_NAME + ","
+                            + PATIENT_COLUMNS.LAST_NAME + ","
+                            + PATIENT_COLUMNS.BIRTH_DATE
+            };
 
     public static class PATIENT_COLUMNS{
         public static final String PATIENT_ID = "patientId";

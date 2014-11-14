@@ -59,15 +59,15 @@ import retrofit.RetrofitError;
  * <p>The system calls onPerformSync() via an RPC call through the IBinder object supplied by
  * SyncService.
  */
-class SyncAdapter extends AbstractThreadedSyncAdapter {
-    public final String TAG = SyncAdapter.this.getClass().getSimpleName();
+class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
+    public final String TAG = SymptomSyncAdapter.this.getClass().getSimpleName();
 
     private SymptomManagerSvcApi mSymptomClient;
 
     /**
      * Constructor. Obtains handle to content resolver for later use.
      */
-    public SyncAdapter(Context context, boolean autoInitialize) {
+    public SymptomSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
         //mContentResolver = context.getContentResolver();
     }
@@ -76,7 +76,7 @@ class SyncAdapter extends AbstractThreadedSyncAdapter {
      * Constructor. Obtains handle to content resolver for later use.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public SyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
+    public SymptomSyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
         super(context, autoInitialize, allowParallelSyncs);
         //mContentResolver = context.getContentResolver();
     }
