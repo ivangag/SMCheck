@@ -189,7 +189,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
         //displayList();
     }
     /**
-     * Crfate a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
+     * Create a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
      * onResume(), and removed in onPause(). If status changes, it sets the state of the Refresh
      * button. If a sync is active or pending, the Refresh button is replaced by an indeterminate
      * ProgressBar; otherwise, the button itself is displayed.

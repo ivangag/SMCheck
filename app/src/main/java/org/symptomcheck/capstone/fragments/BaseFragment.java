@@ -51,10 +51,12 @@ public  abstract class BaseFragment extends Fragment {
     protected Cursor queryAllField(String filterPattern){
 
         Cursor cursor = null;
+
         Uri uriContentProvider = getDefaultUriProvider();
         if (filterPattern.isEmpty()){
            cursor = getDefaultCursorProvider(uriContentProvider);
         }else {
+            filterPattern = filterPattern.trim();
             switch (getFragmentType()) {
 
                 case FRAGMENT_TYPE_PATIENT:

@@ -49,6 +49,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/viewRadioBtnFeedQuestions"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:background="@color/card_foreground_activated"

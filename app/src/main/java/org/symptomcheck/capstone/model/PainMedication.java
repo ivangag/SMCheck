@@ -60,6 +60,28 @@ public class PainMedication extends Model implements IModelBuilder {
 		this.patientMedicalNumber = patientMedicalNumber;
 	}
 
+    public static class Builder{
+        private String medicationName;
+        private String lastTakingDateTime;
+        private String patientMedicalNumber;
+        public Builder setMedicationName(String medicationName){
+            this.medicationName = medicationName;
+            return this;
+        }
+        public Builder setPatientMedicalNumber(String patientMedicalNumber){
+            this.patientMedicalNumber = patientMedicalNumber;
+            return this;
+        }
+
+        public Builder setLastTakingDateTime(String lastTakingDateTime){
+            this.lastTakingDateTime = lastTakingDateTime;
+            return this;
+        }
+
+        public PainMedication Build(){
+            return new PainMedication(this.medicationName,this.lastTakingDateTime,this.patientMedicalNumber);
+        }
+    }
 
     @Override
     public void buildInternalArray() {

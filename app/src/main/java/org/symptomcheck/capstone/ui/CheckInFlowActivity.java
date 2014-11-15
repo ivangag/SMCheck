@@ -1,10 +1,15 @@
 package org.symptomcheck.capstone.ui;
 
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -13,21 +18,30 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.common.collect.Lists;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.dao.DAOManager;
+import org.symptomcheck.capstone.model.FeedStatus;
+import org.symptomcheck.capstone.model.PainLevel;
 import org.symptomcheck.capstone.model.PainMedication;
-import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.utils.NotificationHelper;
+
+import hirondelle.date4j.DateTime;
 
 public class CheckInFlowActivity extends Activity implements ActionBar.TabListener {
 
@@ -57,6 +71,12 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         FRAGMENT_TYPE_FEED_STATUS,
         FRAGMENT_TYPE_MEDICINES,
     }
+
+    private Map<String,String> mMedicationsResponse = new HashMap<String, String>(){};
+    private Map<String,String> mMedicationsTakingTime = new HashMap<String, String>(){};
+    private PainLevel mPainLevelReport = PainLevel.UNKNOWN;
+    private FeedStatus mFeedStatusReport = FeedStatus.UNKNOWN;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +87,10 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         if(mUser != null) {
 
             mMedicines = PainMedication.getAll(mUser.getUserIdentification());
+            for(PainMedication medication : mMedicines){
+                mMedicationsResponse.put(medication.getMedicationName(), "UNKNOWN");
+                mMedicationsTakingTime.put(medication.getMedicationName(), String.valueOf(Calendar.getInstance().getTimeInMillis()));
+            }
 
             // Set up the action bar.
             final ActionBar actionBar = getActionBar();
@@ -145,6 +169,10 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         if (id == R.id.action_settings) {
             return true;
         }*/
+        // save check-in
+        if (id == R.id.action_submit_checkin) {
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -176,12 +204,12 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
 
         @Override
         public Fragment getItem(int position) {
-            int totalItem = getCount();
+            final int totalItem = getCount();
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             if (position == 0) {
                 return PainQuestionFragment.newInstance(position + 1, FragmentType.FRAGMENT_TYPE_PAIN_LEVEL);
-            } else if (position == getCount() - 1) {
+            } else if (position == totalItem - 1) {
                 return PainQuestionFragment.newInstance(position + 1,FragmentType.FRAGMENT_TYPE_FEED_STATUS);
             } else {
                 if (mMedicines.size() > 0) {
@@ -240,13 +268,18 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
     public static class PainQuestionFragment extends Fragment {
 
         View rootView;
+        View painQuestionsView;
+        View feedQuestionsView;
+        View medicinesQuestionsView;
+        TextView txtMedicineTakingTime;
+        FragmentType mFragmentType;
         /**
          * The fragment argument representing the section number for this
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
         private static String ARG_FRAGMENT_TYPE = "frg_tpe";
-
+        String mMedicineName;
         /**
          * Returns a new instance of this fragment for the given section
          * number.
@@ -268,8 +301,8 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
 
-            final FragmentType fragmentType = FragmentType.valueOf(getArguments().getString(ARG_FRAGMENT_TYPE));
-            switch (fragmentType){
+            mFragmentType = FragmentType.valueOf(getArguments().getString(ARG_FRAGMENT_TYPE));
+            switch (mFragmentType){
                 case FRAGMENT_TYPE_PAIN_LEVEL:
                     rootView = inflater.inflate(R.layout.fragment_check_in_question_pain, container, false);
                     break;
@@ -289,24 +322,210 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
             super.onViewCreated(view, savedInstanceState);
 
             TextView title = (TextView) rootView.findViewById(R.id.txt_check_in_header_question);
+            txtMedicineTakingTime = (TextView)rootView.findViewById(R.id.txt_check_in_medicine_take_time);
+
+            final CheckInFlowActivity parentActivity = ((CheckInFlowActivity)getActivity());
             final int positionFragment = getArguments().getInt(ARG_SECTION_NUMBER);
 
-            final FragmentType fragmentType = FragmentType.valueOf(getArguments().getString(ARG_FRAGMENT_TYPE));
-            switch (fragmentType){
+            //mFragmentType = FragmentType.valueOf(getArguments().getString(ARG_FRAGMENT_TYPE));
+
+
+            switch (mFragmentType){
                 case FRAGMENT_TYPE_PAIN_LEVEL:
                     title.setText(getString(R.string.pain_title_question));
+                    painQuestionsView = rootView.findViewById(R.id.viewRadioBtnPaintQuestions);
+                    painQuestionsView.findViewById(R.id.radioBtnPainModerate).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            parentActivity.mPainLevelReport = PainLevel.MODERATE;
+                        }
+                    });
+                    painQuestionsView.findViewById(R.id.radioBtnPainSevere).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            parentActivity.mPainLevelReport = PainLevel.SEVERE;
+                        }
+                    });
+                    painQuestionsView.findViewById(R.id.radioBtnPainWellControlled).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            parentActivity.mPainLevelReport = PainLevel.WELL_CONTROLLED;
+                        }
+                    });
                     break;
                 case FRAGMENT_TYPE_FEED_STATUS:
                     title.setText(getString(R.string.feed_status_title_question));
+                    feedQuestionsView = rootView.findViewById(R.id.viewRadioBtnFeedQuestions);
+                    feedQuestionsView.findViewById(R.id.radioBtnFeedNo).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            parentActivity.mFeedStatusReport = FeedStatus.NO;
+                        }
+                    });
+                    feedQuestionsView.findViewById(R.id.radioBtnFeedSome).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            parentActivity.mFeedStatusReport = FeedStatus.SOME;
+                        }
+                    });
+                    feedQuestionsView.findViewById(R.id.radioBtnFeedCannotEat).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            parentActivity.mFeedStatusReport = FeedStatus.CANNOT_EAT;
+                        }
+                    });
                     break;
                 case FRAGMENT_TYPE_MEDICINES:
-                    title.setText(String.format(getString(R.string.medicine_title_question),
-                            ((CheckInFlowActivity)getActivity()).mMedicines.get(positionFragment - 2).getMedicationName()));
+                    mMedicineName = parentActivity.mMedicines.get(positionFragment - 2).getMedicationName();
+                    title.setText(String.format(getString(R.string.medicine_title_question),mMedicineName));
+                    medicinesQuestionsView = rootView.findViewById(R.id.viewRadioBtnMedQuestions);
+                    medicinesQuestionsView.findViewById(R.id.radioBtnMedicineNO).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            txtMedicineTakingTime.setVisibility(View.GONE);
+                            parentActivity.mMedicationsResponse.put(mMedicineName,getString(R.string.no_response));
+                        }
+                    });
+                    medicinesQuestionsView.findViewById(R.id.radioBtnMedicineYES).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            txtMedicineTakingTime.setVisibility(View.VISIBLE);
+                            parentActivity.mMedicationsResponse.put(mMedicineName,getString(R.string.yes_response));
+                        }
+                    });
+                    final boolean YES = ((RadioButton)medicinesQuestionsView.findViewById(R.id.radioBtnMedicineYES)).isChecked();
+                    txtMedicineTakingTime.setVisibility(YES ? View.VISIBLE : View.GONE);
+                    txtMedicineTakingTime.setClickable(true);
+                    txtMedicineTakingTime.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            showTimePickerDialog(rootView);
+                        }
+                    });
                     break;
             }
-
-
         }
+
+        @Override
+        public void onResume() {
+            if(mFragmentType.equals(FragmentType.FRAGMENT_TYPE_MEDICINES)){
+                final boolean YES = ((RadioButton)medicinesQuestionsView.findViewById(R.id.radioBtnMedicineYES)).isChecked();
+                txtMedicineTakingTime.setVisibility(YES ? View.VISIBLE : View.GONE);
+                txtMedicineTakingTime.setText(
+                        ((CheckInFlowActivity)getActivity()).mMedicationsTakingTime.get(mMedicineName)
+                );
+            }
+            super.onResume();
+        }
+
+        private void showTimePickerDialog(View v) {
+            final Dialog dialog = new Dialog(getActivity());
+
+            dialog.setContentView(R.layout.custom_dialog_datetime);
+
+            dialog.setTitle("Set Schedule Call");
+
+            dialog.show();
+
+            final DatePicker dp = (DatePicker)dialog.findViewById(R.id.datePicker1);
+            final TimePicker tp = (TimePicker)dialog.findViewById(R.id.timePicker1);
+
+            Button btnCancel = (Button)dialog.findViewById(R.id.btnCancelDT);
+            Button btnSet = (Button)dialog.findViewById(R.id.btnSetDT);
+
+            btnCancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                }
+            });
+
+            btnSet.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View arg0) {
+                    String am_pm = "";
+                    // TODO Auto-generated method stub
+                    int m = dp.getMonth()+1;
+                    int d = dp.getDayOfMonth();
+                    int y = dp.getYear();
+
+                    int h = tp.getCurrentHour();
+                    int min = tp.getCurrentMinute();
+
+                    String strm = String.valueOf(min);
+
+                    if(strm.length()==1){
+                        strm = "0"+strm;
+                    }
+                    int hour24 = h;
+                    if(h>12){
+                        am_pm = "PM";
+                        h = h-12;
+                    }else{
+                        am_pm = "AM";
+                    }
+
+                    String date = m+"/"+d+"/"+y+" "+h+":"+strm+":00 "+am_pm;
+                    String time = h+":"+strm+" "+am_pm;
+
+                    //DateTime dateAndTime = new DateTime("2010-01-19 23:59:59");
+                    String format = String.format("%d-%02d-%02d %02d:%02d:%02d",y,m,d,hour24,min,0);
+                    DateTime dateAndTime = new DateTime(format);
+
+                    long milliFrom1970GMT = dateAndTime.getMilliseconds(TimeZone.getTimeZone("GMT+00"));
+
+                    txtMedicineTakingTime.setText(dateAndTime.toString());
+
+                    ((CheckInFlowActivity)getActivity()).mMedicationsTakingTime.put(mMedicineName,String.valueOf(milliFrom1970GMT));
+
+                    Log.i("CheckInFlow", "milliFrom1970GMT= " + milliFrom1970GMT);
+                    Toast.makeText(getActivity(), "Date: " + date + " Time: " + time, Toast.LENGTH_SHORT).show();
+
+                    dialog.dismiss();
+                }
+            });
+            //DialogFragment newFragment = new TimePickerFragment();
+            //newFragment.show(getFragmentManager(), "timePicker");
+        }
+        @Override
+        public void setUserVisibleHint(boolean isVisibleToUser) {
+            super.setUserVisibleHint(isVisibleToUser);
+            final FragmentType fragmentType = FragmentType.valueOf(getArguments().getString(ARG_FRAGMENT_TYPE));
+            // Make sure that we are currently visible
+            if (this.isVisible()) {
+                // If we are becoming invisible, then...
+                if (!isVisibleToUser) {
+                    //Log.d("MyFragment", "Not visible anymore.  Stopping audio.");
+                    // TODO stop audio playback
+                    switch (fragmentType){
+                        case FRAGMENT_TYPE_PAIN_LEVEL:
+                            if(painQuestionsView != null){
+                                PainLevel painLevel = PainLevel.UNKNOWN;
+                                RadioButton radioButtonModerate = ((RadioButton)painQuestionsView.findViewById(R.id.radioBtnPainModerate));
+                                RadioButton radioButtonSever = ((RadioButton)painQuestionsView.findViewById(R.id.radioBtnPainSevere));
+                                RadioButton radioButtonWell = ((RadioButton)painQuestionsView.findViewById(R.id.radioBtnPainWellControlled));
+                                if(radioButtonModerate.isChecked()){
+                                    painLevel = PainLevel.MODERATE;
+                                }else if(radioButtonSever.isChecked()){
+                                    painLevel = PainLevel.SEVERE;
+                                }else if(radioButtonWell.isChecked()){
+                                    painLevel = PainLevel.WELL_CONTROLLED;
+                                }
+                            }
+                            break;
+                        case FRAGMENT_TYPE_FEED_STATUS:
+
+                            break;
+                        case FRAGMENT_TYPE_MEDICINES:
+
+                            break;
+                    }
+                }
+            }
+        }
+
+
     }
 
 }

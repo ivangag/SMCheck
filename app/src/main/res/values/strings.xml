@@ -57,6 +57,8 @@
     <string name="medicine_title_question">Did you take your %s?</string>
     <string name="pain_title_question">How bad is your mouth pain/sore throat?</string>
     <string name="feed_status_title_question">Does your pain stop you from eating/drinking?</string>
+    <string name="no_response">NO</string>
+    <string name="yes_response">YES</string>
 
 
 </resources>

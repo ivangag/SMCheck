@@ -99,8 +99,8 @@ public class CheckIn extends Model implements IModelBuilder {
                                         FeedStatus feedStatus,
                                         Map<PainMedication,String> Medications) {
 
-        Calendar calendar = Calendar.getInstance();
-        Long timestamp = Calendar.getInstance().getTimeInMillis();
+        final Calendar calendar = Calendar.getInstance();
+        Long timestamp = calendar.getTimeInMillis();
         CheckIn checkIn = new CheckIn(timestamp.toString(), painLevel, feedStatus);
         for (PainMedication medication : Medications.keySet()) {
             Question question = new Question(String.format("Did you Take %s ?",
