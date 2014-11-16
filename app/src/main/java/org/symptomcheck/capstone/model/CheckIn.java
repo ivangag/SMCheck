@@ -27,7 +27,18 @@ public class CheckIn extends Model implements IModelBuilder {
     public transient Patient patient;
     @Column
     public transient int needSync = 1;
+    /*
+        //@Column
+        //private String throatImageEncoded;
 
+
+        public String getThroatImageEncoded() {
+            return throatImageEncoded;
+        }
+        public void setThroatImageEncoded(String throatImageEncoded) {
+            this.throatImageEncoded = throatImageEncoded;
+        }
+        */
     private List<Question> questions = new ArrayList<Question>();
 
     // This method is optional, does not affect the foreign key creation.
@@ -139,4 +150,5 @@ public class CheckIn extends Model implements IModelBuilder {
                         //.orderBy("Name ASC")
                 .execute();
     }
+
 }

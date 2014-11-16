@@ -28,8 +28,11 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.content.SyncStatusObserver;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,10 +41,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.activeandroid.content.ContentProvider;
+import com.squareup.picasso.Picasso;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
@@ -363,6 +368,12 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             card.resourceIdThumb=R.drawable.ic_check_in;
             card.secondaryTitle =  fromMilliseconds.format("YYYY-MM-DD hh:ss");
 
+            //retrieve image
+            //byte[] byteArray = Base64.decode("",Base64.DEFAULT);
+            //Bitmap bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+            //ImageView image = (ImageView) getActivity().findViewById(R.id.imageChartApi);
+            //image.setImageBitmap(bmp);
+            //Picasso.with(getActivity()).load(R.id.imageChartApi).resize(150,150).get();
             //build detailed info to be shown in expand area
             // retrieve questions from checkin
             final CheckIn checkIn = CheckIn.getById(checkInId);
