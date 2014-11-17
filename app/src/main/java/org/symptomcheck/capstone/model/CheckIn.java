@@ -7,10 +7,15 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 
+import org.symptomcheck.capstone.utils.Costants;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+
+import hirondelle.date4j.DateTime;
 
 @Table(name = "CheckIns", id = BaseColumns._ID)
 public class CheckIn extends Model implements IModelBuilder {
@@ -27,6 +32,8 @@ public class CheckIn extends Model implements IModelBuilder {
     public transient Patient patient;
     @Column
     public transient int needSync = 1;
+
+
     /*
         //@Column
         //private String throatImageEncoded;
@@ -110,8 +117,9 @@ public class CheckIn extends Model implements IModelBuilder {
                                         FeedStatus feedStatus,
                                         Map<PainMedication,String> Medications) {
 
-        final Calendar calendar = Calendar.getInstance();
-        Long timestamp = calendar.getTimeInMillis();
+        //final Calendar calendar = Calendar.getInstance();
+        Long timestamp = DateTime.now(TimeZone.getTimeZone(Costants.TIME.GMT00)).getMilliseconds(TimeZone.getTimeZone(Costants.TIME.GMT00));
+        //Long timestamp = calendar.getTimeInMillis();
         CheckIn checkIn = new CheckIn(timestamp.toString(), painLevel, feedStatus);
         for (PainMedication medication : Medications.keySet()) {
             Question question = new Question(String.format("Did you Take %s ?",
@@ -121,6 +129,26 @@ public class CheckIn extends Model implements IModelBuilder {
             checkIn.addQuestions(question);
         }
         return checkIn;
+    }
+
+
+    public static String getDetailedInfo(CheckIn checkIn, boolean useStoredQuestions){
+        StringBuilder sb = new StringBuilder();
+        sb.append("Pain Level: " + checkIn.getIssuePainLevel()).append("\n");
+        sb.append("Feed Status: " + checkIn.getIssueFeedStatus()).append("\n");
+
+        sb.append("----------------------------\n");
+        List<Question> questions = useStoredQuestions ? checkIn.getItemsQuestion() : checkIn.getQuestions();
+        for (Question question : questions) {
+            final String time = question.getMedicationTime();
+            sb.append(time)
+                    .append(time.equals(Costants.STRINGS.EMPTY) ? Costants.STRINGS.EMPTY : "\n")
+                    .append(question.getQuestion()).append(" ").append(question.getResponse())
+                    //.append(DateTime.forInstant(Long.valueOf(question.getMedicatationTakingTime()), TimeZone.getDefault()).format("YYYY-MM-DD hh:ss"))
+                    .append("\n----------------------------\n");
+
+        }
+        return sb.toString();
     }
 
 
@@ -150,5 +178,16 @@ public class CheckIn extends Model implements IModelBuilder {
                         //.orderBy("Name ASC")
                 .execute();
     }
-
+    public String getIssueDateTimeClear() {
+        final String savedTime = this.getIssueDateTime();
+        String medicationTime;
+        if(savedTime != null &&
+                !savedTime.isEmpty()){
+            medicationTime = DateTime.forInstant(Long.valueOf(savedTime), TimeZone.getTimeZone(Costants.TIME.GMT00)).format("YYYY-MM-DD hh:mm");
+        }
+        else{
+            medicationTime = Costants.STRINGS.EMPTY;
+        }
+        return medicationTime;
+    }
 }

@@ -28,11 +28,8 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.content.SyncStatusObserver;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -41,25 +38,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.activeandroid.content.ContentProvider;
-import com.squareup.picasso.Picasso;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
 import org.symptomcheck.capstone.model.CheckIn;
-import org.symptomcheck.capstone.model.Question;
 import org.symptomcheck.capstone.provider.ActiveContract;
 
-import java.util.List;
-import java.util.TimeZone;
-
-import hirondelle.date4j.DateTime;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 import it.gmariotti.cardslib.library.internal.CardHeader;
@@ -111,6 +101,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
+        mOptionsMenu = menu;
         //inflater.inflate(R.menu.cards, menu);
     }
 
@@ -297,7 +288,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
             //Set the header title
             header.setTitle(card.mainHeader);
-            header.setPopupMenu(R.menu.popupmain, new CardHeader.OnClickCardHeaderPopupMenuListener() {
+            header.setPopupMenu(R.menu.popup_patient, new CardHeader.OnClickCardHeaderPopupMenuListener() {
                 @Override
                 public void onMenuItemClick(BaseCard card, MenuItem item) {
                     Toast.makeText(getContext(), "Click on card="+card.getId()+" item=" +  item.getTitle(), Toast.LENGTH_SHORT).show();
@@ -354,19 +345,15 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         }
 
         private void setCardFromCursor(CheckinCursorCard card,Cursor cursor) {
-
             final int checkInId = cursor.getInt(ID_COLUMN);
             card.setId(""+ checkInId);
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL));
-            //cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS))
-            final String instantIssueTime = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME));
 
-            // DateTime fromMilliseconds = DateTime.forInstant(31313121L, aTimeZone);
-            DateTime fromMilliseconds = DateTime.forInstant(Long.valueOf(instantIssueTime), TimeZone.getDefault());
+            //final String instantIssueTime = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME));
+            //DateTime fromMilliseconds = DateTime.forInstant(Long.valueOf(instantIssueTime), TimeZone.getDefault());
 
             card.mainHeader = getString(R.string.checkin_header);
             card.resourceIdThumb=R.drawable.ic_check_in;
-            card.secondaryTitle =  fromMilliseconds.format("YYYY-MM-DD hh:ss");
 
             //retrieve image
             //byte[] byteArray = Base64.decode("",Base64.DEFAULT);
@@ -376,23 +363,11 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             //Picasso.with(getActivity()).load(R.id.imageChartApi).resize(150,150).get();
             //build detailed info to be shown in expand area
             // retrieve questions from checkin
+
             final CheckIn checkIn = CheckIn.getById(checkInId);
             if(checkIn != null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Pain Level: " + checkIn.getIssuePainLevel()).append("\n");
-                sb.append("Feed Status: " + checkIn.getIssueFeedStatus()).append("\n");
-
-                List<Question> questions = checkIn.getItemsQuestion();
-
-                for (Question question : questions) {
-
-                    sb.append(question.getQuestion()).append(" ").append(question.getResponse())
-                            .append(" ").append(DateTime.forInstant(Long.valueOf(question.getMedicatationTakingTime()), TimeZone.getDefault()).format("YYYY-MM-DD hh:ss"))
-                            .append("\n");
-
-                }
-
-                mDetailedCheckInInfo = sb.toString();
+                card.secondaryTitle = checkIn.getIssueDateTimeClear(); // fromMilliseconds.format("YYYY-MM-DD hh:ss");
+                mDetailedCheckInInfo = CheckIn.getDetailedInfo(checkIn, true);
             }
         }
     }

@@ -17,7 +17,7 @@ import org.apache.http.impl.client.HttpClients;
  * @author jules
  *
  */
-public class UnsafeHttpsClient {
+public class CustomHttpsClient {
 
 	public static HttpClient createUnsafeClient() {
 		try {

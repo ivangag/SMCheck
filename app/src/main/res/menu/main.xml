@@ -7,7 +7,7 @@
         android:icon="@drawable/ic_action_refresh"
         android:title="@string/description_refresh"
         android:orderInCategory="1"
-        android:showAsAction="ifRoom" />
+        android:showAsAction="always" />
     <item android:id="@+id/action_test"
         android:title="@string/action_accept_checkin"
         android:orderInCategory="100"
@@ -21,7 +21,7 @@
     <item android:id="@+id/action_share"
         android:icon="@drawable/ic_action_share"
         android:title="@string/share"
-        android:showAsAction="ifRoom"
+        android:showAsAction="never"
         android:actionProviderClass="android.widget.ShareActionProvider"
         />
 </menu>

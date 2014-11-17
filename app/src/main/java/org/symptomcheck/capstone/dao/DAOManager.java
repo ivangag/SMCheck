@@ -69,37 +69,43 @@ public class DAOManager {
         (new ActiveHandler<Doctor>()).deleteItems(Doctor.class);
     }
 
-    public synchronized void saveCheckIns(List<CheckIn> checkIns, String medicalRecordNumber,
+    public synchronized boolean saveCheckIns(List<CheckIn> checkIns, String medicalRecordNumber,
                                           String userIdentification, boolean needSync) {
 
         (new ActiveHandler<Question>()).deleteItems(Question.class);
         (new ActiveHandler<CheckIn>()).deleteItems(CheckIn.class);
 
-       Patient patient = null;
+        boolean result = false;
+
+        Patient patient = null;
         //retrieve Patient for foreign key relation
-       List<Patient> patients = new Select().
+        List<Patient> patients = new Select().
                 from(Patient.class)
-                        .where(ActiveContract.PATIENT_COLUMNS.PATIENT_ID + " = ?", medicalRecordNumber)
+                .where(ActiveContract.PATIENT_COLUMNS.PATIENT_ID + " = ?", medicalRecordNumber)
                 .execute();
 
 
-        if(patients.size() > 0) {
+        if (patients.size() > 0) {
             patient = patients.get(0);
-            if(patient != null){
+            if (patient != null) {
                 List<Question> questions = new ArrayList<Question>(checkIns.size());
-                for (CheckIn checkIn : checkIns){
+                for (CheckIn checkIn : checkIns) {
                     checkIn.patient = patient;
                     checkIn.needSync = needSync ? 1 : 0;
-                    for (Question question : checkIn.getQuestions()){
+                    for (Question question : checkIn.getQuestions()) {
                         question.checkIn = checkIn;
                         questions.add(question);
                     }
                 }
-                new ActiveHandler<CheckIn>().saveItems(checkIns);
-                new ActiveHandler<Question>().saveItems(questions);
+                final long countCheckIns =  (new ActiveHandler<CheckIn>().saveItems(checkIns));
+                final long countQuestions = (new ActiveHandler<Question>().saveItems(questions));
+                result = needSync ? (countCheckIns > 0) : ((countCheckIns > 0) && (countQuestions > 0));
             }
         }
+        return result;
     }
+
+
 
     public UserInfo getUser() {
         return new ActiveHandler<UserInfo>().getItem(UserInfo.class);
@@ -136,19 +142,21 @@ public class DAOManager {
         }
 
 
-        public void saveItems(List<T> items){
+        public long saveItems(List<T> items){
+            long count = 0;
             ActiveAndroid.beginTransaction();
             try{
                 for (T item : items) {
                     if(item instanceof IModelBuilder)
                         ((IModelBuilder)item).buildInternalArray();
-                    item.save();
+                    count = item.save();
                 }
                 ActiveAndroid.setTransactionSuccessful();
             }
             finally {
                 ActiveAndroid.endTransaction();
             }
+            return count;
         }
     }
 }

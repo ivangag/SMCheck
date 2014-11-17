@@ -11,7 +11,6 @@ import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import org.symptomcheck.capstone.converter.JacksonConverter;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.ui.LoginActivity;
@@ -19,13 +18,11 @@ import org.symptomcheck.capstone.utils.NotificationHelper;
 import org.symptomcheck.capstone.utils.UserPreferencesManager;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import retrofit.ErrorHandler;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
-import retrofit.android.MainThreadExecutor;
 import retrofit.client.ApacheClient;
 import retrofit.converter.GsonConverter;
 
@@ -129,7 +126,7 @@ public class DownloadHelper {
     SecuredRestBuilder builder =  new SecuredRestBuilder()
             .setLoginEndpoint(GAE_URL_TRUSTED + SymptomManagerSvcApi.TOKEN_PATH)
             .setClientId(this.CLIENT_PATIENT_ID)
-            .setClient(new ApacheClient(UnsafeHttpsClient.createUnsafeClient()))
+            .setClient(new ApacheClient(CustomHttpsClient.createUnsafeClient()))
             .setEndpoint(GAE_URL_TRUSTED)
             .setLogLevel(RestAdapter.LogLevel.FULL);
 

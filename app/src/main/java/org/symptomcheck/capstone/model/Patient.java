@@ -162,12 +162,12 @@ public class Patient extends Model implements IModelBuilder{
                 .execute();
     }
 
-    public static List<Patient> getById(String medicalRecordNumber) {
+    public static Patient getById(String medicalRecordNumber) {
         // This is how you execute a query
         return new Select()
                 .from(Patient.class)
                         .where("patientId = ?", medicalRecordNumber)
                         //.orderBy("Name ASC")
-                .execute();
+                .executeSingle();
     }
 }

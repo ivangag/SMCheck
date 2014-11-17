@@ -136,8 +136,8 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
             if (user != null) {
                 Log.i(TAG, "sync data with: " + user.toString());
                 if (user.getLogged()) {
-                    updateLocalData(active_repo_local_to_sync, user);
                     updateCloudData(active_repo_cloud_to_sync, user);
+                    updateLocalData(active_repo_local_to_sync, user);
                 }
             }
 

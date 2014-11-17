@@ -410,7 +410,6 @@ public class MainActivity extends Activity {
         int id = item.getItemId();
 
         if(id == R.id.action_test){
-            showTimePickerDialog(null);
             /*
             try {
                 if(DAOManager.get().getUser().getUserType().equals(UserType.DOCTOR)) {
@@ -505,89 +504,5 @@ public class MainActivity extends Activity {
             //checkIn = DownloadHelper.get().setUserName("patient002").setPassword("pass").withRetrofitClient().addCheckIn("patient003", checkIn);
         }
     }
-    public static class TimePickerFragment extends DialogFragment
-            implements TimePickerDialog.OnTimeSetListener {
 
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            // Use the current time as the default values for the picker
-            final Calendar c = Calendar.getInstance();
-            int hour = c.get(Calendar.HOUR_OF_DAY);
-            int minute = c.get(Calendar.MINUTE);
-
-            // Create a new instance of TimePickerDialog and return it
-            return new TimePickerDialog(getActivity(), this, hour, minute,
-                    DateFormat.is24HourFormat(getActivity()));
-        }
-
-        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            // Do something with the time chosen by the user
-        }
-    }
-
-    private void showTimePickerDialog(View v) {
-        final Dialog dialog = new Dialog(this);
-
-        dialog.setContentView(R.layout.custom_dialog_datetime);
-
-        dialog.setTitle("Set Schedule Call");
-
-        dialog.show();
-
-        final DatePicker dp = (DatePicker)dialog.findViewById(R.id.datePicker1);
-        final TimePicker tp = (TimePicker)dialog.findViewById(R.id.timePicker1);
-
-        Button btnCancel = (Button)dialog.findViewById(R.id.btnCancelDT);
-        Button btnSet = (Button)dialog.findViewById(R.id.btnSetDT);
-
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-
-        btnSet.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-                String am_pm = "";
-                // TODO Auto-generated method stub
-                int m = dp.getMonth()+1;
-                int d = dp.getDayOfMonth();
-                int y = dp.getYear();
-
-                int h = tp.getCurrentHour();
-                int min = tp.getCurrentMinute();
-
-                String strm = String.valueOf(min);
-
-                if(strm.length()==1){
-                    strm = "0"+strm;
-                }
-                int hour24 = h;
-                if(h>12){
-                    am_pm = "PM";
-                    h = h-12;
-                }else{
-                    am_pm = "AM";
-                }
-
-                String date = m+"/"+d+"/"+y+" "+h+":"+strm+":00 "+am_pm;
-                String time = h+":"+strm+" "+am_pm;
-
-                //DateTime dateAndTime = new DateTime("2010-01-19 23:59:59");
-                String format = String.format("%d-%02d-%02d %02d:%02d:%02d",y,m,d,hour24,min,0);
-                DateTime dateAndTime = new DateTime(format);
-
-                long milliFrom1970GMT = dateAndTime.getMilliseconds(TimeZone.getTimeZone("GMT+00"));
-                Log.i(TAG,"milliFrom1970GMT= " + milliFrom1970GMT);
-                Toast.makeText(getApplicationContext(),"Date: " + date +" Time: "+ time,Toast.LENGTH_SHORT).show();
-
-                dialog.dismiss();
-            }
-        });
-        //DialogFragment newFragment = new TimePickerFragment();
-        //newFragment.show(getFragmentManager(), "timePicker");
-    }
 }

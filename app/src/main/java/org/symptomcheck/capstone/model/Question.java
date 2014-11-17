@@ -8,7 +8,12 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 
+import org.symptomcheck.capstone.utils.Costants;
+
 import java.util.List;
+import java.util.TimeZone;
+
+import hirondelle.date4j.DateTime;
 
 @Table(name = "Questions", id = BaseColumns._ID)
 public class Question extends Model implements IModelBuilder{
@@ -17,9 +22,11 @@ public class Question extends Model implements IModelBuilder{
 	private String question;
 	@Column
 	private String response;
-	@Column
+
+    @Column
 	private String medicatationTakingTime;
-	@Column
+
+    @Column
 	private QuestionType questionType;
 
     @Column(name = "CheckIn")
@@ -92,6 +99,19 @@ public class Question extends Model implements IModelBuilder{
                         .where("CheckIn = ?", checkIn.getId())
                         //.orderBy("Name ASC")
                 .execute();
+    }
+
+    public String getMedicationTime() {
+        final String savedTime = this.getMedicatationTakingTime();
+        String medicationTime;
+        if(savedTime != null &&
+                !savedTime.isEmpty()){
+            medicationTime = DateTime.forInstant(Long.valueOf(savedTime), TimeZone.getTimeZone(Costants.TIME.GMT00)).format("YYYY-MM-DD hh:mm");
+        }
+        else{
+            medicationTime = Costants.STRINGS.EMPTY;
+        }
+        return medicationTime;
     }
 }
 

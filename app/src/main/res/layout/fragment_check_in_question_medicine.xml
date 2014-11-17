@@ -12,7 +12,7 @@
         android:orientation="horizontal">
 
         <LinearLayout
-            android:layout_weight="0.75"
+            android:layout_weight="0.85"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -31,17 +31,18 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_weight="0.25"
+            android:layout_weight="0.15"
             android:layout_width="0dp"
             android:layout_gravity="center"
             android:gravity="center"
+            android:background="@drawable/ab_solid_capstone"
             android:layout_height="match_parent">
             <ImageView
                 android:id="@+id/imageCheckInPain"
                 android:src="@drawable/ic_check_in"
                 android:layout_gravity="center"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:contentDescription="@string/picasso" />
         </LinearLayout>
 

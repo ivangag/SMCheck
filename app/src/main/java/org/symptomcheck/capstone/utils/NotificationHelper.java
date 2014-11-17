@@ -26,6 +26,7 @@ public class NotificationHelper {
 
     public enum AlertType{
         ALERT_GO_TO_LOGIN,
+        ALERT_CHECK_IN_CONFIRMATION,
     }
     // Put the message into a notification and post it.
     // This is just one simple example of what you might choose to do with
@@ -62,21 +63,20 @@ public class NotificationHelper {
 
 
     /**
-     *
-     * @param context
-     * @param alertContextType
-     * @param Title
-     * @param Message
+     * Convenient method to build and show an Alert dialog
+     * @param context Context used to build alert dialog
+     * @param alertType type of alert
+     * @param Title Title of alert
+     * @param Message Message to be shown in the body alert
      */
-    public static void showAlertDialog(final Activity context, AlertType alertContextType,
+    public static void showAlertDialog(final Activity context, AlertType alertType,
                                        String Title, String Message){
 
 
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                context);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
         // set title
         alertDialogBuilder.setTitle(Title);
-        switch (alertContextType){
+        switch (alertType){
 
             case ALERT_GO_TO_LOGIN:
                 // set dialog message
@@ -102,13 +102,29 @@ public class NotificationHelper {
                             }
                         });
                 break;
+            case ALERT_CHECK_IN_CONFIRMATION:
+                // set dialog message
+                alertDialogBuilder
+                        .setMessage(Message)
+                        .setCancelable(false)
+                        .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                // if this button is clicked, close
+                                // current activity
+                                dialog.cancel();
+                            }
+                        })
+                        .setNegativeButton("No",new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                // if this button is clicked, just close
+                                // the dialog box and do nothing
+                                dialog.cancel();
+                            }
+                        });
+                break;
         }
-
-
-
         // create alert dialog
         AlertDialog alertDialog = alertDialogBuilder.create();
-
         // show it
         alertDialog.show();
     }

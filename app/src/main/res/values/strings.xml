@@ -59,6 +59,11 @@
     <string name="feed_status_title_question">Does your pain stop you from eating/drinking?</string>
     <string name="no_response">NO</string>
     <string name="yes_response">YES</string>
+    <string name="alert_dialog_ok">Yes</string>
+    <string name="alert_dialog_cancel">Cancel</string>
+    <string name="alert_dialog_title_checkin_submission">Do you confirm this CheckIn?</string>
+    <string name="title_check_in_confirmation">Click here to confirm Check-In</string>
+    <string name="medicine_header">Medicines</string>
 
 
 </resources>

@@ -1,6 +1,5 @@
 package org.symptomcheck.capstone.ui;
 
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -9,13 +8,18 @@ import java.util.TimeZone;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -34,11 +38,15 @@ import android.widget.Toast;
 import com.google.common.collect.Lists;
 
 import org.symptomcheck.capstone.R;
+import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.dao.DAOManager;
+import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.FeedStatus;
 import org.symptomcheck.capstone.model.PainLevel;
 import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.UserInfo;
+import org.symptomcheck.capstone.provider.ActiveContract;
+import org.symptomcheck.capstone.utils.Costants;
 import org.symptomcheck.capstone.utils.NotificationHelper;
 
 import hirondelle.date4j.DateTime;
@@ -64,7 +72,12 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
 
     private boolean checkInPermitted = true;
 
+    //public final static String EMPTY = Costants.STRINGS.EMPTY;
+    public final static String NO = "NO";
+    public final static String YES = "YES";
     List<PainMedication> mMedicines = Lists.newArrayList();
+    private CheckIn mCheckInFromUserChoices;
+
 
     private enum FragmentType{
         FRAGMENT_TYPE_PAIN_LEVEL,
@@ -72,24 +85,26 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         FRAGMENT_TYPE_MEDICINES,
     }
 
-    private Map<String,String> mMedicationsResponse = new HashMap<String, String>(){};
-    private Map<String,String> mMedicationsTakingTime = new HashMap<String, String>(){};
-    private PainLevel mPainLevelReport = PainLevel.UNKNOWN;
-    private FeedStatus mFeedStatusReport = FeedStatus.UNKNOWN;
+    private Map<String,String> mReportMedicationsResponse = new HashMap<String, String>(){};
+    private Map<String,String> mReportMedicationsTakingTime = new HashMap<String, String>(){};
+    private PainLevel mReportPainLevel = PainLevel.UNKNOWN;
+    private FeedStatus mReportFeedStatus = FeedStatus.UNKNOWN;
+
+    private Handler progressBarHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_in_flow);
 
+        progressBarHandler = new Handler();
         mUser = DAOManager.get().getUser();
 
         if(mUser != null) {
-
             mMedicines = PainMedication.getAll(mUser.getUserIdentification());
             for(PainMedication medication : mMedicines){
-                mMedicationsResponse.put(medication.getMedicationName(), "UNKNOWN");
-                mMedicationsTakingTime.put(medication.getMedicationName(), String.valueOf(Calendar.getInstance().getTimeInMillis()));
+                mReportMedicationsResponse.put(medication.getMedicationName(), Costants.STRINGS.EMPTY);
+                mReportMedicationsTakingTime.put(medication.getMedicationName(), Costants.STRINGS.EMPTY);
             }
 
             // Set up the action bar.
@@ -129,12 +144,12 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                                 .setText(mSectionsPagerAdapter.getPageTitle(i))
                                 .setTabListener(this));
             }
-
-
         } else{
             checkInPermitted = false;
         }
+
     }
+
 
 
     @Override
@@ -163,7 +178,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
+        String msgError = Costants.STRINGS.EMPTY;
         /*
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
@@ -171,10 +186,101 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         }*/
         // save check-in
         if (id == R.id.action_submit_checkin) {
+            //verify check-in data consistence
+            boolean check = false;
+            boolean checkMedicines = true;
+            if (mReportPainLevel == PainLevel.UNKNOWN) {
+                msgError = "Pain Level not reported";
+                mViewPager.setCurrentItem(0);
+            } else if (mReportFeedStatus == FeedStatus.UNKNOWN) {
+                msgError = "Feed Status not reported";
+                mViewPager.setCurrentItem(mSectionsPagerAdapter.getCount() - 1);
+            } else {
+                for (int idx = 0; idx < mMedicines.size(); idx++) {
+                    final String medication = mMedicines.get(idx).getMedicationName();
+                    if (mReportMedicationsResponse.get(medication).equals(Costants.STRINGS.EMPTY)) {
+                        msgError = String.format("Pain Medication %s not reported", medication);
+                        checkMedicines = false;
+                        mViewPager.setCurrentItem(1 + idx);
+                    } else if (mReportMedicationsResponse.get(medication).equals(YES)
+                            && mReportMedicationsTakingTime.get(medication).equals(Costants.STRINGS.EMPTY)) {
+                        msgError = String.format("Pain Medication %s reported without taking time", medication);
+                        checkMedicines = false;
+                        mViewPager.setCurrentItem(1 + idx);
+                    }
+                    if (!checkMedicines)
+                        idx = mMedicines.size();
+                }
+                check = checkMedicines;
+            }
+
+            if (!check) {
+                Toast.makeText(this, msgError, Toast.LENGTH_LONG).show();
+            } else {
+                // Save Check-In and trigger local => cloud sync
+                //executeCheckInSaving(makeCheckInFromUserChoices());
+                mCheckInFromUserChoices = makeCheckInFromUserChoices();
+                showDialog();
+            }
+
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    void showDialog() {
+        DialogFragment newFragment = AlertCheckSubmissionFragment
+                .newInstance(R.string.alert_dialog_title_checkin_submission,CheckIn.getDetailedInfo(mCheckInFromUserChoices,false));
+        newFragment.show(getFragmentManager(), "dialog");
+    }
+
+    private void executeCheckInSaving(final CheckIn checkIn) {
+        final ProgressDialog ringProgressDialog = ProgressDialog.show(this, "Please wait ...", "Check-In submission in progress ...", true);
+        ringProgressDialog.setCancelable(true);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // Here you should write your time consuming task...
+                    // Let the progress ring for 10 seconds...
+                    //Thread.sleep(10000);
+                    final boolean checkinRes = saveCheckIn(checkIn);
+                    if (checkinRes) {
+                        SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_CHECK_IN);
+                    }
+                    progressBarHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(checkinRes) {
+                                finish();
+                                Toast.makeText(getApplicationContext(), "Check-In Submitted Correctly", Toast.LENGTH_LONG).show();
+                            }else {
+                                Toast.makeText(getApplicationContext(), "Check-In Submission ERROR!!!", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                }
+                ringProgressDialog.dismiss();
+            }
+        }).start();
+    }
+
+
+    private CheckIn makeCheckInFromUserChoices(){
+        Map<PainMedication, String> meds = new HashMap<PainMedication, String>();
+        for(int idx = 0; idx < mMedicines.size();idx++) {
+            final String medication = mMedicines.get(idx).getMedicationName();
+            final String time = mReportMedicationsTakingTime.get(medication);
+            meds.put(new PainMedication(medication, time), mReportMedicationsResponse.get(medication));
+        }
+        return CheckIn.createCheckIn(mReportPainLevel,mReportFeedStatus, meds);
+    }
+
+    private boolean saveCheckIn(CheckIn checkIn){
+        return DAOManager.get().saveCheckIns(Lists.newArrayList(checkIn),
+                mUser.getUserIdentification(),mUser.getUserIdentification(),true);
     }
 
     @Override
@@ -273,6 +379,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         View medicinesQuestionsView;
         TextView txtMedicineTakingTime;
         FragmentType mFragmentType;
+        int mPositionFragment;
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -325,10 +432,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
             txtMedicineTakingTime = (TextView)rootView.findViewById(R.id.txt_check_in_medicine_take_time);
 
             final CheckInFlowActivity parentActivity = ((CheckInFlowActivity)getActivity());
-            final int positionFragment = getArguments().getInt(ARG_SECTION_NUMBER);
-
-            //mFragmentType = FragmentType.valueOf(getArguments().getString(ARG_FRAGMENT_TYPE));
-
+            mPositionFragment = getArguments().getInt(ARG_SECTION_NUMBER);
 
             switch (mFragmentType){
                 case FRAGMENT_TYPE_PAIN_LEVEL:
@@ -337,19 +441,19 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                     painQuestionsView.findViewById(R.id.radioBtnPainModerate).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            parentActivity.mPainLevelReport = PainLevel.MODERATE;
+                            parentActivity.mReportPainLevel = PainLevel.MODERATE;
                         }
                     });
                     painQuestionsView.findViewById(R.id.radioBtnPainSevere).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            parentActivity.mPainLevelReport = PainLevel.SEVERE;
+                            parentActivity.mReportPainLevel = PainLevel.SEVERE;
                         }
                     });
                     painQuestionsView.findViewById(R.id.radioBtnPainWellControlled).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            parentActivity.mPainLevelReport = PainLevel.WELL_CONTROLLED;
+                            parentActivity.mReportPainLevel = PainLevel.WELL_CONTROLLED;
                         }
                     });
                     break;
@@ -359,38 +463,38 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                     feedQuestionsView.findViewById(R.id.radioBtnFeedNo).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            parentActivity.mFeedStatusReport = FeedStatus.NO;
+                            parentActivity.mReportFeedStatus = FeedStatus.NO;
                         }
                     });
                     feedQuestionsView.findViewById(R.id.radioBtnFeedSome).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            parentActivity.mFeedStatusReport = FeedStatus.SOME;
+                            parentActivity.mReportFeedStatus = FeedStatus.SOME;
                         }
                     });
                     feedQuestionsView.findViewById(R.id.radioBtnFeedCannotEat).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            parentActivity.mFeedStatusReport = FeedStatus.CANNOT_EAT;
+                            parentActivity.mReportFeedStatus = FeedStatus.CANNOT_EAT;
                         }
                     });
                     break;
                 case FRAGMENT_TYPE_MEDICINES:
-                    mMedicineName = parentActivity.mMedicines.get(positionFragment - 2).getMedicationName();
+                    mMedicineName = parentActivity.mMedicines.get(mPositionFragment - 2).getMedicationName();
                     title.setText(String.format(getString(R.string.medicine_title_question),mMedicineName));
                     medicinesQuestionsView = rootView.findViewById(R.id.viewRadioBtnMedQuestions);
                     medicinesQuestionsView.findViewById(R.id.radioBtnMedicineNO).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             txtMedicineTakingTime.setVisibility(View.GONE);
-                            parentActivity.mMedicationsResponse.put(mMedicineName,getString(R.string.no_response));
+                            parentActivity.mReportMedicationsResponse.put(mMedicineName,NO);
                         }
                     });
                     medicinesQuestionsView.findViewById(R.id.radioBtnMedicineYES).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             txtMedicineTakingTime.setVisibility(View.VISIBLE);
-                            parentActivity.mMedicationsResponse.put(mMedicineName,getString(R.string.yes_response));
+                            parentActivity.mReportMedicationsResponse.put(mMedicineName, YES);
                         }
                     });
                     final boolean YES = ((RadioButton)medicinesQuestionsView.findViewById(R.id.radioBtnMedicineYES)).isChecked();
@@ -409,11 +513,13 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         @Override
         public void onResume() {
             if(mFragmentType.equals(FragmentType.FRAGMENT_TYPE_MEDICINES)){
+                String timeTaken = ((CheckInFlowActivity) getActivity()).mReportMedicationsTakingTime.get(mMedicineName);
                 final boolean YES = ((RadioButton)medicinesQuestionsView.findViewById(R.id.radioBtnMedicineYES)).isChecked();
                 txtMedicineTakingTime.setVisibility(YES ? View.VISIBLE : View.GONE);
-                txtMedicineTakingTime.setText(
-                        ((CheckInFlowActivity)getActivity()).mMedicationsTakingTime.get(mMedicineName)
-                );
+                if(!timeTaken.equals(Costants.STRINGS.EMPTY)) {
+                    timeTaken =  DateTime.forInstant(Long.valueOf(timeTaken),TimeZone.getTimeZone("GMT+00")).format("YYYY-MM-DD hh:mm");
+                }
+                txtMedicineTakingTime.setText(timeTaken);
             }
             super.onResume();
         }
@@ -477,7 +583,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
 
                     txtMedicineTakingTime.setText(dateAndTime.toString());
 
-                    ((CheckInFlowActivity)getActivity()).mMedicationsTakingTime.put(mMedicineName,String.valueOf(milliFrom1970GMT));
+                    ((CheckInFlowActivity)getActivity()).mReportMedicationsTakingTime.put(mMedicineName, String.valueOf(milliFrom1970GMT));
 
                     Log.i("CheckInFlow", "milliFrom1970GMT= " + milliFrom1970GMT);
                     Toast.makeText(getActivity(), "Date: " + date + " Time: " + time, Toast.LENGTH_SHORT).show();
@@ -501,17 +607,17 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                     switch (fragmentType){
                         case FRAGMENT_TYPE_PAIN_LEVEL:
                             if(painQuestionsView != null){
-                                PainLevel painLevel = PainLevel.UNKNOWN;
-                                RadioButton radioButtonModerate = ((RadioButton)painQuestionsView.findViewById(R.id.radioBtnPainModerate));
-                                RadioButton radioButtonSever = ((RadioButton)painQuestionsView.findViewById(R.id.radioBtnPainSevere));
-                                RadioButton radioButtonWell = ((RadioButton)painQuestionsView.findViewById(R.id.radioBtnPainWellControlled));
-                                if(radioButtonModerate.isChecked()){
-                                    painLevel = PainLevel.MODERATE;
-                                }else if(radioButtonSever.isChecked()){
-                                    painLevel = PainLevel.SEVERE;
-                                }else if(radioButtonWell.isChecked()){
-                                    painLevel = PainLevel.WELL_CONTROLLED;
-                                }
+                                    PainLevel painLevel = PainLevel.UNKNOWN;
+                                    RadioButton radioButtonModerate = ((RadioButton)painQuestionsView.findViewById(R.id.radioBtnPainModerate));
+                                    RadioButton radioButtonSever = ((RadioButton)painQuestionsView.findViewById(R.id.radioBtnPainSevere));
+                                    RadioButton radioButtonWell = ((RadioButton)painQuestionsView.findViewById(R.id.radioBtnPainWellControlled));
+                                    if(radioButtonModerate.isChecked()){
+                                        painLevel = PainLevel.MODERATE;
+                                    }else if(radioButtonSever.isChecked()){
+                                        painLevel = PainLevel.SEVERE;
+                                    }else if(radioButtonWell.isChecked()){
+                                        painLevel = PainLevel.WELL_CONTROLLED;
+                                    }
                             }
                             break;
                         case FRAGMENT_TYPE_FEED_STATUS:
@@ -524,8 +630,52 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                 }
             }
         }
+    }
+    public static class AlertCheckSubmissionFragment extends DialogFragment {
 
+        public static AlertCheckSubmissionFragment newInstance(int title,String message) {
+            AlertCheckSubmissionFragment frag = new AlertCheckSubmissionFragment();
+            Bundle args = new Bundle();
+            args.putInt("title", title);
+            args.putString("message", message);
+            frag.setArguments(args);
+            return frag;
+        }
 
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final int title = getArguments().getInt("title");
+            final String message = getArguments().getString("message");
+
+            return new AlertDialog.Builder(getActivity())
+                    .setIcon(R.drawable.ic_check_in)
+                    .setMessage(message)
+                    .setTitle(title)
+                    .setPositiveButton(R.string.alert_dialog_ok,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int whichButton) {
+                                    ((CheckInFlowActivity) getActivity())
+                                            .confirmCheckInSubmission();
+                                }
+                            })
+                    .setNegativeButton(R.string.alert_dialog_cancel,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int whichButton) {
+                                    ((CheckInFlowActivity) getActivity())
+                                            .cancelCheckInSubmission();
+                                }
+                            }).create();
+        }
+    }
+
+    private void cancelCheckInSubmission() {
+
+    }
+
+    private void confirmCheckInSubmission() {
+        executeCheckInSaving(mCheckInFromUserChoices);
     }
 
 }

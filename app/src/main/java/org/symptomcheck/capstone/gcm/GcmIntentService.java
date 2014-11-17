@@ -94,6 +94,9 @@ public class GcmIntentService extends IntentService {
                 }
                 break;
             case DOCTOR:
+                if(action.equals(GcmConstants.GCM_ACTION_MEDICATION_RX)){
+                    SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_MEDICINES);
+                }
                 break;
             case ADMIN:
                 break;
