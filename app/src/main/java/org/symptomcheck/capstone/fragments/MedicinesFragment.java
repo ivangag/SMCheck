@@ -47,7 +47,7 @@ import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
-import org.symptomcheck.capstone.model.Doctor;
+import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.provider.ActiveContract;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -63,10 +63,9 @@ import it.gmariotti.cardslib.library.view.CardListView;
  *
  * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
  */
-public class DoctorFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>
-,IFragmentListener {
+public class MedicinesFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>, IFragmentListener {
 
-    DoctorCursorCardAdapter mAdapter;
+    MedicinesCursorCardAdapter mAdapter;
     CardListView mListView;
     /**
      * Handle to a SyncObserver. The ProgressBar element is visible until the SyncObserver reports
@@ -78,6 +77,21 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
     private Object mSyncObserverHandle;
     private Menu mOptionsMenu;
 
+    private static final String ARG_PATIENT_ID = "patient_id";
+    String mMedicineName;
+    /**
+     * Returns a new instance of this fragment for the given section
+     * number.
+     */
+    public static MedicinesFragment newInstance(long patientId) {
+        MedicinesFragment fragment = new MedicinesFragment();
+        Bundle args = new Bundle();
+        if (patientId != -1) {
+            args.putLong(ARG_PATIENT_ID, patientId);
+        }
+        fragment.setArguments(args);
+        return fragment;
+    }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,7 +99,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root= inflater.inflate(R.layout.fragment_card_doctors_list_cursor, container, false);
+        View root= inflater.inflate(R.layout.fragment_card_medicines_list_cursor, container, false);
         //setupListFragment(root);
         setHasOptionsMenu(true);
         return root;
@@ -96,7 +110,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
         switch (item.getItemId()) {
             // If the user clicks the "Refresh" button.
             case R.id.menu_refresh:
-                SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_DOCTORS);
+                SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_MEDICINES);
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -148,14 +162,19 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
     }
 
     static int count = 0;
+    String mSelection = null;
     private void init() {
 
+        final Long patientId = getArguments().getLong(ARG_PATIENT_ID);
+        if((patientId > 0)){
+            mSelection = "Patient = " + patientId;
+        }
         //Vehicle vehicle = new Vehicle();
         //vehicle.setVIN("VIN" + count);
         //long count = vehicle.save();
-        mAdapter = new DoctorCursorCardAdapter(getActivity());
+        mAdapter = new MedicinesCursorCardAdapter(getActivity());
 
-        mListView = (CardListView) getActivity().findViewById(R.id.card_doctors_list_cursor);
+        mListView = (CardListView) getActivity().findViewById(R.id.card_medicines_list_cursor);
         if (mListView != null) {
             mListView.setAdapter(mAdapter);
         }
@@ -163,11 +182,11 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
         mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
             public Cursor runQuery(CharSequence charSequence) {
-                return queryAllField(charSequence.toString(),null);
+                return queryAllField(charSequence.toString(),mSelection);
             }
         });
-
         // Force start background query to load sessions
+
         getLoaderManager().restartLoader(0, null, this);
 
 
@@ -178,8 +197,9 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
 
         Loader<Cursor> loader = null;
         loader = new CursorLoader(getActivity(),
-                ContentProvider.createUri(Doctor.class, null),
-                null, null, null, ActiveContract.DOCTORS_COLUMNS.FIRST_NAME + " asc"
+                ContentProvider.createUri(PainMedication.class, null),
+                ActiveContract.MEDICINES_TABLE_PROJECTION, mSelection, null,
+                ActiveContract.MEDICINES_COLUMNS.NAME + " asc"
         );
         return loader;
     }
@@ -193,8 +213,12 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
 
         //displayList();
     }
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.swapCursor(null);
+    }
     /**
-     * Create a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
+     * Crfate a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
      * onResume(), and removed in onPause(). If status changes, it sets the state of the Refresh
      * button. If a sync is active or pending, the Refresh button is replaced by an indeterminate
      * ProgressBar; otherwise, the button itself is displayed.
@@ -255,14 +279,11 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
     }
 
     public static final int ID_COLUMN = 0;
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
-    }
+
 
     @Override
     public int getFragmentType() {
-        return BaseFragment.FRAGMENT_TYPE_DOCTORS;
+        return BaseFragment.FRAGMENT_TYPE_MEDICINES;
     }
 
     @Override
@@ -273,17 +294,17 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
     //-------------------------------------------------------------------------------------------------------------
     // Adapter
     //-------------------------------------------------------------------------------------------------------------
-    public class DoctorCursorCardAdapter extends CardCursorAdapter {
+    public class MedicinesCursorCardAdapter extends CardCursorAdapter {
 
-        private String mDetailedInfo;
+        private String mDetailedMedicineInfo;
 
-        public DoctorCursorCardAdapter(Context context) {
+        public MedicinesCursorCardAdapter(Context context) {
             super(context);
         }
 
         @Override
         protected Card getCardFromCursor(Cursor cursor) {
-            DoctorCursorCard card = new DoctorCursorCard(super.getContext());
+            MedicineCursorCard card = new MedicineCursorCard(super.getContext());
             setCardFromCursor(card,cursor);
 
 
@@ -327,44 +348,28 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
                 }
             });
 
-            /*
-            card.setOnExpandAnimatorEndListener(new Card.OnExpandAnimatorEndListener() {
-                @Override
-                public void onExpandEnd(Card card) {
-
-                }
-            });
-
-            card.setOnExpandAnimatorStartListener(new Card.OnExpandAnimatorStartListener() {
-                @Override
-                public void onExpandStart(Card card) {
-                    Toast.makeText(getContext(), "Card Expanded id=" + card.getId(),Toast.LENGTH_SHORT).show();
-                }
-            })*/
-
             //This provides a simple (and useless) expand area
-            CustomExpandCard expand = new CustomExpandCard(super.getContext(), mDetailedInfo);
-            expand.setTitle("Doctor Details");
+            CustomExpandCard expand = new CustomExpandCard(super.getContext(), mDetailedMedicineInfo);
+            //expand.setTitle("Check-In Details");
             //Add Expand Area to Card
             card.addCardExpand(expand);
 
             return card;
         }
 
-        private void setCardFromCursor(DoctorCursorCard card,Cursor cursor) {
+        private void setCardFromCursor(MedicineCursorCard card,Cursor cursor) {
+            final int medicineId = cursor.getInt(ID_COLUMN);
+            card.setId(""+ medicineId);
+            card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.MEDICINES_COLUMNS.NAME));
 
-            card.setId(""+cursor.getInt(ID_COLUMN));
-            card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.DOCTORS_COLUMNS.FIRST_NAME))
-                    + " " + cursor.getString(cursor.getColumnIndex(ActiveContract.DOCTORS_COLUMNS.LAST_NAME));
-            card.secondaryTitle =
-                    cursor.getString(cursor.getColumnIndex(ActiveContract.DOCTORS_COLUMNS.DOCTOR_ID))
-                            /*+ " " + cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.BIRTH_DATE))*/
-            ;
-            card.mainHeader = getString(R.string.doctor_header);
-            card.resourceIdThumb=R.drawable.ic_doctor;
+            card.mainHeader = getString(R.string.medicine_header);
+            card.resourceIdThumb=R.drawable.ic_medicine;
 
-            //build detailed info to be shown in expand area
-             mDetailedInfo = "";
+            final PainMedication painMedication = PainMedication.getById(medicineId);
+            if(painMedication != null) {
+                //card.secondaryTitle = painMedication.getIssueDateTimeClear(); // fromMilliseconds.format("YYYY-MM-DD hh:ss");
+                mDetailedMedicineInfo = PainMedication.getDetailedInfo(painMedication);
+            }
         }
     }
 
@@ -385,7 +390,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
     //-------------------------------------------------------------------------------------------------------------
     // Cards
     //-------------------------------------------------------------------------------------------------------------
-    public class DoctorCursorCard extends Card {
+    public class MedicineCursorCard extends Card {
 
         String mainTitle;
         String secondaryTitle;
@@ -393,7 +398,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
         int resourceIdThumb;
         private ImageButton mButtonExpandCustom;
 
-        public DoctorCursorCard(Context context) {
+        public MedicineCursorCard(Context context) {
             super(context, R.layout.carddemo_cursor_inner_content);
         }
 
@@ -416,7 +421,8 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
                 mButtonExpandCustom.setClickable(true);
 
                 ViewToClickToExpand extraCustomButtonExpand =
-                        ViewToClickToExpand.builder().highlightView(false)
+                        ViewToClickToExpand.builder()
+                                .highlightView(false)
                                 .setupView(mButtonExpandCustom);
 
                 setViewToClickToExpand(extraCustomButtonExpand);

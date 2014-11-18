@@ -140,22 +140,22 @@ public  abstract class BaseFragment extends Fragment {
             case FRAGMENT_TYPE_PATIENT:
                 cursor = getActivity().getContentResolver()
                                 .query(uriContentProvider,
-                                ActiveContract.PATIENT_TABLE_PROJECTION, selection, null, null);
+                                ActiveContract.PATIENT_TABLE_PROJECTION, selection, null, ActiveContract.PATIENT_COLUMNS.FIRST_NAME + " asc");
                 break;
             case FRAGMENT_TYPE_DOCTORS:
                 cursor = getActivity().getContentResolver()
                         .query(uriContentProvider,
-                                ActiveContract.DOCTOR_TABLE_PROJECTION, selection, null, null);
+                                ActiveContract.DOCTOR_TABLE_PROJECTION, selection, null,  ActiveContract.DOCTORS_COLUMNS.FIRST_NAME + " asc");
                 break;
             case FRAGMENT_TYPE_CHECKIN:
                 cursor = getActivity().getContentResolver()
                         .query(uriContentProvider,
-                                ActiveContract.CHECK_IN_TABLE_PROJECTION, selection, null, null);
+                                ActiveContract.CHECK_IN_TABLE_PROJECTION, selection, null, ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME + " asc");
                 break;
             case FRAGMENT_TYPE_MEDICINES:
                 cursor = getActivity().getContentResolver()
                         .query(uriContentProvider,
-                                ActiveContract.MEDICINES_TABLE_PROJECTION, selection, null, null);
+                                ActiveContract.MEDICINES_TABLE_PROJECTION, selection, null, ActiveContract.MEDICINES_COLUMNS.NAME + " asc");
                 break;
             default:
                 break;

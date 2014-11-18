@@ -43,7 +43,7 @@ public class DAOManager {
     }
 
     public synchronized boolean saveUser(UserInfo userInfo){
-        new ActiveHandler<UserInfo>().deleteItems(UserInfo.class);
+        this.deleteUser();
         return userInfo.save() > 0;
     }
 

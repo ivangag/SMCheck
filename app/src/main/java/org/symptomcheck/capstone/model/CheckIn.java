@@ -183,7 +183,8 @@ public class CheckIn extends Model implements IModelBuilder {
         String medicationTime;
         if(savedTime != null &&
                 !savedTime.isEmpty()){
-            medicationTime = DateTime.forInstant(Long.valueOf(savedTime), TimeZone.getTimeZone(Costants.TIME.GMT00)).format("YYYY-MM-DD hh:mm");
+            medicationTime = DateTime.forInstant(Long.valueOf(savedTime),
+                    TimeZone.getDefault()).format("YYYY-MM-DD hh:mm");
         }
         else{
             medicationTime = Costants.STRINGS.EMPTY;

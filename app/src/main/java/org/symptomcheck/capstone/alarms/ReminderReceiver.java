@@ -38,6 +38,8 @@ public class ReminderReceiver extends WakefulBroadcastReceiver {
          * This intent holds an extra identifying the wake lock.
          */
         Intent service = new Intent(context, ReminderSchedulingService.class);
+        service.setAction(ReminderSchedulingService.ACTION_CHECK_IN_SUBMISSION);
+        //ReminderSchedulingService.startCheckInReminder(context,"","");
         // Start the service, keeping the device awake while it is launching.
         startWakefulService(context, service);
 

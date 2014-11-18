@@ -198,7 +198,8 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         Loader<Cursor> loader = null;
         loader = new CursorLoader(getActivity(),
                 ContentProvider.createUri(CheckIn.class, null),
-                ActiveContract.CHECK_IN_TABLE_PROJECTION, mSelection, null, null
+                ActiveContract.CHECK_IN_TABLE_PROJECTION, mSelection, null,
+                ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME + " asc"
         );
         return loader;
     }
@@ -378,7 +379,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
             final CheckIn checkIn = CheckIn.getById(checkInId);
             if(checkIn != null) {
-                card.secondaryTitle = checkIn.getIssueDateTimeClear(); // fromMilliseconds.format("YYYY-MM-DD hh:ss");
+                card.secondaryTitle = checkIn.getIssueDateTimeClear();// + " (" + checkIn.getIssueDateTime() + ")"; // fromMilliseconds.format("YYYY-MM-DD hh:ss");
                 mDetailedCheckInInfo = CheckIn.getDetailedInfo(checkIn, true);
             }
         }

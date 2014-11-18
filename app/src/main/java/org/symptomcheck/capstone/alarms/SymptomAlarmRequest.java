@@ -40,6 +40,8 @@ public class SymptomAlarmRequest {
     private SymptomAlarmRequest() {
     }
 
+
+
     public void setAlarm(Context ctx,AlarmRequestedType alarmRequestedType){
         switch (alarmRequestedType){
             case ALARM_REMINDER:

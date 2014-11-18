@@ -182,7 +182,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         Loader<Cursor> loader = null;
         loader = new CursorLoader(getActivity(),
                 mUriContentProvider,
-                null, null, null, null
+                null, null, null, ActiveContract.PATIENT_COLUMNS.FIRST_NAME + " asc"
         );
         return loader;
     }

@@ -60,6 +60,27 @@ public class PainMedication extends Model implements IModelBuilder {
 		this.patientMedicalNumber = patientMedicalNumber;
 	}
 
+    public static PainMedication getById(int id) {
+        // This is how you execute a query
+        return new Select()
+                .from(PainMedication.class)
+                .where("_id = ?", id)
+                        //.orderBy("Name ASC")
+                .executeSingle();
+    }
+
+    public static String getDetailedInfo(PainMedication painMedication) {
+        final Patient patient = Patient.getById(painMedication.getPatientMedicalNumber());
+        StringBuilder sb = new StringBuilder();
+        sb.append("Name: " + painMedication.getMedicationName())
+                .append("\n");
+        sb.append("Patient: " + (patient != null ? patient.toString() : "NA"));
+
+        sb.append("\n----------------------------\n");
+
+        return sb.toString();
+    }
+
     public static class Builder{
         private String medicationName;
         private String lastTakingDateTime;

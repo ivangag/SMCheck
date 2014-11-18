@@ -37,6 +37,7 @@ import org.symptomcheck.capstone.fragments.CheckInFragment;
 import org.symptomcheck.capstone.fragments.DoctorFragment;
 import org.symptomcheck.capstone.fragments.ICardEventListener;
 import org.symptomcheck.capstone.fragments.IFragmentListener;
+import org.symptomcheck.capstone.fragments.MedicinesFragment;
 import org.symptomcheck.capstone.fragments.PatientsFragment;
 import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.FeedStatus;
@@ -237,7 +238,7 @@ public class MainActivity extends Activity implements ICardEventListener {
     }
 
 
-        private Fragment selectFragment(ShowFragmentType fragmentType, long contentUriId) {
+    private Fragment selectFragment(ShowFragmentType fragmentType, long contentUriId) {
 
         Fragment fragment = null;
                 switch (fragmentType) {
@@ -251,13 +252,13 @@ public class MainActivity extends Activity implements ICardEventListener {
                         fragment = new DoctorFragment();
                         break;
                     case PATIENT_MEDICINES:
+                        fragment = MedicinesFragment.newInstance(contentUriId);
                         break;
                     case SETTINGS:
                         openSettings();
                         break;
                     case LOGOUT:
-                        fragment = AlertLogoutFragment
-                                .newInstance();
+                        fragment = AlertLogoutFragment.newInstance();
                         break;
                     default:
                         break;
@@ -277,8 +278,7 @@ public class MainActivity extends Activity implements ICardEventListener {
                         openSettings();
                         break;
                     case CASE_SHOW_DOCTOR_LOGOUT:
-                        fragment = AlertLogoutFragment
-                                .newInstance();
+                        fragment = AlertLogoutFragment.newInstance();
                         break;
                 }
                 break;
@@ -290,12 +290,14 @@ public class MainActivity extends Activity implements ICardEventListener {
                     case CASE_SHOW_PATIENT_DOCTORS:
                         fragment = new DoctorFragment();
                         break;
+                    case CASE_SHOW_PATIENT_MEDICINES:
+                        fragment = MedicinesFragment.newInstance(contentUriId);
+                        break;
                     case CASE_SHOW_PATIENT_SETTINGS:
                         openSettings();
                         break;
                     case CASE_SHOW_PATIENT_LOGOUT:
-                        fragment =  AlertLogoutFragment
-                                .newInstance();
+                        fragment =  AlertLogoutFragment.newInstance();
                         break;
                 }
                 break;

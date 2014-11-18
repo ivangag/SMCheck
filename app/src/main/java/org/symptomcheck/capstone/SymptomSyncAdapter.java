@@ -134,7 +134,8 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
 
             final UserInfo user = DAOManager.get().getUser();
             if (user != null) {
-                Log.i(TAG, "sync data with: " + user.toString());
+                Log.i(TAG, String.format("syncing: User:%s - Local:%s - Cloud:%s",
+                        user.toString(),active_repo_local_to_sync,active_repo_cloud_to_sync));
                 if (user.getLogged()) {
                     updateCloudData(active_repo_cloud_to_sync, user);
                     updateLocalData(active_repo_local_to_sync, user);

@@ -27,6 +27,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import org.symptomcheck.capstone.R;
+import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.alarms.SymptomAlarmRequest;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.gcm.GcmRegistrationService;
@@ -297,6 +298,8 @@ public class LoginActivity extends Activity{
         protected ErrorLogin doInBackground(Void... params) {
             // Attempt authentication against a network service.
             errorLogin.onSuccess = true;
+            boolean useToken = mEmail.isEmpty()
+                                    || mPassword.isEmpty();
             final String token = UserPreferencesManager.get().getBearerToken(getApplicationContext());
             try {
                 // Simulate network access.
@@ -304,8 +307,7 @@ public class LoginActivity extends Activity{
 
 
                 SymptomManagerSvcApi client;
-                if(mEmail.isEmpty()
-                        || mPassword.isEmpty()){
+                if(useToken){
                     client = DownloadHelper.get()
                             .setAccessToken(token)
                             .withRetrofitClient(getApplicationContext());
@@ -320,6 +322,11 @@ public class LoginActivity extends Activity{
                 userInfo.setLogged(true);
 
                 DAOManager.get().saveUser(userInfo);
+                if(!useToken){
+                    //probably is the first access after wiping data
+                    SyncUtils.ForceRefresh();
+                    Thread.sleep(2000);
+                }
 
             } catch (Exception e) {
                 errorLogin.onSuccess = false;
