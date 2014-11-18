@@ -64,7 +64,7 @@ import it.gmariotti.cardslib.library.view.CardListView;
  * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
  */
 public class DoctorFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>
-,IFragmentNotification{
+,IFragmentListener {
 
     DoctorCursorCardAdapter mAdapter;
     CardListView mListView;
@@ -78,7 +78,11 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
     private Object mSyncObserverHandle;
     private Menu mOptionsMenu;
 
-
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root= inflater.inflate(R.layout.fragment_card_doctors_list_cursor, container, false);
@@ -159,7 +163,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
         mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
             public Cursor runQuery(CharSequence charSequence) {
-                return queryAllField(charSequence.toString());
+                return queryAllField(charSequence.toString(),null);
             }
         });
 

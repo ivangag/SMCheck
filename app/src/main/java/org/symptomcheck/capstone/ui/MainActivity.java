@@ -1,32 +1,24 @@
 package org.symptomcheck.capstone.ui;
 
 import android.app.Activity;
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
@@ -39,7 +31,8 @@ import org.symptomcheck.capstone.bus.DownloadEvent;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.fragments.CheckInFragment;
 import org.symptomcheck.capstone.fragments.DoctorFragment;
-import org.symptomcheck.capstone.fragments.IFragmentNotification;
+import org.symptomcheck.capstone.fragments.ICardEventListener;
+import org.symptomcheck.capstone.fragments.IFragmentListener;
 import org.symptomcheck.capstone.fragments.PatientsFragment;
 import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.FeedStatus;
@@ -57,13 +50,12 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 import de.greenrobot.event.EventBus;
-import hirondelle.date4j.DateTime;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements ICardEventListener {
+
 
     private final String TAG = MainActivity.this.getClass().getSimpleName();
 
@@ -80,15 +72,26 @@ public class MainActivity extends Activity {
     private TextView mTextViewUserDetails;
     private ShareActionProvider mShareActionProvider;
     private Fragment mBaseFragment;
-    private int mSelectedFragment = -1;
+    private int mSelectedFragmentPosition = -1;
+    private ShowFragmentType mSelectedFragmentType;
+
+    public enum ShowFragmentType{
+        DOCTOR_PATIENTS,
+        SETTINGS,
+        PATIENT_CHECKINS,
+        PATIENT_DOCTORS,
+        PATIENT_MEDICINES,
+        LOGOUT,
+    }
 
     private static final int CASE_SHOW_DOCTOR_PATIENTS = 0;
     private static final int CASE_SHOW_DOCTOR_SETTINGS = 1;
     private static final int CASE_SHOW_DOCTOR_LOGOUT = 2;
     private static final int CASE_SHOW_PATIENT_CHECKINS = 0;
     private static final int CASE_SHOW_PATIENT_DOCTORS = 1;
-    private static final int CASE_SHOW_PATIENT_SETTINGS = 2;
-    private static final int CASE_SHOW_PATIENT_LOGOUT = 3;
+    private static final int CASE_SHOW_PATIENT_MEDICINES = 2 ;
+    private static final int CASE_SHOW_PATIENT_SETTINGS = 3;
+    private static final int CASE_SHOW_PATIENT_LOGOUT = 4;
 
     private UserInfo user;
 
@@ -157,9 +160,9 @@ public class MainActivity extends Activity {
             mDrawerLayout.setDrawerListener(mDrawerToggle);
 
             if (user.getUserType().equals(UserType.DOCTOR)) {
-                selectDrawerItem(CASE_SHOW_DOCTOR_PATIENTS);
+                selectDrawerItem(CASE_SHOW_DOCTOR_PATIENTS,-1);
             } else if (user.getUserType().equals(UserType.PATIENT)) {
-                selectDrawerItem(CASE_SHOW_PATIENT_CHECKINS);
+                selectDrawerItem(CASE_SHOW_PATIENT_CHECKINS,-1);
             }
         }else{
             Toast.makeText(this,"User not more Logged!!!!!",Toast.LENGTH_LONG).show();
@@ -186,8 +189,12 @@ public class MainActivity extends Activity {
                             .into(mImageView);
                 } else if (userType.equals(UserType.PATIENT)) {
                     mFragmentTitles = getResources().getStringArray(R.array.patient_fragments_array);
-                    mDrawerImagesResources = new int[]{R.drawable.ic_check_in, R.drawable.ic_doctor,
-                            R.drawable.ic_action_settings, R.drawable.ic_logout};
+                    mDrawerImagesResources = new int[]{
+                            R.drawable.ic_check_in,
+                            R.drawable.ic_doctor,
+                            R.drawable.ic_medicine,
+                            R.drawable.ic_action_settings,
+                            R.drawable.ic_logout};
                     Picasso.with(this).load(R.drawable.ic_patient)
                             //.resize(96, 96)
                             //.centerCrop()
@@ -226,7 +233,70 @@ public class MainActivity extends Activity {
     }
 
 
-    private Fragment selectFragment(int position) {
+    private ShowFragmentType getFragmentType(int position) {
+
+        ShowFragmentType fragmentType = null;
+        switch (user.getUserType()) {
+            case DOCTOR:
+                switch (position) {
+                    case CASE_SHOW_DOCTOR_PATIENTS:
+                        fragmentType = ShowFragmentType.DOCTOR_PATIENTS;
+                        break;
+                    case CASE_SHOW_DOCTOR_SETTINGS:
+                        fragmentType = ShowFragmentType.SETTINGS;
+                        break;
+                    case CASE_SHOW_DOCTOR_LOGOUT:
+                        fragmentType = ShowFragmentType.LOGOUT;
+                        break;
+                }
+                break;
+            case PATIENT:
+                switch (position) {
+                    case CASE_SHOW_PATIENT_CHECKINS:
+                        fragmentType = ShowFragmentType.PATIENT_CHECKINS;
+                        break;
+                    case CASE_SHOW_PATIENT_DOCTORS:
+                        fragmentType = ShowFragmentType.PATIENT_DOCTORS;
+                        break;
+                    case CASE_SHOW_PATIENT_SETTINGS:
+                        fragmentType = ShowFragmentType.SETTINGS;
+                        break;
+                    case CASE_SHOW_PATIENT_LOGOUT:
+                        fragmentType = ShowFragmentType.LOGOUT;
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
+        return fragmentType;
+    }
+    private Fragment selectFragment(ShowFragmentType fragmentType, long contentUriId) {
+
+        Fragment fragment = null;
+                switch (fragmentType) {
+                    case DOCTOR_PATIENTS:
+                        fragment = new PatientsFragment();
+                        break;
+                    case PATIENT_CHECKINS:
+                        fragment = CheckInFragment.newInstance(contentUriId);
+                        break;
+                    case PATIENT_DOCTORS:
+                        fragment = new DoctorFragment();
+                        break;
+                    case PATIENT_MEDICINES:
+                        break;
+                    case SETTINGS:
+                        break;
+                    case LOGOUT:
+                        doLogout();
+                        break;
+                    default:
+                        break;
+                }
+        return fragment;
+    }
+    private Fragment selectFragment(int position, long contentUriId) {
 
         Fragment fragment = null;
         switch (user.getUserType()) {
@@ -245,7 +315,7 @@ public class MainActivity extends Activity {
             case PATIENT:
                 switch (position) {
                     case CASE_SHOW_PATIENT_CHECKINS:
-                        fragment = new CheckInFragment();
+                        fragment = CheckInFragment.newInstance(contentUriId);
                         break;
                     case CASE_SHOW_PATIENT_DOCTORS:
                         fragment = new DoctorFragment();
@@ -276,7 +346,7 @@ public class MainActivity extends Activity {
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
             fragmentTransaction
-                    //.addToBackStack(null)
+                    .addToBackStack(null)
                     .replace(R.id.content_frame, fragment);
             fragmentTransaction.commit();
 
@@ -360,7 +430,7 @@ public class MainActivity extends Activity {
             public boolean onQueryTextSubmit(String query) {
                 //Toast.makeText(getActivity().getApplicationContext(), "onQueryTextSubmit:" + query, Toast.LENGTH_SHORT).show();
                 //mNetAdapter.update(query.toUpperCase());
-                IFragmentNotification notifier = (IFragmentNotification) getCurrentDisplayedFragment();
+                IFragmentListener notifier = (IFragmentListener) getCurrentDisplayedFragment();
                 if (notifier != null)
                     notifier.OnFilterData(query);
                 return true;
@@ -369,7 +439,7 @@ public class MainActivity extends Activity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 //Toast.makeText(getActivity().getApplicationContext(), "onQueryTextChange:" + newText,Toast.LENGTH_SHORT).show();
-                IFragmentNotification notifier = (IFragmentNotification) getCurrentDisplayedFragment();
+                IFragmentListener notifier = (IFragmentListener) getCurrentDisplayedFragment();
                 if(notifier != null)
                     notifier.OnFilterData(newText);
                 return true;
@@ -448,19 +518,37 @@ public class MainActivity extends Activity {
         return mBaseFragment;
     }
 
+    @Override
+    public void OnCheckInOpenRequired(long patientId) {
+        final ShowFragmentType fragmentType = ShowFragmentType.PATIENT_CHECKINS;
+        mBaseFragment = selectFragment(fragmentType,patientId);
+        mSelectedFragmentType = fragmentType;
+        if (mBaseFragment != null)
+            openFragment(mBaseFragment);
+    }
+
+    @Override
+    public void OnMedicinesOpenRequired(long patientId) {
+        final ShowFragmentType fragmentType = ShowFragmentType.PATIENT_MEDICINES;
+        mBaseFragment = selectFragment(fragmentType,patientId);
+        mSelectedFragmentType = fragmentType;
+        if (mBaseFragment != null)
+            openFragment(mBaseFragment);
+    }
+
+
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView parent, View view, int position, long id) {
-            selectDrawerItem(position);
+            selectDrawerItem(position,-1);
         }
     }
 
     /** Swaps fragments in the main content view */
-    private void selectDrawerItem(int position) {
-
-        if(mSelectedFragment != position) {
-            mBaseFragment = selectFragment(position);
-            mSelectedFragment = position;
+    private void selectDrawerItem(int position, long contentProviderId) {
+        if(mSelectedFragmentPosition != position) {
+            mBaseFragment = selectFragment(position,contentProviderId);
+            mSelectedFragmentPosition = position;
             if (mBaseFragment != null)
                 openFragment(mBaseFragment);
         }

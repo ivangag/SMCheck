@@ -41,7 +41,7 @@ public class DAOManager {
      * @param doctors
      * @param userIdentification
      */
-    public synchronized void saveDoctors(List<Doctor> doctors, String userIdentification) {
+    public synchronized void rebuildDoctors(List<Doctor> doctors, String userIdentification) {
         this.deleteDoctors(userIdentification);
         (new ActiveHandler<Doctor>()).saveItems(doctors);
     }
@@ -49,7 +49,7 @@ public class DAOManager {
     /**
      * Doctor user saving patients
      */
-    public synchronized void savePatients(List<Patient> patients, String userIdentification) {
+    public synchronized void rebuildPatients(List<Patient> patients, String userIdentification) {
         this.deletePatients(userIdentification);
         (new ActiveHandler<Patient>()).saveItems(patients);
     }
@@ -68,12 +68,15 @@ public class DAOManager {
         //delete the foreign key objects also
         (new ActiveHandler<Doctor>()).deleteItems(Doctor.class);
     }
+    public synchronized void deleteCheckIns() {
+        //delete the foreign key objects also
+        (new ActiveHandler<Question>()).deleteItems(Question.class);
+        (new ActiveHandler<CheckIn>()).deleteItems(CheckIn.class);
+    }
+
 
     public synchronized boolean saveCheckIns(List<CheckIn> checkIns, String medicalRecordNumber,
                                           String userIdentification, boolean needSync) {
-
-        (new ActiveHandler<Question>()).deleteItems(Question.class);
-        (new ActiveHandler<CheckIn>()).deleteItems(CheckIn.class);
 
         boolean result = false;
 
@@ -111,8 +114,14 @@ public class DAOManager {
         return new ActiveHandler<UserInfo>().getItem(UserInfo.class);
     }
 
-    public synchronized void savePainMedications(List<PainMedication> medications, String medicalRecordNumber, String userIdentification) {
+    public synchronized void deleteMedicines() {
+        //delete the foreign key objects also
         new ActiveHandler<PainMedication>().deleteItems(PainMedication.class);
+    }
+
+    public synchronized void savePainMedications(List<PainMedication> medications,
+                                                 String medicalRecordNumber) {
+
         new ActiveHandler<PainMedication>().saveItems(medications);
     }
 

@@ -63,7 +63,7 @@ import it.gmariotti.cardslib.library.view.CardListView;
  *
  * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
  */
-public class CheckInFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>, IFragmentNotification{
+public class CheckInFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>, IFragmentListener {
 
     CheckinCursorCardAdapter mAdapter;
     CardListView mListView;
@@ -77,7 +77,26 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
     private Object mSyncObserverHandle;
     private Menu mOptionsMenu;
 
-
+    private static final String ARG_PATIENT_ID = "patient_id";
+    String mMedicineName;
+    /**
+     * Returns a new instance of this fragment for the given section
+     * number.
+     */
+    public static CheckInFragment newInstance(long patientId) {
+        CheckInFragment fragment = new CheckInFragment();
+        Bundle args = new Bundle();
+        if (patientId != -1) {
+            args.putLong(ARG_PATIENT_ID, patientId);
+        }
+        fragment.setArguments(args);
+        return fragment;
+    }
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root= inflater.inflate(R.layout.fragment_card_checkins_list_cursor, container, false);
@@ -143,8 +162,13 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
     }
 
     static int count = 0;
+    String mSelection = null;
     private void init() {
 
+        final Long patientId = getArguments().getLong(ARG_PATIENT_ID);
+        if((patientId > 0)){
+            mSelection = "Patient = " + patientId;
+        }
         //Vehicle vehicle = new Vehicle();
         //vehicle.setVIN("VIN" + count);
         //long count = vehicle.save();
@@ -154,13 +178,15 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         if (mListView != null) {
             mListView.setAdapter(mAdapter);
         }
+
         mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
             public Cursor runQuery(CharSequence charSequence) {
-                return queryAllField(charSequence.toString());
+                return queryAllField(charSequence.toString(),mSelection);
             }
         });
         // Force start background query to load sessions
+
         getLoaderManager().restartLoader(0, null, this);
 
 
@@ -172,7 +198,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         Loader<Cursor> loader = null;
         loader = new CursorLoader(getActivity(),
                 ContentProvider.createUri(CheckIn.class, null),
-                null, null, null, null
+                ActiveContract.CHECK_IN_TABLE_PROJECTION, mSelection, null, null
         );
         return loader;
     }
@@ -185,6 +211,10 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         mAdapter.swapCursor(data);
 
         //displayList();
+    }
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.swapCursor(null);
     }
     /**
      * Crfate a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
@@ -248,10 +278,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
     }
 
     public static final int ID_COLUMN = 0;
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
-    }
+
 
     @Override
     public int getFragmentType() {

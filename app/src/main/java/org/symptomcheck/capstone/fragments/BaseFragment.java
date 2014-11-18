@@ -48,14 +48,17 @@ public  abstract class BaseFragment extends Fragment {
         }
     }
 
-    protected Cursor queryAllField(String filterPattern){
+    protected Cursor queryAllField(String filterPattern,String selection){
 
         Cursor cursor = null;
 
         Uri uriContentProvider = getDefaultUriProvider();
         if (filterPattern.isEmpty()){
-           cursor = getDefaultCursorProvider(uriContentProvider);
+           cursor = getDefaultCursorProvider(uriContentProvider,selection);
         }else {
+            if(selection != null){
+                selection = selection + " AND ";
+            }
             filterPattern = filterPattern.trim();
             switch (getFragmentType()) {
 
@@ -89,7 +92,7 @@ public  abstract class BaseFragment extends Fragment {
                     cursor = getActivity().getContentResolver()
                             .query(uriContentProvider,
                                     ActiveContract.CHECK_IN_TABLE_PROJECTION,
-                                    ActiveContract.CHECKIN_COLUMNS.FEED_STATUS + " LIKE ? OR " +
+                                   selection + ActiveContract.CHECKIN_COLUMNS.FEED_STATUS + " LIKE ? OR " +
                                             ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL + " LIKE ?",
                                     new String[]{"%" + filterPattern + "%", "%" + filterPattern + "%"}
                                     , ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME + " asc");
@@ -131,28 +134,28 @@ public  abstract class BaseFragment extends Fragment {
         return uriContentProvider;
     }
 
-    protected Cursor getDefaultCursorProvider(Uri uriContentProvider) {
+    protected Cursor getDefaultCursorProvider(Uri uriContentProvider, String selection) {
         Cursor cursor = null;
         switch (getFragmentType()){
             case FRAGMENT_TYPE_PATIENT:
                 cursor = getActivity().getContentResolver()
                                 .query(uriContentProvider,
-                                ActiveContract.PATIENT_TABLE_PROJECTION, null, null, null);
+                                ActiveContract.PATIENT_TABLE_PROJECTION, selection, null, null);
                 break;
             case FRAGMENT_TYPE_DOCTORS:
                 cursor = getActivity().getContentResolver()
                         .query(uriContentProvider,
-                                ActiveContract.DOCTOR_TABLE_PROJECTION, null, null, null);
+                                ActiveContract.DOCTOR_TABLE_PROJECTION, selection, null, null);
                 break;
             case FRAGMENT_TYPE_CHECKIN:
                 cursor = getActivity().getContentResolver()
                         .query(uriContentProvider,
-                                ActiveContract.CHECK_IN_TABLE_PROJECTION, null, null, null);
+                                ActiveContract.CHECK_IN_TABLE_PROJECTION, selection, null, null);
                 break;
             case FRAGMENT_TYPE_MEDICINES:
                 cursor = getActivity().getContentResolver()
                         .query(uriContentProvider,
-                                ActiveContract.MEDICINES_TABLE_PROJECTION, null, null, null);
+                                ActiveContract.MEDICINES_TABLE_PROJECTION, selection, null, null);
                 break;
             default:
                 break;

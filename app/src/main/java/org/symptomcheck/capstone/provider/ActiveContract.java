@@ -44,6 +44,7 @@ public class ActiveContract {
                     BaseColumns._ID + ","
                             + CHECKIN_COLUMNS.PAIN_LEVEL + ","
                             + CHECKIN_COLUMNS.FEED_STATUS + ","
+                            + CHECKIN_COLUMNS.PATIENT + ","
                             + CHECKIN_COLUMNS.ISSUE_TIME
             };
 
@@ -70,6 +71,7 @@ public class ActiveContract {
         public static final String PAIN_LEVEL = "issuePainLevel";
         public static final String FEED_STATUS = "issueFeedStatus";
         public static final String ISSUE_TIME = "issueDateTime";
+        public static final String PATIENT = "Patient";
     }
     public static class MEDICINES_COLUMNS{
         public static final String NAME = "medicationName";

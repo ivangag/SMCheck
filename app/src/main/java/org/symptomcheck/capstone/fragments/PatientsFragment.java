@@ -65,7 +65,7 @@ import it.gmariotti.cardslib.library.view.CardListView;
  * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
  */
 public class PatientsFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>
-    ,IFragmentNotification {
+    ,IFragmentListener {
 
     PatientCursorCardAdapter mAdapter;
     CardListView mListView;
@@ -86,6 +86,12 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         //setupListFragment(root);
         setHasOptionsMenu(true);
         return root;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
     }
 
     @Override
@@ -161,7 +167,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
             public Cursor runQuery(CharSequence charSequence) {
-                return queryAllField(charSequence.toString());
+                return queryAllField(charSequence.toString(),null);
             }
         });
         // Force start background query to load sessions
@@ -294,6 +300,20 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
             header.setPopupMenu(R.menu.popup_patient, new CardHeader.OnClickCardHeaderPopupMenuListener() {
                 @Override
                 public void onMenuItemClick(BaseCard card, MenuItem item) {
+                    int id = item.getItemId();
+                    Activity activity = getActivity();
+                    Long cardId = Long.valueOf(card.getId());
+                    if(id == R.id.menu_pop_open_check_ins){
+                        if((activity != null)
+                            && (activity instanceof ICardEventListener)){
+                            ((ICardEventListener)(activity)).OnCheckInOpenRequired(cardId);
+                        }
+                    }else if(id == R.id.menu_pop_open_medicines){
+                        if((activity != null)
+                                && (activity instanceof ICardEventListener)){
+                            ((ICardEventListener)(activity)).OnMedicinesOpenRequired(cardId);
+                        }
+                    }
                     Toast.makeText(getContext(), "Click on card="+card.getId()+" item=" +  item.getTitle(), Toast.LENGTH_SHORT).show();
                 }
             });

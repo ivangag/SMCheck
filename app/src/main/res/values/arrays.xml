@@ -4,6 +4,7 @@
         name="patient_fragments_array">
         <item>Check-Ins</item>
         <item>Doctors</item>
+        <item>Medicines</item>
         <item>Settings</item>
         <item>Logout</item>
     </string-array>

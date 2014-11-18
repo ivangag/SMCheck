@@ -38,7 +38,6 @@ public class GcmRegistrationService extends IntentService {
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_GCM_DEVICE_REGISTRATION = "org.symptomcheck.capstone.gcm.action.REGISTRATION";
     private static final String ACTION_GCM_DEVICE_UNREGISTRATION = "org.symptomcheck.capstone.gcm.action.UNREGISTRATION";
-    //private static final String ACTION_GCM_DEVICE_REGISTRATION = "org.symptomcheck.capstone.gcm.action.REGISTRATION";
 
     // TODO: Rename parameters
     private static final String EXTRA_PARAM1 = "org.symptomcheck.capstone.gcm.extra.PARAM1";

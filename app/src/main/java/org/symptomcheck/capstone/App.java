@@ -1,6 +1,7 @@
 package org.symptomcheck.capstone;
 
 import android.app.Application;
+import android.app.job.JobScheduler;
 
 import com.activeandroid.ActiveAndroid;
 

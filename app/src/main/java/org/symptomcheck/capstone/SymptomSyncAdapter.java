@@ -262,7 +262,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         List<Doctor> doctors = null;
         try {
             doctors = (List<Doctor>) mSymptomClient.findDoctorsByPatient(user.getUserIdentification());
-            DAOManager.get().saveDoctors(doctors, user.getUserIdentification());
+            DAOManager.get().rebuildDoctors(doctors, user.getUserIdentification());
         }catch (RetrofitError e){
             DownloadHelper.get().handleRetrofitError(getContext(),e);
             Log.e(TAG, "Retrofit:" + e.getMessage() + "; Status: " + e.getResponse().getStatus());
@@ -270,7 +270,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
             if(e.getCause().getClass().equals(RetrofitError.class)){
                 DownloadHelper.get().handleRetrofitError(getContext(), (RetrofitError) e.getCause());
             }
-            Log.e(TAG,"Error saveDoctors:" + e.getMessage());
+            Log.e(TAG,"Error rebuildDoctors:" + e.getMessage());
         }
         return doctors;
     }
@@ -281,7 +281,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.i(TAG, method);
         try {
             Patient patient = mSymptomClient.findPatientByMedicalRecordNumber(user.getUserIdentification());;
-            DAOManager.get().savePatients(Lists.newArrayList(patient),user.getUserIdentification());
+            DAOManager.get().rebuildPatients(Lists.newArrayList(patient), user.getUserIdentification());
         }catch (RetrofitError e){
             DownloadHelper.get().handleRetrofitError(getContext(),e);
             Log.e(TAG, "Retrofit:" + e.getMessage() + "; Status: " + e.getResponse().getStatus());
@@ -299,7 +299,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.i(TAG, method);
         try {
             Doctor doctor = mSymptomClient.findDoctorByUniqueDoctorID(user.getUserIdentification());
-            DAOManager.get().saveDoctors(Lists.newArrayList(doctor),user.getUserIdentification());
+            DAOManager.get().rebuildDoctors(Lists.newArrayList(doctor), user.getUserIdentification());
         }catch (RetrofitError e){
             DownloadHelper.get().handleRetrofitError(getContext(),e);
             Log.e(TAG, "Retrofit:" + e.getMessage() + "; Status: " + e.getResponse().getStatus());
@@ -319,12 +319,12 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
 
         try {
              patients = (List<Patient>) mSymptomClient.findPatientsByDoctor(user.getUserIdentification());
-             DAOManager.get().savePatients(patients,user.getUserIdentification());
+             DAOManager.get().rebuildPatients(patients, user.getUserIdentification());
         }catch (RetrofitError e){
             DownloadHelper.get().handleRetrofitError(getContext(),e);
             Log.e(TAG, "Retrofit:" + e.getMessage() + "; Status: " + e.getResponse().getStatus());
         }catch (Exception e){
-            Log.e(TAG,"Error savePatients:" + e.getMessage());
+            Log.e(TAG,"Error rebuildPatients:" + e.getMessage());
             if(e.getCause().getClass().equals(RetrofitError.class)){
                 DownloadHelper.get().handleRetrofitError(getContext(), (RetrofitError) e.getCause());
             }
@@ -339,6 +339,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         List<Patient> patients = Patient.getAll();
         try {
             if(patients != null){
+                DAOManager.get().deleteCheckIns();
                 for(Patient patient : patients){
                     List<CheckIn> checkIns = (List<CheckIn>) mSymptomClient.findCheckInsByPatient(patient.getMedicalRecordNumber());
                     if((checkIns != null)&& (checkIns.size() > 0))
@@ -371,10 +372,11 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         List<Patient> patients = Patient.getAll();
         try {
             if(patients != null){
+                DAOManager.get().deleteMedicines();
                 for(Patient patient : patients){
                     List<PainMedication> medications = (List<PainMedication>) mSymptomClient.findPainMedicationsByPatient(patient.getMedicalRecordNumber());
                     if((medications != null)&& (medications.size() > 0))
-                        DAOManager.get().savePainMedications(medications, patient.getMedicalRecordNumber(), user.getUserIdentification());
+                        DAOManager.get().savePainMedications(medications, patient.getMedicalRecordNumber());
                 }
             }else {
                 Log.e(TAG, "syncPatientsMedicines=> sync not possible: patients = null!");
