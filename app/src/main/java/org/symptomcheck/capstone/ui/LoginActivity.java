@@ -6,7 +6,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.PathEffect;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,27 +27,16 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import org.symptomcheck.capstone.R;
-import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.alarms.SymptomAlarmRequest;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.gcm.GcmRegistrationService;
-import org.symptomcheck.capstone.model.CheckIn;
-import org.symptomcheck.capstone.model.FeedStatus;
-import org.symptomcheck.capstone.model.PainLevel;
-import org.symptomcheck.capstone.model.PainMedication;
-import org.symptomcheck.capstone.model.Patient;
-import org.symptomcheck.capstone.model.Question;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
-import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.utils.NotificationHelper;
-import org.symptomcheck.capstone.utils.UserPreferencesManager;
+import org.symptomcheck.capstone.preference.UserPreferencesManager;
 
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import retrofit.RetrofitError;
 import retrofit.client.Response;

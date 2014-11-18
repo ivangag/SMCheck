@@ -1,0 +1,26 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/pref_header_check_in"
+        android:key="pref_key_general_check_in_reminder">
+
+
+    <org.symptomcheck.capstone.preference.TimePreference
+        android:key="checkin_start_time"
+        android:title="@string/pref_title_start_check_in_time"
+        android:defaultValue="08:00"
+        />
+    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
+         dismiss it. -->
+    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
+    <ListPreference
+        android:key="checkin_frequency"
+        android:title="@string/pref_title_checkin_frequency"
+        android:entries="@array/pref_checkin_frequency_titles"
+        android:entryValues="@array/pref_checkin_frequency_values"
+        android:defaultValue="4"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+
+    </PreferenceCategory>
+</PreferenceScreen>

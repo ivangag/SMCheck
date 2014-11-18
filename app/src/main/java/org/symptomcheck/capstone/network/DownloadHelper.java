@@ -15,7 +15,7 @@ import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.ui.LoginActivity;
 import org.symptomcheck.capstone.utils.NotificationHelper;
-import org.symptomcheck.capstone.utils.UserPreferencesManager;
+import org.symptomcheck.capstone.preference.UserPreferencesManager;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;

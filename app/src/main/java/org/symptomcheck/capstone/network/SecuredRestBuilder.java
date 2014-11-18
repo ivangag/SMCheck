@@ -13,8 +13,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import org.apache.commons.io.IOUtils;
-import org.symptomcheck.capstone.dao.DAOManager;
-import org.symptomcheck.capstone.utils.UserPreferencesManager;
+import org.symptomcheck.capstone.preference.UserPreferencesManager;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -24,8 +23,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 import retrofit.Endpoint;
 import retrofit.ErrorHandler;

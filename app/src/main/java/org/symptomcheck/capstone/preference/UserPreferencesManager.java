@@ -1,12 +1,7 @@
-package org.symptomcheck.capstone.utils;
+package org.symptomcheck.capstone.preference;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
-
-import org.symptomcheck.capstone.bus.LoginEvent;
-import org.symptomcheck.capstone.ui.LoginActivity;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * Created by igaglioti on 06/11/2014.

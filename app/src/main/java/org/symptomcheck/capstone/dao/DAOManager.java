@@ -31,6 +31,17 @@ public class DAOManager {
     private DAOManager() {
     }
 
+    public synchronized void wipeAllData(){
+        this.deleteUser();
+        this.deleteDoctors();
+        this.deletePatients();
+        this.deleteMedicines();
+    }
+
+    private synchronized void deleteUser() {
+        new ActiveHandler<UserInfo>().deleteItems(UserInfo.class);
+    }
+
     public synchronized boolean saveUser(UserInfo userInfo){
         new ActiveHandler<UserInfo>().deleteItems(UserInfo.class);
         return userInfo.save() > 0;
@@ -42,7 +53,7 @@ public class DAOManager {
      * @param userIdentification
      */
     public synchronized void rebuildDoctors(List<Doctor> doctors, String userIdentification) {
-        this.deleteDoctors(userIdentification);
+        this.deleteDoctors();
         (new ActiveHandler<Doctor>()).saveItems(doctors);
     }
 
@@ -50,21 +61,21 @@ public class DAOManager {
      * Doctor user saving patients
      */
     public synchronized void rebuildPatients(List<Patient> patients, String userIdentification) {
-        this.deletePatients(userIdentification);
+        this.deletePatients();
         (new ActiveHandler<Patient>()).saveItems(patients);
     }
 
     /**
      * Doctor user saving patients
      */
-    private synchronized void deletePatients(String userIdentification) {
+    private synchronized void deletePatients() {
         //delete the foreign key objects also
         (new ActiveHandler<Question>()).deleteItems(Question.class);
         (new ActiveHandler<CheckIn>()).deleteItems(CheckIn.class);
         (new ActiveHandler<Patient>()).deleteItems(Patient.class);
     }
 
-    private synchronized void deleteDoctors(String userIdentification) {
+    private synchronized void deleteDoctors() {
         //delete the foreign key objects also
         (new ActiveHandler<Doctor>()).deleteItems(Doctor.class);
     }

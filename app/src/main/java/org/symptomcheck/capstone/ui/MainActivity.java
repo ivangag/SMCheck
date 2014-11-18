@@ -1,9 +1,13 @@
 package org.symptomcheck.capstone.ui;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -43,7 +47,7 @@ import org.symptomcheck.capstone.model.Question;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
-import org.symptomcheck.capstone.utils.UserPreferencesManager;
+import org.symptomcheck.capstone.preference.UserPreferencesManager;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -233,45 +237,7 @@ public class MainActivity extends Activity implements ICardEventListener {
     }
 
 
-    private ShowFragmentType getFragmentType(int position) {
-
-        ShowFragmentType fragmentType = null;
-        switch (user.getUserType()) {
-            case DOCTOR:
-                switch (position) {
-                    case CASE_SHOW_DOCTOR_PATIENTS:
-                        fragmentType = ShowFragmentType.DOCTOR_PATIENTS;
-                        break;
-                    case CASE_SHOW_DOCTOR_SETTINGS:
-                        fragmentType = ShowFragmentType.SETTINGS;
-                        break;
-                    case CASE_SHOW_DOCTOR_LOGOUT:
-                        fragmentType = ShowFragmentType.LOGOUT;
-                        break;
-                }
-                break;
-            case PATIENT:
-                switch (position) {
-                    case CASE_SHOW_PATIENT_CHECKINS:
-                        fragmentType = ShowFragmentType.PATIENT_CHECKINS;
-                        break;
-                    case CASE_SHOW_PATIENT_DOCTORS:
-                        fragmentType = ShowFragmentType.PATIENT_DOCTORS;
-                        break;
-                    case CASE_SHOW_PATIENT_SETTINGS:
-                        fragmentType = ShowFragmentType.SETTINGS;
-                        break;
-                    case CASE_SHOW_PATIENT_LOGOUT:
-                        fragmentType = ShowFragmentType.LOGOUT;
-                        break;
-                }
-                break;
-            default:
-                break;
-        }
-        return fragmentType;
-    }
-    private Fragment selectFragment(ShowFragmentType fragmentType, long contentUriId) {
+        private Fragment selectFragment(ShowFragmentType fragmentType, long contentUriId) {
 
         Fragment fragment = null;
                 switch (fragmentType) {
@@ -287,9 +253,11 @@ public class MainActivity extends Activity implements ICardEventListener {
                     case PATIENT_MEDICINES:
                         break;
                     case SETTINGS:
+                        openSettings();
                         break;
                     case LOGOUT:
-                        doLogout();
+                        fragment = AlertLogoutFragment
+                                .newInstance();
                         break;
                     default:
                         break;
@@ -306,9 +274,11 @@ public class MainActivity extends Activity implements ICardEventListener {
                         fragment = new PatientsFragment();
                         break;
                     case CASE_SHOW_DOCTOR_SETTINGS:
+                        openSettings();
                         break;
                     case CASE_SHOW_DOCTOR_LOGOUT:
-                        doLogout();
+                        fragment = AlertLogoutFragment
+                                .newInstance();
                         break;
                 }
                 break;
@@ -321,9 +291,11 @@ public class MainActivity extends Activity implements ICardEventListener {
                         fragment = new DoctorFragment();
                         break;
                     case CASE_SHOW_PATIENT_SETTINGS:
+                        openSettings();
                         break;
                     case CASE_SHOW_PATIENT_LOGOUT:
-                        doLogout();
+                        fragment =  AlertLogoutFragment
+                                .newInstance();
                         break;
                 }
                 break;
@@ -333,21 +305,39 @@ public class MainActivity extends Activity implements ICardEventListener {
         return fragment;
     }
 
+
+    private void openSettings(){
+        //SettingsActivity.startSettingActivity(getApplicationContext());
+        Intent intent = new Intent(this,SettingsActivity.class);
+        startActivity(intent);
+    }
+
+    private void askForLogout(DialogFragment logoutFragment){
+//        DialogFragment newFragment = AlertLogoutFragment
+//                .newInstance();
+        logoutFragment.show(getFragmentManager(), "logout_dialog");
+    }
     private void doLogout(){
-        DAOManager.get().getUser().delete();
+
+        DAOManager.get().wipeAllData();
         UserPreferencesManager.get().setLogged(this,false);
         finish();
         Intent intent = new Intent(getApplicationContext(),LoginActivity.class);
         startActivity(intent);
     }
 
-    private void openFragment(Fragment fragment) {
+    private void openFragment(Fragment fragment, boolean addToBackStack) {
             FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
+        if(addToBackStack) {
             fragmentTransaction
                     .addToBackStack(null)
                     .replace(R.id.content_frame, fragment);
+        }else{
+            fragmentTransaction
+                    .replace(R.id.content_frame, fragment);
+        }
             fragmentTransaction.commit();
 
     }
@@ -430,7 +420,7 @@ public class MainActivity extends Activity implements ICardEventListener {
             public boolean onQueryTextSubmit(String query) {
                 //Toast.makeText(getActivity().getApplicationContext(), "onQueryTextSubmit:" + query, Toast.LENGTH_SHORT).show();
                 //mNetAdapter.update(query.toUpperCase());
-                IFragmentListener notifier = (IFragmentListener) getCurrentDisplayedFragment();
+                IFragmentListener notifier = getCurrentDisplayedFragment();
                 if (notifier != null)
                     notifier.OnFilterData(query);
                 return true;
@@ -439,7 +429,7 @@ public class MainActivity extends Activity implements ICardEventListener {
             @Override
             public boolean onQueryTextChange(String newText) {
                 //Toast.makeText(getActivity().getApplicationContext(), "onQueryTextChange:" + newText,Toast.LENGTH_SHORT).show();
-                IFragmentListener notifier = (IFragmentListener) getCurrentDisplayedFragment();
+                IFragmentListener notifier = getCurrentDisplayedFragment();
                 if(notifier != null)
                     notifier.OnFilterData(newText);
                 return true;
@@ -514,8 +504,8 @@ public class MainActivity extends Activity implements ICardEventListener {
         return super.onOptionsItemSelected(item);
     }
 
-    public Fragment getCurrentDisplayedFragment() {
-        return mBaseFragment;
+    public IFragmentListener getCurrentDisplayedFragment() {
+        return (mBaseFragment instanceof IFragmentListener ? (IFragmentListener)mBaseFragment : null);
     }
 
     @Override
@@ -524,7 +514,7 @@ public class MainActivity extends Activity implements ICardEventListener {
         mBaseFragment = selectFragment(fragmentType,patientId);
         mSelectedFragmentType = fragmentType;
         if (mBaseFragment != null)
-            openFragment(mBaseFragment);
+            openFragment(mBaseFragment,true);
     }
 
     @Override
@@ -533,7 +523,7 @@ public class MainActivity extends Activity implements ICardEventListener {
         mBaseFragment = selectFragment(fragmentType,patientId);
         mSelectedFragmentType = fragmentType;
         if (mBaseFragment != null)
-            openFragment(mBaseFragment);
+            openFragment(mBaseFragment,true);
     }
 
 
@@ -548,14 +538,24 @@ public class MainActivity extends Activity implements ICardEventListener {
     private void selectDrawerItem(int position, long contentProviderId) {
         if(mSelectedFragmentPosition != position) {
             mBaseFragment = selectFragment(position,contentProviderId);
-            mSelectedFragmentPosition = position;
-            if (mBaseFragment != null)
-                openFragment(mBaseFragment);
+            if(!(mBaseFragment instanceof DialogFragment)) {
+                if (mBaseFragment != null){
+                    mSelectedFragmentPosition = position;
+                    openFragment(mBaseFragment,false);
+                }
+            }
         }
 
-        // Highlight the selected item, update the title, and close the drawer
-        mDrawerList.setItemChecked(position, true);
-        setTitle(mFragmentTitles[position]);
+        if(mBaseFragment != null) {
+            if (!(mBaseFragment instanceof DialogFragment)) {
+                // Highlight the selected item, update the title, and close the drawer
+                mDrawerList.setItemChecked(position, true);
+                setTitle(mFragmentTitles[position]);
+            } else {
+                askForLogout((DialogFragment) mBaseFragment);
+            }
+        }
+
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 
@@ -590,6 +590,44 @@ public class MainActivity extends Activity implements ICardEventListener {
             checkIns =  CheckIn.getAllToSync();
             SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_CHECK_IN);
             //checkIn = DownloadHelper.get().setUserName("patient002").setPassword("pass").withRetrofitClient().addCheckIn("patient003", checkIn);
+        }
+    }
+
+    public static class AlertLogoutFragment extends DialogFragment {
+
+        public static AlertLogoutFragment newInstance() {
+            AlertLogoutFragment frag = new AlertLogoutFragment();
+            Bundle args = new Bundle();
+            //args.putInt("title", title);
+            //args.putString("message", message);
+            frag.setArguments(args);
+            return frag;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            //final int title = getArguments().getInt("title");
+            //final String message = getArguments().getString("message");
+
+            return new AlertDialog.Builder(getActivity())
+                    .setIcon(R.drawable.ic_logout)
+                    .setMessage(getString(R.string.logout_question))
+                    .setTitle(getString(R.string.title_activity_main))
+                    .setPositiveButton(R.string.alert_dialog_ok,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int whichButton) {
+                                    ((MainActivity) getActivity())
+                                            .doLogout();
+                                }
+                            })
+                    .setNegativeButton(R.string.alert_dialog_cancel,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int whichButton) {
+                                    dismiss();
+                                }
+                            }).create();
         }
     }
 

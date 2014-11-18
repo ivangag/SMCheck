@@ -43,7 +43,7 @@ import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
 import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.utils.NetworkHelper;
-import org.symptomcheck.capstone.utils.UserPreferencesManager;
+import org.symptomcheck.capstone.preference.UserPreferencesManager;
 
 import java.util.List;
 

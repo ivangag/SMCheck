@@ -169,12 +169,17 @@
         </service>
 
         <activity
-            android:uiOptions="splitActionBarWhenNarrow"
+            android:name="org.symptomcheck.capstone.ui.CheckInFlowActivity"
+            android:exported="true"
             android:label="@string/title_check_in_flow"
-            android:name=".ui.CheckInFlowActivity"
-            android:exported="true">
-            <meta-data android:name="android.support.UI_OPTIONS"
+            android:uiOptions="splitActionBarWhenNarrow" >
+            <meta-data
+                android:name="android.support.UI_OPTIONS"
                 android:value="splitActionBarWhenNarrow" />
+        </activity>
+        <activity
+            android:name="org.symptomcheck.capstone.ui.SettingsActivity"
+            android:label="@string/title_activity_settings" >
         </activity>
     </application>
 

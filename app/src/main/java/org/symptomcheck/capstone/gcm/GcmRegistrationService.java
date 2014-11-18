@@ -1,7 +1,6 @@
 package org.symptomcheck.capstone.gcm;
 
 import android.app.IntentService;
-import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
@@ -16,7 +15,7 @@ import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.utils.BuildInfo;
-import org.symptomcheck.capstone.utils.UserPreferencesManager;
+import org.symptomcheck.capstone.preference.UserPreferencesManager;
 
 import java.io.IOException;
 import java.util.List;

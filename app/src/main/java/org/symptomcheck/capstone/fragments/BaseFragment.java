@@ -71,7 +71,7 @@ public  abstract class BaseFragment extends Fragment {
                                         ActiveContract.PATIENT_COLUMNS.LAST_NAME + " LIKE ? OR " +
                                                 ActiveContract.PATIENT_COLUMNS.PATIENT_ID + " LIKE ? OR " +
                                                 ActiveContract.PATIENT_COLUMNS.FIRST_NAME + " LIKE ?",
-                                        new String[]{"%" + filterPattern + "%", "%" + filterPattern + "%"}
+                                        new String[]{"%" + filterPattern + "%", "%" + filterPattern + "%", "%" + filterPattern + "%"}
                                         , ActiveContract.PATIENT_COLUMNS.FIRST_NAME + " asc");
 
                     break;

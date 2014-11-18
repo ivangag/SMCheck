@@ -347,21 +347,6 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
                 }
             });
 
-            /*
-            card.setOnExpandAnimatorEndListener(new Card.OnExpandAnimatorEndListener() {
-                @Override
-                public void onExpandEnd(Card card) {
-
-                }
-            });
-
-            card.setOnExpandAnimatorStartListener(new Card.OnExpandAnimatorStartListener() {
-                @Override
-                public void onExpandStart(Card card) {
-                    Toast.makeText(getContext(), "Card Expanded id=" + card.getId(),Toast.LENGTH_SHORT).show();
-                }
-            })*/
-
             //This provides a simple (and useless) expand area
             CustomExpandCard expand = new CustomExpandCard(super.getContext(),mDetailedCheckInInfo);
             expand.setTitle("Check-In Details");

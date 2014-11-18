@@ -30,7 +30,7 @@ import android.util.Log;
 public class GenericAccountService extends Service {
     private static final String TAG = "GenericAccountService";
     private static final String ACCOUNT_TYPE = "org.symptomcheck.capstone";
-    public static final String ACCOUNT_NAME = "symptomcheck";
+    public static final String ACCOUNT_NAME = "Symptom Management";
     private Authenticator mAuthenticator;
 
     /**
