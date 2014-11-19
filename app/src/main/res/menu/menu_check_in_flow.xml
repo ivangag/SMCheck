@@ -7,11 +7,11 @@
         android:icon="@drawable/ic_action_accept"
         android:title="@string/action_accept_checkin"
         android:orderInCategory="110"
-        android:showAsAction="always" />
+        android:showAsAction="never" />
 
     <item android:id="@+id/action_submit_photo"
         android:icon="@drawable/ic_action_camera"
         android:title="@string/action_take_photo"
         android:orderInCategory="100"
-        android:showAsAction="always" />
+        android:showAsAction="ifRoom" />
 </menu>

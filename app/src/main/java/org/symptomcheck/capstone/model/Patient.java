@@ -5,6 +5,7 @@ import android.provider.BaseColumns;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 
 
 import com.activeandroid.Model;
@@ -13,6 +14,10 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
+
+import org.symptomcheck.capstone.utils.Costants;
+
+import hirondelle.date4j.DateTime;
 
 /**
  * Store Patient's data
@@ -41,6 +46,8 @@ public class Patient extends Model implements IModelBuilder{
 
     @Column
     private String[] doctorsList = new String[]{};
+    private boolean birthDateClear;
+
     public Patient() {
 	}
 	
@@ -117,7 +124,7 @@ public class Patient extends Model implements IModelBuilder{
 	
 	@Override
 	public String toString() {
-		return "Patient " + this.firstName + " "+ this.lastName + " " + this.medicalRecordNumber;
+		return "Name: " + this.firstName + " "+ this.lastName + " - Medical Number; " + this.medicalRecordNumber;
 	}
 
 	/**
@@ -162,12 +169,49 @@ public class Patient extends Model implements IModelBuilder{
                 .execute();
     }
 
-    public static Patient getById(String medicalRecordNumber) {
+    public static Patient getByMedicalNumber(String medicalRecordNumber) {
         // This is how you execute a query
         return new Select()
                 .from(Patient.class)
                         .where("patientId = ?", medicalRecordNumber)
                         //.orderBy("Name ASC")
                 .executeSingle();
+    }
+
+    public static Patient getById(Long id) {
+        // This is how you execute a query
+        return new Select()
+                .from(Patient.class)
+                .where("_id = ?", id)
+                        //.orderBy("Name ASC")
+                .executeSingle();
+    }
+
+    public static String getDetailedInfo(Patient patient) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Name: ").append(patient.getFirstName());
+        sb.append("\n----------------------------\n");
+        sb.append("LastName: ").append(patient.getLastName());
+        sb.append("\n----------------------------\n");
+        sb.append("MedicalNumber: ").append(patient.getMedicalRecordNumber());
+        sb.append("\n----------------------------\n");
+        sb.append("BirthDate: ").append(patient.getBirthDateClear());
+        sb.append("\n----------------------------\n");
+
+        return sb.toString();
+    }
+
+    public String getBirthDateClear() {
+        final String savedTime = this.getBirthDate();
+        String birthDateTime;
+        if(savedTime != null &&
+                !savedTime.isEmpty()){
+            birthDateTime = DateTime.forInstant(Long.valueOf(savedTime),
+                    TimeZone.getDefault()).format("YYYY-MM-DD hh:mm");
+        }
+        else{
+            birthDateTime = Costants.STRINGS.EMPTY;
+        }
+        return birthDateTime;
     }
 }

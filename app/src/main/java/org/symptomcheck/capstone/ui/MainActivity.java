@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -76,7 +77,8 @@ public class MainActivity extends Activity implements ICardEventListener {
     private TextView mTextViewHeaderUser;
     private TextView mTextViewUserDetails;
     private ShareActionProvider mShareActionProvider;
-    private Fragment mBaseFragment;
+    private Fragment mCurrentFragment;
+    private Fragment mPreviousFragment;
     private int mSelectedFragmentPosition = -1;
     private ShowFragmentType mSelectedFragmentType;
 
@@ -100,6 +102,7 @@ public class MainActivity extends Activity implements ICardEventListener {
 
     private UserInfo user;
 
+    private static int mFragmentBackStackCount = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,7 +121,29 @@ public class MainActivity extends Activity implements ICardEventListener {
 
         if(user != null) {
             initUserResource();
+            getFragmentManager().
+                    addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+                        @Override
+                        public void onBackStackChanged() {
+                            /*if(getFragmentManager().getBackStackEntryCount() > 0) {
+                                FragmentManager.BackStackEntry backEntry = getFragmentManager().getBackStackEntryAt(getFragmentManager().getBackStackEntryCount() - 1);
+                                String str = backEntry.getName();
+                                Fragment fragment = getFragmentManager().findFragmentByTag(str);
+                                ;
+                                if(!(mCurrentFragment instanceof DialogFragment)){
 
+                                }
+                            }*/
+                            if(mFragmentBackStackCount > getFragmentManager().getBackStackEntryCount()){
+                                // fragment removed
+                                Log.d("MainActivity", "Fragment Removed");
+                                mCurrentFragment = mPreviousFragment;
+                            }else{
+                                Log.d("MainActivity", "Fragment Added");
+                            }
+                            mFragmentBackStackCount = getFragmentManager().getBackStackEntryCount();
+                        }
+                    });
 
             //mDrawerList.addHeaderView(mTextViewHeaderUser);
 
@@ -238,7 +263,7 @@ public class MainActivity extends Activity implements ICardEventListener {
     }
 
 
-    private Fragment selectFragment(ShowFragmentType fragmentType, long contentUriId) {
+    private Fragment selectFragment(ShowFragmentType fragmentType, long ownerId) {
 
         Fragment fragment = null;
                 switch (fragmentType) {
@@ -246,13 +271,13 @@ public class MainActivity extends Activity implements ICardEventListener {
                         fragment = new PatientsFragment();
                         break;
                     case PATIENT_CHECKINS:
-                        fragment = CheckInFragment.newInstance(contentUriId);
+                        fragment = CheckInFragment.newInstance(ownerId);
                         break;
                     case PATIENT_DOCTORS:
                         fragment = new DoctorFragment();
                         break;
                     case PATIENT_MEDICINES:
-                        fragment = MedicinesFragment.newInstance(contentUriId);
+                        fragment = MedicinesFragment.newInstance(ownerId);
                         break;
                     case SETTINGS:
                         openSettings();
@@ -265,7 +290,7 @@ public class MainActivity extends Activity implements ICardEventListener {
                 }
         return fragment;
     }
-    private Fragment selectFragment(int position, long contentUriId) {
+    private Fragment selectFragment(int position, long ownerId) {
 
         Fragment fragment = null;
         switch (user.getUserType()) {
@@ -285,13 +310,13 @@ public class MainActivity extends Activity implements ICardEventListener {
             case PATIENT:
                 switch (position) {
                     case CASE_SHOW_PATIENT_CHECKINS:
-                        fragment = CheckInFragment.newInstance(contentUriId);
+                        fragment = CheckInFragment.newInstance(ownerId);
                         break;
                     case CASE_SHOW_PATIENT_DOCTORS:
                         fragment = new DoctorFragment();
                         break;
                     case CASE_SHOW_PATIENT_MEDICINES:
-                        fragment = MedicinesFragment.newInstance(contentUriId);
+                        fragment = MedicinesFragment.newInstance(ownerId);
                         break;
                     case CASE_SHOW_PATIENT_SETTINGS:
                         openSettings();
@@ -329,8 +354,9 @@ public class MainActivity extends Activity implements ICardEventListener {
     }
 
     private void openFragment(Fragment fragment, boolean addToBackStack) {
-            FragmentManager fragmentManager = getFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         if(addToBackStack) {
             fragmentTransaction
@@ -340,7 +366,7 @@ public class MainActivity extends Activity implements ICardEventListener {
             fragmentTransaction
                     .replace(R.id.content_frame, fragment);
         }
-            fragmentTransaction.commit();
+        fragmentTransaction.commit();
 
     }
     /**
@@ -507,25 +533,27 @@ public class MainActivity extends Activity implements ICardEventListener {
     }
 
     public IFragmentListener getCurrentDisplayedFragment() {
-        return (mBaseFragment instanceof IFragmentListener ? (IFragmentListener)mBaseFragment : null);
+        return (mCurrentFragment instanceof IFragmentListener ? (IFragmentListener) mCurrentFragment : null);
     }
 
     @Override
     public void OnCheckInOpenRequired(long patientId) {
         final ShowFragmentType fragmentType = ShowFragmentType.PATIENT_CHECKINS;
-        mBaseFragment = selectFragment(fragmentType,patientId);
+        mPreviousFragment = mCurrentFragment;
+        mCurrentFragment = selectFragment(fragmentType,patientId);
         mSelectedFragmentType = fragmentType;
-        if (mBaseFragment != null)
-            openFragment(mBaseFragment,true);
+        if (mCurrentFragment != null)
+            openFragment(mCurrentFragment,true);
     }
 
     @Override
     public void OnMedicinesOpenRequired(long patientId) {
         final ShowFragmentType fragmentType = ShowFragmentType.PATIENT_MEDICINES;
-        mBaseFragment = selectFragment(fragmentType,patientId);
+        mPreviousFragment = mCurrentFragment;
+        mCurrentFragment = selectFragment(fragmentType,patientId);
         mSelectedFragmentType = fragmentType;
-        if (mBaseFragment != null)
-            openFragment(mBaseFragment,true);
+        if (mCurrentFragment != null)
+            openFragment(mCurrentFragment,true);
     }
 
 
@@ -537,24 +565,25 @@ public class MainActivity extends Activity implements ICardEventListener {
     }
 
     /** Swaps fragments in the main content view */
-    private void selectDrawerItem(int position, long contentProviderId) {
+    private void selectDrawerItem(int position, long ownerId) {
         if(mSelectedFragmentPosition != position) {
-            mBaseFragment = selectFragment(position,contentProviderId);
-            if(!(mBaseFragment instanceof DialogFragment)) {
-                if (mBaseFragment != null){
+            mPreviousFragment = mCurrentFragment;
+            mCurrentFragment = selectFragment(position,ownerId);
+            if(!(mCurrentFragment instanceof DialogFragment)) {
+                if (mCurrentFragment != null){
                     mSelectedFragmentPosition = position;
-                    openFragment(mBaseFragment,false);
+                    openFragment(mCurrentFragment,false);
                 }
             }
         }
 
-        if(mBaseFragment != null) {
-            if (!(mBaseFragment instanceof DialogFragment)) {
+        if(mCurrentFragment != null) {
+            if (!(mCurrentFragment instanceof DialogFragment)) {
                 // Highlight the selected item, update the title, and close the drawer
                 mDrawerList.setItemChecked(position, true);
-                setTitle(mFragmentTitles[position]);
+                //setTitle(mFragmentTitles[position]);
             } else {
-                askForLogout((DialogFragment) mBaseFragment);
+                askForLogout((DialogFragment) mCurrentFragment);
             }
         }
 

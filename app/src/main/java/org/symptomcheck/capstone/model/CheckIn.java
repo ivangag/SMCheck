@@ -33,6 +33,8 @@ public class CheckIn extends Model implements IModelBuilder {
     @Column
     public transient int needSync = 1;
 
+    @Column
+    private String imageUrl;
 
     /*
         //@Column
@@ -61,6 +63,15 @@ public class CheckIn extends Model implements IModelBuilder {
         this.issueDateTime = date;
         this.issueFeedStatus = feedStatus;
         this.issuePainLevel = painLevel;
+    }
+
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public PainLevel getIssuePainLevel() {
@@ -191,4 +202,5 @@ public class CheckIn extends Model implements IModelBuilder {
         }
         return medicationTime;
     }
+
 }

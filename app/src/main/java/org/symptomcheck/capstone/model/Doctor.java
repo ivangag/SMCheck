@@ -111,4 +111,12 @@ public class Doctor extends Model implements IModelBuilder {
                         //.orderBy("Name ASC")
                 .execute();
     }
+
+    public static Doctor getByDoctorNumber(String uniqueDoctorId) {
+        return new Select()
+                .from(Doctor.class)
+                        .where("doctorId = ?", uniqueDoctorId)
+                        //.orderBy("Name ASC")
+                .executeSingle();
+    }
 }

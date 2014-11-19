@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">SymptomCheck</string>
+    <string name="app_name">Symptom Management</string>
     <string name="account_name">FeedSync Service</string>
     <string name="title_entry_detail">Entry Detail</string>
     <string name="loading">Waiting for sync…</string>
@@ -46,6 +46,7 @@
     <string name="title_section3">Section 3</string>
     <string name="action_accept_checkin">Submit Checkin</string>
     <string name="patient_header">Patient</string>
+    <string name="patients_header">Patients</string>
     <string name="doctor_header">Doctor</string>
     <string name="error_login_header">Login Error\n%s</string>
     <string name="checkin_header">Check-In</string>

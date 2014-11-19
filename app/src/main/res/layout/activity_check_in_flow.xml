@@ -1,9 +1,60 @@
-<android.support.v4.view.ViewPager
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/pager"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.symptomcheck.capstone.ui.CheckInFlowActivity" />
+    android:orientation="vertical">
+
+    <android.support.v4.view.ViewPager
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/pager"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        tools:context="org.symptomcheck.capstone.ui.CheckInFlowActivity" />
 
 
+    <RelativeLayout
+        android:layout_gravity="bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ab_solid_capstone"
+        android:orientation="horizontal" >
+
+        <ImageButton
+            android:background="@drawable/ab_solid_capstone"
+            android:id="@+id/btn_check_in_goto_previous"
+            android:src="@drawable/ic_action_previous_item"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:contentDescription="Go to Previous Question">
+        </ImageButton>
+
+        <ImageButton
+            android:background="@drawable/ab_solid_capstone"
+            android:id="@+id/btn_check_in_confirm_submission"
+            android:src="@drawable/ic_action_accept"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="Submit CheckIn"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true">
+        </ImageButton>
+
+        <ImageButton
+            android:background="@drawable/ab_solid_capstone"
+            android:src="@drawable/ic_action_next_item"
+            android:id="@+id/btn_check_in_goto_next"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:contentDescription="Go to Next Question">
+        </ImageButton>
+    </RelativeLayout>
+
+</LinearLayout>

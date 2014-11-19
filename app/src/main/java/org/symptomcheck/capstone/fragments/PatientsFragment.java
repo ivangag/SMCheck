@@ -48,7 +48,12 @@ import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
+import org.symptomcheck.capstone.dao.DAOManager;
+import org.symptomcheck.capstone.model.Doctor;
+import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.Patient;
+import org.symptomcheck.capstone.model.UserInfo;
+import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -67,6 +72,7 @@ import it.gmariotti.cardslib.library.view.CardListView;
 public class PatientsFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>
     ,IFragmentListener {
 
+    private static String ARG_DOCTOR_ID = "doctor_id";
     PatientCursorCardAdapter mAdapter;
     CardListView mListView;
     /**
@@ -79,6 +85,16 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
     private Object mSyncObserverHandle;
     private Menu mOptionsMenu;
 
+
+    public static PatientsFragment newInstance(long doctorId) {
+        PatientsFragment fragment = new PatientsFragment();
+        Bundle args = new Bundle();
+        if (doctorId != -1) {
+            args.putLong(ARG_DOCTOR_ID, doctorId);
+        }
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -122,9 +138,19 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
+        init();
         super.onActivityCreated(savedInstanceState);
        //hideList(false);
-        init();
+    }
+
+    @Override
+    public String getTitleText() {
+        String title = TITLE_NONE;
+        if(mDoctorOwner != null){
+            title = mDoctorOwner.getFirstName() + " " + mDoctorOwner.getLastName() + " " + getString(R.string.patients_header);
+        }
+        return title;
+        //return getString(R.string.patients_header);
     }
 
 
@@ -150,15 +176,15 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         }
     }
 
-    static int count = 0;
+    private Doctor mDoctorOwner = null;
     private final Uri mUriContentProvider = ContentProvider.createUri(Patient.class, null);
     private void init() {
 
-        //Vehicle vehicle = new Vehicle();
-        //vehicle.setVIN("VIN" + count);
-        //long count = vehicle.save();
+        final  UserInfo user = DAOManager.get().getUser();
+        if(user.getUserType().equals(UserType.DOCTOR)){
+            mDoctorOwner = Doctor.getByDoctorNumber(user.getUserIdentification());
+        }
         mAdapter = new PatientCursorCardAdapter(getActivity());
-
         mListView = (CardListView) getActivity().findViewById(R.id.card_patients_list_cursor);
         if (mListView != null) {
             mListView.setAdapter(mAdapter);
@@ -172,8 +198,6 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         });
         // Force start background query to load sessions
         getLoaderManager().restartLoader(0, null, this);
-
-
     }
 
     @Override
@@ -240,8 +264,8 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
     @Override
     public void onResume() {
         super.onResume();
-        mSyncStatusObserver.onStatusChanged(0);
 
+        mSyncStatusObserver.onStatusChanged(0);
         // Watch for sync state changes
         final int mask = ContentResolver.SYNC_OBSERVER_TYPE_PENDING |
                 ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE;
@@ -257,7 +281,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         }
     }
 
-    public static final int ID_COLUMN = 0;
+
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.swapCursor(null);
@@ -273,7 +297,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         mAdapter.getFilter().filter(textToSearch);
     }
 
-
+    public static final int ID_COLUMN = 0;
     //-------------------------------------------------------------------------------------------------------------
     // Adapter
     //-------------------------------------------------------------------------------------------------------------
@@ -353,10 +377,16 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
                     + " " + cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.LAST_NAME));
             card.secondaryTitle =
                     cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.PATIENT_ID))
-                            + " " + cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.BIRTH_DATE));
+            //                + " " + cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.BIRTH_DATE))
+            ;
             card.mainHeader = getString(R.string.patient_header);
             card.resourceIdThumb=R.drawable.ic_patient_small;
 
+            final Patient patient = Patient.getById((long) cursor.getInt(ID_COLUMN));
+            if(patient != null) {
+                //card.secondaryTitle = painMedication.getIssueDateTimeClear(); // fromMilliseconds.format("YYYY-MM-DD hh:ss");
+                mDetailedInfo = Patient.getDetailedInfo(patient);
+            }
 
         }
     }

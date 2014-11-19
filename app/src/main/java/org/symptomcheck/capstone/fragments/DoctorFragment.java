@@ -119,9 +119,15 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
+        init();
         super.onActivityCreated(savedInstanceState);
        //hideList(false);
-        init();
+    }
+
+    @Override
+    public String getTitleText() {
+        String title = TITLE_NONE;
+        return title;
     }
 
 

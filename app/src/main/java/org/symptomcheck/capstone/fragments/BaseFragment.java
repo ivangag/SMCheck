@@ -3,6 +3,9 @@ package org.symptomcheck.capstone.fragments;
 import android.app.Fragment;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
+import android.support.v4.app.NavUtils;
+import android.view.MenuItem;
 
 import com.activeandroid.content.ContentProvider;
 
@@ -22,6 +25,8 @@ public  abstract class BaseFragment extends Fragment {
     public final static int FRAGMENT_TYPE_DOCTORS   = 1;
     public final static int FRAGMENT_TYPE_CHECKIN = 2;
     public final static int FRAGMENT_TYPE_MEDICINES = 3;
+
+    public static final String TITLE_NONE = "";
 
     public abstract int getFragmentType();
 
@@ -95,7 +100,7 @@ public  abstract class BaseFragment extends Fragment {
                                    selection + ActiveContract.CHECKIN_COLUMNS.FEED_STATUS + " LIKE ? OR " +
                                             ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL + " LIKE ?",
                                     new String[]{"%" + filterPattern + "%", "%" + filterPattern + "%"}
-                                    , ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME + " asc");
+                                    , ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME + " desc");
                     break;
                 case FRAGMENT_TYPE_MEDICINES:
                     cursor = getActivity().getContentResolver()
@@ -150,7 +155,7 @@ public  abstract class BaseFragment extends Fragment {
             case FRAGMENT_TYPE_CHECKIN:
                 cursor = getActivity().getContentResolver()
                         .query(uriContentProvider,
-                                ActiveContract.CHECK_IN_TABLE_PROJECTION, selection, null, ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME + " asc");
+                                ActiveContract.CHECK_IN_TABLE_PROJECTION, selection, null, ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME + " desc");
                 break;
             case FRAGMENT_TYPE_MEDICINES:
                 cursor = getActivity().getContentResolver()
@@ -163,4 +168,41 @@ public  abstract class BaseFragment extends Fragment {
         return cursor;
     }
 
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setTitle();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setTitle();
+    }
+
+    protected void setTitle(){
+        final String titleResId = getTitleText();
+        if (!titleResId.equals(TITLE_NONE))
+            getActivity().setTitle(titleResId);
+    }
+
+    public abstract String getTitleText();
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // This ID represents the Home or Up button. In the case of this
+                // activity, the Up button is shown. Use NavUtils to allow users
+                // to navigate up one level in the application structure. For
+                // more details, see the Navigation pattern on Android Design:
+                //
+                // http://developer.android.com/design/patterns/navigation.html#up-vs-back
+                //
+                NavUtils.navigateUpFromSameTask(getActivity());
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

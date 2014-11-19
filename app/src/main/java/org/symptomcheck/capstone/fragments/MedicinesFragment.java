@@ -47,7 +47,10 @@ import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
+import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.PainMedication;
+import org.symptomcheck.capstone.model.Patient;
+import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -79,6 +82,8 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
     private static final String ARG_PATIENT_ID = "patient_id";
     String mMedicineName;
+    private Patient mPatientOwner;
+
     /**
      * Returns a new instance of this fragment for the given section
      * number.
@@ -121,7 +126,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         mOptionsMenu = menu;
-        //inflater.inflate(R.menu.cards, menu);
+        inflater.inflate(R.menu.menu_medicines, menu);
     }
 
     @Override
@@ -133,9 +138,18 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
+        init();
         super.onActivityCreated(savedInstanceState);
        //hideList(false);
-        init();
+    }
+
+    @Override
+    public String getTitleText() {
+        String title = TITLE_NONE;
+        if(mPatientOwner != null){
+            title = mPatientOwner.getFirstName() + " " + mPatientOwner.getLastName() + " " + getString(R.string.medicine_header);
+        }
+        return title;
     }
 
 
@@ -166,8 +180,12 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
     private void init() {
 
         final Long patientId = getArguments().getLong(ARG_PATIENT_ID);
+
         if((patientId > 0)){
-            mSelection = "Patient = " + patientId;
+            mPatientOwner = Patient.getById(patientId);
+            mSelection = ActiveContract.MEDICINES_COLUMNS.PATIENT_ID + " = '" + mPatientOwner.getMedicalRecordNumber()  + "'";
+        }else if (DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)){
+            mPatientOwner = Patient.getByMedicalNumber(DAOManager.get().getUser().getUserIdentification());
         }
         //Vehicle vehicle = new Vehicle();
         //vehicle.setVIN("VIN" + count);

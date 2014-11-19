@@ -6,18 +6,18 @@
     <item android:id="@+id/menu_refresh"
         android:icon="@drawable/ic_action_refresh"
         android:title="@string/description_refresh"
-        android:orderInCategory="1"
-        android:showAsAction="always" />
+        android:orderInCategory="110"
+        android:showAsAction="ifRoom" />
     <item android:id="@+id/action_test"
         android:title="@string/action_accept_checkin"
-        android:orderInCategory="100"
+        android:orderInCategory="120"
         android:showAsAction="never" />
     <item android:id="@+id/action_search"
         android:title="@string/action_search"
+        android:orderInCategory="100"
         android:icon="@drawable/ic_action_search"
         android:showAsAction="ifRoom|collapseActionView"
         android:actionViewClass="android.widget.SearchView" />
-
     <item android:id="@+id/action_share"
         android:icon="@drawable/ic_action_share"
         android:title="@string/share"

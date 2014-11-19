@@ -70,11 +70,12 @@ public class PainMedication extends Model implements IModelBuilder {
     }
 
     public static String getDetailedInfo(PainMedication painMedication) {
-        final Patient patient = Patient.getById(painMedication.getPatientMedicalNumber());
+        final Patient patient = Patient.getByMedicalNumber(painMedication.getPatientMedicalNumber());
         StringBuilder sb = new StringBuilder();
-        sb.append("Name: " + painMedication.getMedicationName())
-                .append("\n");
-        sb.append("Patient: " + (patient != null ? patient.toString() : "NA"));
+
+        sb.append("Name: ").append(painMedication.getMedicationName());
+        sb.append("\n----------------------------\n");
+        sb.append("Patient: ").append(patient != null ? patient.toString() : "NA");
 
         sb.append("\n----------------------------\n");
 

@@ -30,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -67,9 +68,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
      * The {@link ViewPager} that will host the section contents.
      */
     ViewPager mViewPager;
-
     UserInfo mUser;
-
     private boolean checkInPermitted = true;
 
     //public final static String EMPTY = Costants.STRINGS.EMPTY;
@@ -101,19 +100,28 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         mUser = DAOManager.get().getUser();
 
         if(mUser != null) {
+
+            ImageButton btnGoToPreviousTab = (ImageButton) findViewById(R.id.btn_check_in_goto_previous);
+            ImageButton btnGoToNextTab = (ImageButton) findViewById(R.id.btn_check_in_goto_next);
+            ImageButton btnSubmit = (ImageButton) findViewById(R.id.btn_check_in_confirm_submission);
+
+
             mMedicines = PainMedication.getAll(mUser.getUserIdentification());
             for(PainMedication medication : mMedicines){
                 mReportMedicationsResponse.put(medication.getMedicationName(), Costants.STRINGS.EMPTY);
                 mReportMedicationsTakingTime.put(medication.getMedicationName(), Costants.STRINGS.EMPTY);
             }
-
             // Set up the action bar.
             final ActionBar actionBar = getActionBar();
-            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-            actionBar.setTitle(
-                    mUser.getFirstName()
-                            + " " + mUser.getLastName()
-                            + " " + "Check-In");
+            if (actionBar != null) {
+                actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+                //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+                actionBar.setTitle(
+                        mUser.getFirstName()
+                                + " " + mUser.getLastName()
+                                + " " + "Check-In");
+            }
+
 
             // Create the adapter that will return a fragment for each of the three
             // primary sections of the activity.
@@ -129,7 +137,9 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
             mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
                 @Override
                 public void onPageSelected(int position) {
-                    actionBar.setSelectedNavigationItem(position);
+                    if (actionBar != null) {
+                       // actionBar.setSelectedNavigationItem(position);
+                    }
                 }
             });
 
@@ -139,11 +149,39 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                 // the adapter. Also specify this Activity object, which implements
                 // the TabListener interface, as the callback (listener) for when
                 // this tab is selected.
-                actionBar.addTab(
-                        actionBar.newTab()
-                                .setText(mSectionsPagerAdapter.getPageTitle(i))
-                                .setTabListener(this));
+                if (actionBar != null) {
+                    actionBar.addTab(
+                            actionBar.newTab()
+                                    .setText(mSectionsPagerAdapter.getPageTitle(i))
+                                    .setTabListener(this));
+                }
             }
+
+
+            btnGoToPreviousTab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(mViewPager.getCurrentItem() > 0)
+                        mViewPager.setCurrentItem(mViewPager.getCurrentItem() - 1);
+                }
+            });
+
+            btnGoToNextTab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(mViewPager.getCurrentItem() < mSectionsPagerAdapter.getCount() - 1)
+                        mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
+                }
+            });
+
+            btnSubmit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    handleCheckInSubmissionRequest();
+                }
+            });
+
+
         } else{
             checkInPermitted = false;
         }
@@ -162,7 +200,11 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
     @Override
     protected void onResume() {
         if(!checkInPermitted) {
-            NotificationHelper.showAlertDialog(this, NotificationHelper.AlertType.ALERT_GO_TO_LOGIN, getActionBar().getTitle().toString(), "");
+            String title = "Check-In";
+            if(null != getActionBar()){
+                title = getActionBar().getTitle().toString();
+            }
+            NotificationHelper.showAlertDialog(this, NotificationHelper.AlertType.ALERT_GO_TO_LOGIN,title , "");
         }
         super.onResume();
     }
@@ -178,7 +220,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        String msgError = Costants.STRINGS.EMPTY;
+
         /*
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
@@ -186,47 +228,56 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         }*/
         // save check-in
         if (id == R.id.action_submit_checkin) {
-            //verify check-in data consistence
-            boolean check = false;
-            boolean checkMedicines = true;
-            if (mReportPainLevel == PainLevel.UNKNOWN) {
-                msgError = "Pain Level not reported";
-                mViewPager.setCurrentItem(0);
-            } else if (mReportFeedStatus == FeedStatus.UNKNOWN) {
-                msgError = "Feed Status not reported";
-                mViewPager.setCurrentItem(mSectionsPagerAdapter.getCount() - 1);
-            } else {
-                for (int idx = 0; idx < mMedicines.size(); idx++) {
-                    final String medication = mMedicines.get(idx).getMedicationName();
-                    if (mReportMedicationsResponse.get(medication).equals(Costants.STRINGS.EMPTY)) {
-                        msgError = String.format("Pain Medication %s not reported", medication);
-                        checkMedicines = false;
-                        mViewPager.setCurrentItem(1 + idx);
-                    } else if (mReportMedicationsResponse.get(medication).equals(YES)
-                            && mReportMedicationsTakingTime.get(medication).equals(Costants.STRINGS.EMPTY)) {
-                        msgError = String.format("Pain Medication %s reported without taking time", medication);
-                        checkMedicines = false;
-                        mViewPager.setCurrentItem(1 + idx);
-                    }
-                    if (!checkMedicines)
-                        idx = mMedicines.size();
-                }
-                check = checkMedicines;
-            }
 
-            if (!check) {
-                Toast.makeText(this, msgError, Toast.LENGTH_LONG).show();
-            } else {
-                // Save Check-In and trigger local => cloud sync
-                //executeCheckInSaving(makeCheckInFromUserChoices());
-                mCheckInFromUserChoices = makeCheckInFromUserChoices();
-                showDialog();
-            }
+            handleCheckInSubmissionRequest();
 
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void handleCheckInSubmissionRequest() {
+        String msgError = Costants.STRINGS.EMPTY;
+        //verify check-in data consistence
+        boolean check = false;
+        boolean checkMedicines = true;
+        if (mReportPainLevel == PainLevel.UNKNOWN) {
+            msgError = "Pain Level not reported";
+            mViewPager.setCurrentItem(0);
+        } else {
+            for (int idx = 0; idx < mMedicines.size(); idx++) {
+                final String medication = mMedicines.get(idx).getMedicationName();
+                if (mReportMedicationsResponse.get(medication).equals(Costants.STRINGS.EMPTY)) {
+                    msgError = String.format("Pain Medication %s not reported", medication);
+                    checkMedicines = false;
+                    mViewPager.setCurrentItem(1 + idx);
+                } else if (mReportMedicationsResponse.get(medication).equals(YES)
+                        && mReportMedicationsTakingTime.get(medication).equals(Costants.STRINGS.EMPTY)) {
+                    msgError = String.format("Pain Medication %s reported without Date & Time", medication);
+                    checkMedicines = false;
+                    mViewPager.setCurrentItem(1 + idx);
+                }
+                if (!checkMedicines)
+                    idx = mMedicines.size();
+            }
+            check = checkMedicines;
+        }
+        // in this way we'll check the medicines questions first
+        if (check &&  (mReportFeedStatus == FeedStatus.UNKNOWN)) {
+            check = false;
+            msgError = "Feed Status not reported";
+            mViewPager.setCurrentItem(mSectionsPagerAdapter.getCount() - 1);
+        }
+
+        if (!check) {
+            Toast.makeText(this, msgError, Toast.LENGTH_LONG).show();
+        } else {
+            // Save Check-In and trigger local => cloud sync
+            //executeCheckInSaving(makeCheckInFromUserChoices());
+            mCheckInFromUserChoices = makeCheckInFromUserChoices();
+            showDialog();
+        }
     }
 
     void showDialog() {
@@ -248,6 +299,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                     final boolean checkinRes = saveCheckIn(checkIn);
                     if (checkinRes) {
                         SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_CHECK_IN);
+                        Thread.sleep(2000);
                     }
                     progressBarHandler.post(new Runnable() {
                         @Override
@@ -314,14 +366,11 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             if (position == 0) {
-                return PainQuestionFragment.newInstance(position + 1, FragmentType.FRAGMENT_TYPE_PAIN_LEVEL);
+                return CheckInQuestionFragment.newInstance(position + 1, FragmentType.FRAGMENT_TYPE_PAIN_LEVEL);
             } else if (position == totalItem - 1) {
-                return PainQuestionFragment.newInstance(position + 1,FragmentType.FRAGMENT_TYPE_FEED_STATUS);
+                return CheckInQuestionFragment.newInstance(position + 1, FragmentType.FRAGMENT_TYPE_FEED_STATUS);
             } else {
-                if (mMedicines.size() > 0) {
-                    // for each medicine we have to instantiate a Fragment question
-                }
-                return PainQuestionFragment.newInstance(position + 1,FragmentType.FRAGMENT_TYPE_MEDICINES);
+                return CheckInQuestionFragment.newInstance(position + 1, FragmentType.FRAGMENT_TYPE_MEDICINES);
             }
         }
 
@@ -371,7 +420,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PainQuestionFragment extends Fragment {
+    public static class CheckInQuestionFragment extends Fragment {
 
         View rootView;
         View painQuestionsView;
@@ -391,8 +440,8 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PainQuestionFragment newInstance(int sectionNumber,FragmentType fragmentType) {
-            PainQuestionFragment fragment = new PainQuestionFragment();
+        public static CheckInQuestionFragment newInstance(int sectionNumber,FragmentType fragmentType) {
+            CheckInQuestionFragment fragment = new CheckInQuestionFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             args.putString(ARG_FRAGMENT_TYPE,fragmentType.toString());
@@ -400,7 +449,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
             return fragment;
         }
 
-        public PainQuestionFragment() {
+        public CheckInQuestionFragment() {
 
         }
 
@@ -495,6 +544,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                         public void onClick(View v) {
                             txtMedicineTakingTime.setVisibility(View.VISIBLE);
                             parentActivity.mReportMedicationsResponse.put(mMedicineName, YES);
+                            showTimePickerDialog(rootView);
                         }
                     });
                     final boolean YES = ((RadioButton)medicinesQuestionsView.findViewById(R.id.radioBtnMedicineYES)).isChecked();

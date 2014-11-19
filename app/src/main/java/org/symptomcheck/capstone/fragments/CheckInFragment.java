@@ -47,7 +47,10 @@ import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
+import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.CheckIn;
+import org.symptomcheck.capstone.model.Patient;
+import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -133,9 +136,18 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
+        init();
         super.onActivityCreated(savedInstanceState);
        //hideList(false);
-        init();
+    }
+
+    @Override
+    public String getTitleText() {
+        String title = TITLE_NONE;
+        if(mPatientOwner != null){
+            title = mPatientOwner.getFirstName() + " " + mPatientOwner.getLastName() + " " + getString(R.string.checkin_header);
+        }
+        return title;
     }
 
 
@@ -161,13 +173,17 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         }
     }
 
-    static int count = 0;
-    String mSelection = null;
+    String mSelectionQuery = null;
+    Patient mPatientOwner = null;
     private void init() {
 
         final Long patientId = getArguments().getLong(ARG_PATIENT_ID);
+
         if((patientId > 0)){
-            mSelection = "Patient = " + patientId;
+            mPatientOwner = Patient.getById(patientId);
+            mSelectionQuery =  ActiveContract.CHECKIN_COLUMNS.PATIENT + " = "  + patientId;
+        }else if (DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)){
+            mPatientOwner = Patient.getByMedicalNumber(DAOManager.get().getUser().getUserIdentification());
         }
         //Vehicle vehicle = new Vehicle();
         //vehicle.setVIN("VIN" + count);
@@ -182,11 +198,10 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
             public Cursor runQuery(CharSequence charSequence) {
-                return queryAllField(charSequence.toString(),mSelection);
+                return queryAllField(charSequence.toString(), mSelectionQuery);
             }
         });
         // Force start background query to load sessions
-
         getLoaderManager().restartLoader(0, null, this);
 
 
@@ -198,7 +213,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         Loader<Cursor> loader = null;
         loader = new CursorLoader(getActivity(),
                 ContentProvider.createUri(CheckIn.class, null),
-                ActiveContract.CHECK_IN_TABLE_PROJECTION, mSelection, null,
+                ActiveContract.CHECK_IN_TABLE_PROJECTION, mSelectionQuery, null,
                 ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME + " asc"
         );
         return loader;
