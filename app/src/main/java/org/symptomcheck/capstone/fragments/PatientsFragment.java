@@ -72,6 +72,9 @@ import it.gmariotti.cardslib.library.view.CardListView;
 public class PatientsFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>
     ,IFragmentListener {
 
+
+    private Doctor mDoctorOwner = null;
+    private Uri mUriContentProvider;
     private static String ARG_DOCTOR_ID = "doctor_id";
     PatientCursorCardAdapter mAdapter;
     CardListView mListView;
@@ -147,10 +150,10 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
     public String getTitleText() {
         String title = TITLE_NONE;
         if(mDoctorOwner != null){
-            title = mDoctorOwner.getFirstName() + " " + mDoctorOwner.getLastName() + " " + getString(R.string.patients_header);
+            title = //mDoctorOwner.getFirstName() + " " +
+                    mDoctorOwner.getLastName() + "'s " + getString(R.string.patients_header);
         }
         return title;
-        //return getString(R.string.patients_header);
     }
 
 
@@ -178,14 +181,15 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         }
     }
 
-    private Doctor mDoctorOwner = null;
-    private final Uri mUriContentProvider = ContentProvider.createUri(Patient.class, null);
-    private void init() {
 
+    private void init() {
+        mUriContentProvider=  ContentProvider.createUri(Patient.class, null);
         final  UserInfo user = DAOManager.get().getUser();
+
         if(user.getUserType().equals(UserType.DOCTOR)){
             mDoctorOwner = Doctor.getByDoctorNumber(user.getUserIdentification());
         }
+
         mAdapter = new PatientCursorCardAdapter(getActivity());
         mListView = (CardListView) getActivity().findViewById(R.id.card_patients_list_cursor);
         //mListView.setEmptyView(getActivity().findViewById(android.R.id.empty));
@@ -307,7 +311,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
     public class PatientCursorCardAdapter extends CardCursorAdapter {
 
 
-        private String mDetailedInfo;
+
 
         public PatientCursorCardAdapter(Context context) {
             super(context);
@@ -364,7 +368,12 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
 
 
             //This provides a simple (and useless) expand area
-            CustomExpandCard expand = new CustomExpandCard(super.getContext(), mDetailedInfo);
+            String detailedInfo = "";
+            final Patient patient = Patient.getById((long) cursor.getInt(ID_COLUMN));
+            if(patient != null) {
+                detailedInfo = Patient.getDetailedInfo(patient);
+            }
+            CustomExpandCard expand = new CustomExpandCard(super.getContext(), detailedInfo);
             expand.setTitle("Patient Details");
             //Add Expand Area to Card
             card.addCardExpand(expand);
@@ -383,13 +392,6 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
             ;
             card.mainHeader = getString(R.string.patient_header);
             card.resourceIdThumb=R.drawable.ic_patient_small;
-
-            final Patient patient = Patient.getById((long) cursor.getInt(ID_COLUMN));
-            if(patient != null) {
-                //card.secondaryTitle = painMedication.getIssueDateTimeClear(); // fromMilliseconds.format("YYYY-MM-DD hh:ss");
-                mDetailedInfo = Patient.getDetailedInfo(patient);
-            }
-
         }
     }
 

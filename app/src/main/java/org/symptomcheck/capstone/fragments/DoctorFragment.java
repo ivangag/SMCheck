@@ -47,7 +47,11 @@ import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
+import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.Doctor;
+import org.symptomcheck.capstone.model.Patient;
+import org.symptomcheck.capstone.model.UserInfo;
+import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -66,6 +70,7 @@ import it.gmariotti.cardslib.library.view.CardListView;
 public class DoctorFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>
 ,IFragmentListener {
 
+    private static String ARG_PATIENT_ID  ="patient_id";
     DoctorCursorCardAdapter mAdapter;
     CardListView mListView;
     /**
@@ -77,6 +82,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
      */
     private Object mSyncObserverHandle;
     private Menu mOptionsMenu;
+    private Patient mPatientOwner;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -114,19 +120,35 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         setIconActionBar();
-        //SyncUtils.CreateSyncAccount(activity);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         init();
         super.onActivityCreated(savedInstanceState);
-       //hideList(false);
+        hideList(false);
+    }
+
+
+
+    public static PatientsFragment newInstance(long patientId) {
+        PatientsFragment fragment = new PatientsFragment();
+        Bundle args = new Bundle();
+        if (patientId != -1) {
+            args.putLong(ARG_PATIENT_ID, patientId);
+        }
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
     public String getTitleText() {
         String title = TITLE_NONE;
+
+        if(mPatientOwner != null){
+            title =// mPatientOwner.getFirstName() + " " +
+                    mPatientOwner.getLastName() + "'s " + getString(R.string.doctor_header);
+        }
         return title;
     }
 
@@ -146,8 +168,10 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
         final MenuItem refreshItem = mOptionsMenu.findItem(R.id.menu_refresh);
         if (refreshItem != null) {
             if (refreshing) {
+                hideList(true);
                 refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
+                displayList(false);
                 refreshItem.setActionView(null);
             }
         }
@@ -156,13 +180,13 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
     static int count = 0;
     private void init() {
 
-        //Vehicle vehicle = new Vehicle();
-        //vehicle.setVIN("VIN" + count);
-        //long count = vehicle.save();
         mAdapter = new DoctorCursorCardAdapter(getActivity());
-
         mListView = (CardListView) getActivity().findViewById(R.id.card_doctors_list_cursor);
-        //mListView.setEmptyView(getActivity().findViewById(android.R.id.empty));
+        final UserInfo user = DAOManager.get().getUser();
+
+        if(user.getUserType().equals(UserType.PATIENT)){
+            mPatientOwner = Patient.getByMedicalNumber(user.getUserIdentification());
+        }
         if (mListView != null) {
             mListView.setAdapter(mAdapter);
         }
@@ -198,7 +222,8 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
         }
         mAdapter.swapCursor(data);
 
-        //displayList();
+        displayList(data.getCount() <= 0);
+
     }
     /**
      * Create a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
@@ -360,7 +385,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
 
         private void setCardFromCursor(DoctorCursorCard card,Cursor cursor) {
 
-            card.setId(""+cursor.getInt(ID_COLUMN));
+            card.setId("" + cursor.getInt(ID_COLUMN));
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.DOCTORS_COLUMNS.FIRST_NAME))
                     + " " + cursor.getString(cursor.getColumnIndex(ActiveContract.DOCTORS_COLUMNS.LAST_NAME));
             card.secondaryTitle =
@@ -368,10 +393,10 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
                             /*+ " " + cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.BIRTH_DATE))*/
             ;
             card.mainHeader = getString(R.string.doctor_header);
-            card.resourceIdThumb=R.drawable.ic_doctor;
+            card.resourceIdThumb = R.drawable.ic_doctor;
 
             //build detailed info to be shown in expand area
-             mDetailedInfo = "";
+            mDetailedInfo = "";
         }
     }
 

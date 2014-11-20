@@ -12,7 +12,6 @@ import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.Question;
 import org.symptomcheck.capstone.model.UserInfo;
-import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
 
 import java.util.ArrayList;
@@ -105,7 +104,7 @@ public class DAOManager {
                 List<Question> questions = new ArrayList<Question>(checkIns.size());
                 for (CheckIn checkIn : checkIns) {
                     checkIn.patient = patient;
-                    checkIn.needSync = needSync ? 1 : 0;
+                    checkIn.setNeedSync(needSync ? 1 : 0);
                     for (Question question : checkIn.getQuestions()) {
                         question.checkIn = checkIn;
                         questions.add(question);
@@ -130,12 +129,14 @@ public class DAOManager {
         new ActiveHandler<PainMedication>().deleteItems(PainMedication.class);
     }
 
-    public synchronized void savePainMedications(List<PainMedication> medications,
-                                                 String medicalRecordNumber) {
+    public synchronized boolean savePainMedications(List<PainMedication> medications,
+                                                    String medicalRecordNumber, boolean needSync) {
 
-        new ActiveHandler<PainMedication>().saveItems(medications);
+        for(PainMedication medication : medications){
+            medication.setNeedSync(needSync ? 1 : 0);
+        }
+        return ((new ActiveHandler<PainMedication>().saveItems(medications)) > 0);
     }
-
 
 
     class ActiveHandler<T extends Model> {

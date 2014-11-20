@@ -22,7 +22,10 @@ public class PainMedication extends Model implements IModelBuilder {
 
     @Column
     private String patientMedicalNumber;
-    
+
+    @Column
+    private transient int needSync = 1;
+
     public PainMedication(){}
 
     public PainMedication(String medicationName, String lastTakingDateTime){
@@ -75,11 +78,21 @@ public class PainMedication extends Model implements IModelBuilder {
 
         sb.append("Name: ").append(painMedication.getMedicationName());
         sb.append("\n----------------------------\n");
-        sb.append("Patient: ").append(patient != null ? patient.toString() : "NA");
+        sb.append("Patient")
+                .append("\n")
+                .append(patient != null ? patient.toString() : "NA");
 
         sb.append("\n----------------------------\n");
 
         return sb.toString();
+    }
+
+    public int getNeedSync() {
+        return needSync;
+    }
+
+    public void setNeedSync(int needSync) {
+        this.needSync = needSync;
     }
 
     public static class Builder{
@@ -110,12 +123,19 @@ public class PainMedication extends Model implements IModelBuilder {
 
     }
 
+    public static List<PainMedication> getAllToSync() {
+        // This is how you execute a query
+        return new Select()
+                .from(PainMedication.class)
+                .where("needSync = ?", 1)
+                .execute();
+    }
+
     public static List<PainMedication> getAll(String patientMedicalNumber) {
         // This is how you execute a query
         return new Select()
                 .from(PainMedication.class)
                 .where("patientMedicalNumber = ?", patientMedicalNumber)
-                        //.orderBy("Name ASC")
                 .execute();
     }
 }

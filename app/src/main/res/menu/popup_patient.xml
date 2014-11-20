@@ -7,7 +7,7 @@
         android:showAsAction="always"
         tools:ignore="AppCompatResource" />
     <item android:id="@+id/menu_pop_open_medicines"
-        android:title="@string/medicine_header"
+        android:title="@string/medicines_header"
         android:orderInCategory="2"
         android:showAsAction="always"
         tools:ignore="AppCompatResource" />

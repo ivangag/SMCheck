@@ -31,23 +31,20 @@ public class CheckIn extends Model implements IModelBuilder {
     @Column(name = "Patient")
     public transient Patient patient;
     @Column
-    public transient int needSync = 1;
+    private transient int needSync = 1;
 
     @Column
     private String imageUrl;
 
-    /*
-        //@Column
-        //private String throatImageEncoded;
 
+    public int getNeedSync() {
+        return needSync;
+    }
 
-        public String getThroatImageEncoded() {
-            return throatImageEncoded;
-        }
-        public void setThroatImageEncoded(String throatImageEncoded) {
-            this.throatImageEncoded = throatImageEncoded;
-        }
-        */
+    public void setNeedSync(int needSync) {
+        this.needSync = needSync;
+    }
+
     private List<Question> questions = new ArrayList<Question>();
 
     // This method is optional, does not affect the foreign key creation.
@@ -201,6 +198,15 @@ public class CheckIn extends Model implements IModelBuilder {
             medicationTime = Costants.STRINGS.EMPTY;
         }
         return medicationTime;
+    }
+
+    public static List<CheckIn> getAllByPatient(Patient patient) {
+        // This is how you execute a query
+        return new Select()
+                .from(CheckIn.class)
+                        .where("Patient = ?", patient.getId())
+                        .orderBy("issueDateTime DESC")
+                .execute();
     }
 
 }

@@ -64,10 +64,6 @@ public  abstract class BaseFragment extends Fragment {
         mListShown = true;
     }
 
-    protected void displayEmptyListMessage(boolean show){
-        mEmptyListContainer.setVisibility(show ? View.VISIBLE : View.GONE);
-        mListContainer.setVisibility(show ? View.GONE : View.VISIBLE);
-    }
     protected void displayList(boolean isEmpty){
         if (isResumed()) {
             setListVisibility(true,isEmpty);

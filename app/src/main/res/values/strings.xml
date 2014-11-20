@@ -64,7 +64,7 @@
     <string name="alert_dialog_cancel">Cancel</string>
     <string name="alert_dialog_title_checkin_submission">Do you confirm this CheckIn?</string>
     <string name="title_check_in_confirmation">Click here to confirm Check-In</string>
-    <string name="medicine_header">Medicines</string>
+    <string name="medicines_header">Medicines</string>
     <string name="title_activity_settings">Symptom Management Settings</string>
 
     <!--Preference resources-->
@@ -121,5 +121,7 @@
     <string name="delete_medicine">Delete</string>
     <string name="txt_cards_empty_list">No Results</string>
     <string name="txt_loading_progress">Loading...</string>
+    <string name="checkins_header">Check-Ins</string>
+    <string name="medicine_header">Medicine</string>
     <item name="txt_medication_delete" type="id">Medication Delete</item>
 </resources>

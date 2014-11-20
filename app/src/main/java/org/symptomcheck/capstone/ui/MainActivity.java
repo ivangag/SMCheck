@@ -257,15 +257,14 @@ public class MainActivity extends Activity implements ICardEventListener {
     public boolean onPrepareOptionsMenu(Menu menu) {
         // If the nav drawer is open, hide action getItemsQuestion related to the content view
         boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
-        //menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
 
         MenuItem menuCheckInTest = menu.findItem(R.id.action_test);
-
+        menuCheckInTest.setVisible(false);
+        /*
         if((menuCheckInTest != null)
                 && (user != null)) {
             menuCheckInTest.setVisible(user.getUserType().equals(UserType.PATIENT));
-        }
-
+        }*/
         return super.onPrepareOptionsMenu(menu);
 
     }
@@ -603,33 +602,6 @@ public class MainActivity extends Activity implements ICardEventListener {
         mTitle = title;
         if(getActionBar() != null)
             getActionBar().setTitle(mTitle);
-    }
-
-    private void testAddCheckIn(){
-        //test addCheckin patient
-        Patient patient = Patient.getAll().get(0);
-        List<Question>  questions = Question.getAll();
-        List<CheckIn>  checkIns =  CheckIn.getAllToSync();
-        if(patient != null) {
-            Long timeMed1 = Calendar.getInstance().getTimeInMillis();
-            Map<PainMedication,String> meds = new HashMap<PainMedication,String>();
-            meds.put(new PainMedication("XXX", timeMed1.toString()),"YES");
-            meds.put(new PainMedication("YYY", timeMed1.toString()),"YES");
-            meds.put( new PainMedication("ZZZ", timeMed1.toString()),"NO");
-            CheckIn checkIn = CheckIn.createCheckIn(PainLevel.SEVERE, FeedStatus.SOME, meds);
-
-            checkIn.patient = patient;
-            if ( checkIn.save() > 0) {
-                for (Question question : checkIn.getQuestions()) {
-                    question.checkIn = checkIn;
-                    question.save();
-                }
-            }
-            questions = Question.getAll();
-            checkIns =  CheckIn.getAllToSync();
-            SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_CHECK_IN);
-            //checkIn = DownloadHelper.get().setUserName("patient002").setPassword("pass").withRetrofitClient().addCheckIn("patient003", checkIn);
-        }
     }
 
     public static class AlertLogoutFragment extends DialogFragment {

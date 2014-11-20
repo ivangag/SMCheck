@@ -138,6 +138,11 @@ public class Patient extends Model implements IModelBuilder{
 		return Objects.hashCode(medicalRecordNumber, this.firstName, this.lastName);
 	}
 
+    // This method is optional, does not affect the foreign key creation.
+    public List<CheckIn> getItemsCheckIns() {
+        return getMany(CheckIn.class, "Patient");
+    }
+
 	/**
 	 * Two Object are considered equal if they have exactly the same values for
 	 * their properties
@@ -213,5 +218,16 @@ public class Patient extends Model implements IModelBuilder{
             birthDateTime = Costants.STRINGS.EMPTY;
         }
         return birthDateTime;
+    }
+
+
+    public static void checkExperienceStatus(){
+        List<Patient> patients = getAll();
+        for(Patient patient : patients){
+            List<CheckIn> checkIns = CheckIn.getAllByPatient(patient);
+            if(checkIns.size() > 0){
+                // we have the
+            }
+        }
     }
 }

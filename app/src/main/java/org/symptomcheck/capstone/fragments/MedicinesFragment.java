@@ -25,6 +25,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.LoaderManager;
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.CursorLoader;
@@ -34,8 +35,11 @@ import android.content.SyncStatusObserver;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -46,10 +50,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.activeandroid.content.ContentProvider;
+import com.google.common.collect.Lists;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
@@ -58,8 +64,10 @@ import org.symptomcheck.capstone.cardsui.CustomExpandCard;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.Patient;
+import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
+import org.symptomcheck.capstone.utils.Costants;
 
 import java.util.List;
 
@@ -92,6 +100,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
     private static final String ARG_PATIENT_ID = "patient_id";
     private Patient mPatientOwner;
+
 
     /**
      * Returns a new instance of this fragment for the given section
@@ -142,10 +151,22 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
     }
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+
+        MenuItem menuItemAddMedicine = mOptionsMenu.findItem(R.id.action_add_medicines);
+
+        final UserInfo userInfo = DAOManager.get().getUser();
+        if(null != userInfo) {
+            menuItemAddMedicine.setVisible(userInfo.getUserType().equals(UserType.DOCTOR));
+        }
+
+        super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         setIconActionBar();
-        //SyncUtils.CreateSyncAccount(activity);
     }
 
     @Override
@@ -159,7 +180,8 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
     public String getTitleText() {
         String title = TITLE_NONE;
         if(mPatientOwner != null){
-            title = mPatientOwner.getFirstName() + " " + mPatientOwner.getLastName() + " " + getString(R.string.medicine_header);
+            title = //mPatientOwner.getFirstName() + " " +
+                    mPatientOwner.getLastName() + "'s " + getString(R.string.medicines_header);
         }
         return title;
     }
@@ -183,33 +205,41 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                 hideList(true);
                 refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
-                //displayList();
+                displayList(false);
                 refreshItem.setActionView(null);
             }
         }
     }
 
-    static int count = 0;
+    private Handler progressBarHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message message) {
+
+            switch (message.what){
+
+            }
+
+            Toast.makeText(getActivity(), "Medication added correctly", Toast.LENGTH_LONG).show();
+            return true;
+        }
+    });
+
     String mSelection = null;
     private void init() {
 
-        final Long patientId = getArguments().getLong(ARG_PATIENT_ID);
 
-        if((patientId > 0)){
+        final Long patientId = getArguments().getLong(ARG_PATIENT_ID);
+        if ((patientId > 0)) {
             mPatientOwner = Patient.getById(patientId);
-            if(mPatientOwner != null) {
+            if (mPatientOwner != null) {
                 mSelection = ActiveContract.MEDICINES_COLUMNS.PATIENT_ID + " = '" + mPatientOwner.getMedicalRecordNumber() + "'";
             }
-        }else if (DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)){
+        } else if (DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)) {
             mPatientOwner = Patient.getByMedicalNumber(DAOManager.get().getUser().getUserIdentification());
         }
-        //Vehicle vehicle = new Vehicle();
-        //vehicle.setVIN("VIN" + count);
-        //long count = vehicle.save();
         mAdapter = new MedicinesCursorCardAdapter(getActivity());
 
         mListView = (CardListView) getActivity().findViewById(R.id.card_medicines_list_cursor);
-        //mListView.setEmptyView(getActivity().findViewById(android.R.id.empty));
 
         if (mListView != null) {
             mListView.setAdapter(mAdapter);
@@ -219,7 +249,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
         mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
             public Cursor runQuery(CharSequence charSequence) {
-                return queryAllField(charSequence.toString(),mSelection);
+                return queryAllField(charSequence.toString(), mSelection);
             }
         });
         // Force start background query to load sessions
@@ -248,16 +278,14 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
         }
         mAdapter.swapCursor(data);
 
-        //displayEmptyListMessage(data.getCount() > 0);
         displayList(data.getCount() <= 0);
-        //displayList();
     }
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.swapCursor(null);
     }
     /**
-     * Crfate a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
+     * Create a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
      * onResume(), and removed in onPause(). If status changes, it sets the state of the Refresh
      * button. If a sync is active or pending, the Refresh button is replaced by an indeterminate
      * ProgressBar; otherwise, the button itself is displayed.
@@ -377,7 +405,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             @Override
             public void onClick(View arg0) {
 
-                final String medicationName = entry_medication_name.getText().toString();
+                final String medicationName = entry_medication_name.getText().toString().toUpperCase();
 
                 boolean existMedication = false;
                 //check if medication exists for the Patient
@@ -398,7 +426,8 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                     view_error_message.setVisibility(View.VISIBLE);
                     textView_error_message.setText(getString(R.string.txt_error_medication_empty));
                 } else {
-                    Toast.makeText(getActivity(), "New Medication inserted successfully: " + medicationName.toUpperCase(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getActivity(), "New Medication inserted successfully: " + medicationName.toUpperCase(), Toast.LENGTH_SHORT).show();
+                    executePainMedicationsUpdate(getActivity(),new PainMedication(medicationName,"",mPatientOwner.getMedicalRecordNumber()));
                     dialog.dismiss();
                 }
 
@@ -434,8 +463,8 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {
-
                                     Toast.makeText(getActivity(),"Medication " + medicationName + " removed successfully",Toast.LENGTH_SHORT).show();
+
                                 }
                             })
                     .setNegativeButton(R.string.alert_dialog_cancel,
@@ -448,12 +477,64 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                             }).create();
         }
     }
+
+    private void executePainMedicationsUpdate(Context context, final PainMedication medication) {
+        final ProgressDialog ringProgressDialog = ProgressDialog.show(context, "Please wait...",
+                "Operation in progress...", true);
+        ringProgressDialog.setCancelable(true);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    //waitForDebugger();
+                    final boolean painMedicationRes = savePainMedication(medication);
+                    if (painMedicationRes) {
+                        SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_MEDICINES);
+                        Thread.sleep(2000);
+                    }
+
+                    progressBarHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(painMedicationRes) {
+                                Toast.makeText(getActivity(), "Medication added correctly", Toast.LENGTH_LONG).show();
+                                Log.i("AddNewMedication", "Medication " + medication.getMedicationName() + " Patient: " + medication.getPatientMedicalNumber());
+                                ((IFragmentListener)MedicinesFragment.this).OnFilterData(Costants.STRINGS.EMPTY);
+                            }else {
+                                Toast.makeText(getActivity(), "Error", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+
+                    /*
+                    Message message = Message.obtain();
+                    message.what = 80;
+                    Bundle data = new Bundle();
+                    data.putString("MEDICATION_NAME",medication.getMedicationName() + " Patient: " + medication.getPatientMedicalNumber());
+                    data.putBoolean("RESULT",painMedicationRes);
+                    message.setData(data);
+                    progressBarHandler.sendMessage(message);
+                    */
+
+                } catch (Exception exception) {
+                    Toast.makeText(getActivity(), "Error: " + exception.getCause().getMessage(), Toast.LENGTH_LONG).show();
+                }
+                ringProgressDialog.dismiss();
+            }
+
+        }).start();
+    }
+
+
+    private boolean savePainMedication(PainMedication medication) {
+        return DAOManager.get().savePainMedications(Lists.newArrayList(medication), mPatientOwner.getMedicalRecordNumber(),true);
+    }
     //-------------------------------------------------------------------------------------------------------------
     // Adapter
     //-------------------------------------------------------------------------------------------------------------
     public class MedicinesCursorCardAdapter extends CardCursorAdapter {
 
-        private String mDetailedMedicineInfo;
+
 
 
         public MedicinesCursorCardAdapter(Context context) {
@@ -478,13 +559,24 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                 @Override
                 public void onMenuItemClick(BaseCard card, MenuItem item) {
                     final int id = item.getItemId();
-                    final String mMedicineName = ((MedicineCursorCard)card).mainTitle;
-                    if(id == R.id.menu_pop_delete_medicine){
+                    final String mMedicineName = ((MedicineCursorCard) card).mainTitle;
+                    if (id == R.id.menu_pop_delete_medicine) {
                         AlertMedicationDeleteFragment.newInstance(R.id.txt_medication_delete,
                                 "Are you sure to delete " + mMedicineName + " ?", mMedicineName)
-                        .show(getFragmentManager(),"Alert_Medication_Delete");
+                                .show(getFragmentManager(), "Alert_Medication_Delete");
                     }
                     //Toast.makeText(getContext(), "Click on card="+card.getId()+" item=" +  item.getTitle(), Toast.LENGTH_SHORT).show();
+                }
+            });
+            header.setPopupMenuPrepareListener(new CardHeader.OnPrepareCardHeaderPopupMenuListener() {
+                @Override
+                public boolean onPreparePopupMenu(BaseCard baseCard, PopupMenu popupMenu) {
+                    MenuItem item = popupMenu.getMenu().findItem(R.id.menu_pop_delete_medicine);
+                    final UserInfo userInfo = DAOManager.get().getUser();
+                    if(null != userInfo) {
+                        item.setVisible(userInfo.getUserType().equals(UserType.DOCTOR));
+                    }
+                    return true;
                 }
             });
 
@@ -497,8 +589,6 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             thumb.setDrawableResource(card.resourceIdThumb);
             card.addCardThumbnail(thumb);
 
-
-            //Simple clickListener
             card.setOnClickListener(new Card.OnCardClickListener() {
                 @Override
                 public void onClick(Card card, View view) {
@@ -514,7 +604,13 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             });
 
             //This provides a simple (and useless) expand area
-            CustomExpandCard expand = new CustomExpandCard(super.getContext(), mDetailedMedicineInfo);
+            String detailedMedicineInfo  = "";
+            final PainMedication painMedication = PainMedication.getById(cursor.getInt(ID_COLUMN));
+            if(painMedication != null) {
+                //card.secondaryTitle = painMedication.getIssueDateTimeClear(); // fromMilliseconds.format("YYYY-MM-DD hh:ss");
+                detailedMedicineInfo = PainMedication.getDetailedInfo(painMedication);
+            }
+            CustomExpandCard expand = new CustomExpandCard(super.getContext(), detailedMedicineInfo);
             //expand.setTitle("Check-In Details");
             //Add Expand Area to Card
             card.addCardExpand(expand);
@@ -530,11 +626,6 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             card.mainHeader = getString(R.string.medicine_header);
             card.resourceIdThumb=R.drawable.ic_medicine;
 
-            final PainMedication painMedication = PainMedication.getById(medicineId);
-            if(painMedication != null) {
-                //card.secondaryTitle = painMedication.getIssueDateTimeClear(); // fromMilliseconds.format("YYYY-MM-DD hh:ss");
-                mDetailedMedicineInfo = PainMedication.getDetailedInfo(painMedication);
-            }
         }
     }
 

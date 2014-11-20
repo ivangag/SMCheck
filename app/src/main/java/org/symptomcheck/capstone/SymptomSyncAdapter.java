@@ -191,6 +191,29 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
             // if DOCTOR
             // 2) look for Medication to upload N.B Medication are "marked" with a needSync field set to true
             case DOCTOR:
+                List<PainMedication> painMedications = PainMedication.getAllToSync();
+                if(painMedications.size() > 0) {
+                    Log.i(TAG, method + "::Medications to sync: " + painMedications.size());
+                    for (PainMedication medication : painMedications) {
+                        try {
+                            mSymptomClient.addPainMedication(medication.getPatientMedicalNumber(), medication);
+                            new Update(PainMedication.class)
+                                    .set("needSync = 0")
+                                    .where("_id = ?", medication.getId())
+                                    .execute();
+                            Log.i(TAG, method + "::addPainMedication: " + medication.getId());
+                        }catch (RetrofitError error){
+                            DownloadHelper.get().handleRetrofitError(getContext(),error);
+                            Log.e(TAG, method + "::addPainMedication error: " +  error.getMessage() +
+                                    "; Status: " + error.getResponse().getStatus());
+                        }catch (Exception e){
+                            if(e.getCause().getClass().equals(RetrofitError.class)){
+                                DownloadHelper.get().handleRetrofitError(getContext(), (RetrofitError) e.getCause());
+                            }
+                            Log.e(TAG,"Error " + method + e.getMessage());
+                        }
+                    }
+                }
                 break;
 
         }
@@ -201,60 +224,56 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
      * Download data from the cloud in order to sync local repo with the remote one
      * @param sync sync type to be performed
      */
-    void updateLocalData(String sync, UserInfo user){
-       //final UserInfo user = DAOManager.get().getUser();
-       //if(user != null) {
-           //Log.i(TAG, "updateLocalData with: " + user.toString());
-           //if (user.getLogged()) {
-               switch (user.getUserType()) {
-                   case DOCTOR:
-                       if(sync.equals(ActiveContract.SYNC_ALL)) {
-                           // get and save Doctor detail
-                           syncDoctorBaseInfo(user);
-                           //get and save Doctor' Patients
-                           syncDoctorPatients(user);
-                           //sync All Patients' information
-                           //get and save Patients' Check-Ins
-                           syncPatientsCheckIns(user);
-                           //get and save Patients' Medicines
-                           syncPatientsMedicines(user);
-                       }else if(sync.equals(ActiveContract.SYNC_PATIENTS)){
-                           syncDoctorPatients(user);
-                       }else if(sync.equals(ActiveContract.SYNC_CHECK_IN)){
-                           syncDoctorBaseInfo(user);
-                           syncPatientsCheckIns(user);
-                       }else if(sync.equals(ActiveContract.SYNC_DOCTORS)){
-                           syncDoctorBaseInfo(user);
-                       }
-                       break;
-                   case PATIENT:
-                       if(sync.equals(ActiveContract.SYNC_ALL)) {
-                           // get and save Patient detail
-                           syncPatientBaseInfo(user);
-                           //sync All Patient' information
-                           //get and save Patient' Doctors
-                           syncPatientDoctors(user);
-                           //get and save Patients' Check-Ins
-                           syncPatientsCheckIns(user);
-                           //get and save Patients' Medicines
-                           syncPatientsMedicines(user);
-                       }else if(sync.equals(ActiveContract.SYNC_MEDICINES)) {
-                           syncPatientsMedicines(user);
-                       }else if(sync.equals(ActiveContract.SYNC_CHECK_IN)) {
-                           syncPatientsCheckIns(user);
-                       }else if(sync.equals(ActiveContract.SYNC_PATIENTS)) {
-                           syncPatientBaseInfo(user);
-                       }else if(sync.equals(ActiveContract.SYNC_DOCTORS)) {
-                           syncPatientDoctors(user);
-                       }
-                       break;
-                   case ADMIN:
-                       break;
-                   default:
-                       break;
-               }
-         //  }
-       //}
+    void updateLocalData(String sync, UserInfo user) {
+        switch (user.getUserType()) {
+            case DOCTOR:
+                if (sync.equals(ActiveContract.SYNC_ALL)) {
+                    // get and save Doctor detail
+                    syncDoctorBaseInfo(user);
+                    //get and save Doctor' Patients
+                    syncDoctorPatients(user);
+                    //sync All Patients' information
+                    //get and save Patients' Check-Ins
+                    syncPatientsCheckIns(user);
+                    //get and save Patients' Medicines
+                    syncPatientsMedicines(user);
+                } else if (sync.equals(ActiveContract.SYNC_PATIENTS)) {
+                    syncDoctorPatients(user);
+                } else if (sync.equals(ActiveContract.SYNC_CHECK_IN)) {
+                    syncDoctorBaseInfo(user);
+                    syncPatientsCheckIns(user);
+                } else if (sync.equals(ActiveContract.SYNC_DOCTORS)) {
+                    syncDoctorBaseInfo(user);
+                } else if (sync.equals(ActiveContract.SYNC_MEDICINES)) {
+                    syncPatientsMedicines(user);
+                }
+                break;
+            case PATIENT:
+                if (sync.equals(ActiveContract.SYNC_ALL)) {
+                    // get and save Patient detail
+                    syncPatientBaseInfo(user);
+                    //sync All Patient' information
+                    //get and save Patient' Doctors
+                    syncPatientDoctors(user);
+                    //get and save Patients' Check-Ins
+                    syncPatientsCheckIns(user);
+                    //get and save Patients' Medicines
+                    syncPatientsMedicines(user);
+                } else if (sync.equals(ActiveContract.SYNC_MEDICINES)) {
+                    syncPatientsMedicines(user);
+                } else if (sync.equals(ActiveContract.SYNC_CHECK_IN)) {
+                    syncPatientsCheckIns(user);
+                } else if (sync.equals(ActiveContract.SYNC_PATIENTS)) {
+                    syncPatientBaseInfo(user);
+                } else if (sync.equals(ActiveContract.SYNC_DOCTORS)) {
+                    syncPatientDoctors(user);
+                }
+                break;
+            case ADMIN:
+                break;
+            default:
+                break;
+        }
     }
 
     private List<Doctor> syncPatientDoctors(UserInfo user) {
@@ -340,10 +359,12 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         List<Patient> patients = Patient.getAll();
         try {
             if(patients != null){
+                List<CheckIn> checkInsToSync = CheckIn.getAllToSync();
                 DAOManager.get().deleteCheckIns();
                 for(Patient patient : patients){
                     List<CheckIn> checkIns = (List<CheckIn>) mSymptomClient.findCheckInsByPatient(patient.getMedicalRecordNumber());
-                    if((checkIns != null)&& (checkIns.size() > 0))
+                    checkIns.addAll(checkInsToSync);
+                    if((checkIns.size() > 0))
                         DAOManager.get().saveCheckIns(checkIns,
                                 patient.getMedicalRecordNumber(),
                                 user.getUserIdentification(), false);
@@ -373,11 +394,13 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         List<Patient> patients = Patient.getAll();
         try {
             if(patients != null){
+                List<PainMedication> medicationsToSync = PainMedication.getAllToSync();
                 DAOManager.get().deleteMedicines();
                 for(Patient patient : patients){
                     List<PainMedication> medications = (List<PainMedication>) mSymptomClient.findPainMedicationsByPatient(patient.getMedicalRecordNumber());
-                    if((medications != null)&& (medications.size() > 0))
-                        DAOManager.get().savePainMedications(medications, patient.getMedicalRecordNumber());
+                    medications.addAll(medicationsToSync);
+                    if((medications.size() > 0))
+                        DAOManager.get().savePainMedications(medications, patient.getMedicalRecordNumber(),false);
                 }
             }else {
                 Log.e(TAG, "syncPatientsMedicines=> sync not possible: patients = null!");

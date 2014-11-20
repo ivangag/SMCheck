@@ -138,14 +138,15 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
     public void onActivityCreated(Bundle savedInstanceState) {
         init();
         super.onActivityCreated(savedInstanceState);
-       //hideList(false);
+        hideList(false);
     }
 
     @Override
     public String getTitleText() {
         String title = TITLE_NONE;
         if(mPatientOwner != null){
-            title = mPatientOwner.getFirstName() + " " + mPatientOwner.getLastName() + " " + getString(R.string.checkin_header);
+            title = //mPatientOwner.getFirstName() + " " +
+                    mPatientOwner.getLastName() + "'s " + getString(R.string.checkins_header);
         }
         return title;
     }
@@ -166,8 +167,10 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         final MenuItem refreshItem = mOptionsMenu.findItem(R.id.menu_refresh);
         if (refreshItem != null) {
             if (refreshing) {
+                hideList(true);
                 refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
+                displayList(false);
                 refreshItem.setActionView(null);
             }
         }
@@ -227,6 +230,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         }
         mAdapter.swapCursor(data);
 
+        displayList(data.getCount() <= 0);
         //displayList();
     }
     @Override
@@ -234,7 +238,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         mAdapter.swapCursor(null);
     }
     /**
-     * Crfate a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
+     * Create a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
      * onResume(), and removed in onPause(). If status changes, it sets the state of the Refresh
      * button. If a sync is active or pending, the Refresh button is replaced by an indeterminate
      * ProgressBar; otherwise, the button itself is displayed.
@@ -312,7 +316,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
     //-------------------------------------------------------------------------------------------------------------
     public class CheckinCursorCardAdapter extends CardCursorAdapter {
 
-        private String mDetailedCheckInInfo;
+
 
         public CheckinCursorCardAdapter(Context context) {
             super(context);
@@ -367,6 +371,13 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             });
 
             //This provides a simple (and useless) expand area
+
+            String mDetailedCheckInInfo = "";
+            final CheckIn checkIn = CheckIn.getById(cursor.getInt(ID_COLUMN));
+            if(checkIn != null) {
+                card.secondaryTitle = checkIn.getIssueDateTimeClear();// + " (" + checkIn.getIssueDateTime() + ")"; // fromMilliseconds.format("YYYY-MM-DD hh:ss");
+                mDetailedCheckInInfo = CheckIn.getDetailedInfo(checkIn, true);
+            }
             CustomExpandCard expand = new CustomExpandCard(super.getContext(),mDetailedCheckInInfo);
             expand.setTitle("Check-In Details");
             //Add Expand Area to Card
@@ -395,11 +406,6 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             //build detailed info to be shown in expand area
             // retrieve questions from checkin
 
-            final CheckIn checkIn = CheckIn.getById(checkInId);
-            if(checkIn != null) {
-                card.secondaryTitle = checkIn.getIssueDateTimeClear();// + " (" + checkIn.getIssueDateTime() + ")"; // fromMilliseconds.format("YYYY-MM-DD hh:ss");
-                mDetailedCheckInInfo = CheckIn.getDetailedInfo(checkIn, true);
-            }
         }
     }
 
