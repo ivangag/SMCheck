@@ -21,21 +21,29 @@ package org.symptomcheck.capstone.fragments;
 import android.accounts.Account;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.LoaderManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Loader;
 import android.content.SyncStatusObserver;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -52,6 +60,8 @@ import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
+
+import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
@@ -81,7 +91,6 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
     private Menu mOptionsMenu;
 
     private static final String ARG_PATIENT_ID = "patient_id";
-    String mMedicineName;
     private Patient mPatientOwner;
 
     /**
@@ -91,7 +100,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
     public static MedicinesFragment newInstance(long patientId) {
         MedicinesFragment fragment = new MedicinesFragment();
         Bundle args = new Bundle();
-        if (patientId != -1) {
+        if (patientId > 0) {
             args.putLong(ARG_PATIENT_ID, patientId);
         }
         fragment.setArguments(args);
@@ -105,7 +114,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root= inflater.inflate(R.layout.fragment_card_medicines_list_cursor, container, false);
-        //setupListFragment(root);
+        setupListFragment(root);
         setHasOptionsMenu(true);
         return root;
     }
@@ -117,6 +126,9 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             case R.id.menu_refresh:
                 SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_MEDICINES);
                 return true;
+            case R.id.action_add_medicines:
+                showInsertNewMedicationDialog(mPatientOwner.getMedicalRecordNumber());
+                break;
         }
         return super.onOptionsItemSelected(item);
 
@@ -140,7 +152,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
     public void onActivityCreated(Bundle savedInstanceState) {
         init();
         super.onActivityCreated(savedInstanceState);
-       //hideList(false);
+        hideList(false);
     }
 
     @Override
@@ -168,8 +180,10 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
         final MenuItem refreshItem = mOptionsMenu.findItem(R.id.menu_refresh);
         if (refreshItem != null) {
             if (refreshing) {
+                hideList(true);
                 refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
+                //displayList();
                 refreshItem.setActionView(null);
             }
         }
@@ -183,7 +197,9 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
         if((patientId > 0)){
             mPatientOwner = Patient.getById(patientId);
-            mSelection = ActiveContract.MEDICINES_COLUMNS.PATIENT_ID + " = '" + mPatientOwner.getMedicalRecordNumber()  + "'";
+            if(mPatientOwner != null) {
+                mSelection = ActiveContract.MEDICINES_COLUMNS.PATIENT_ID + " = '" + mPatientOwner.getMedicalRecordNumber() + "'";
+            }
         }else if (DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)){
             mPatientOwner = Patient.getByMedicalNumber(DAOManager.get().getUser().getUserIdentification());
         }
@@ -193,9 +209,12 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
         mAdapter = new MedicinesCursorCardAdapter(getActivity());
 
         mListView = (CardListView) getActivity().findViewById(R.id.card_medicines_list_cursor);
+        //mListView.setEmptyView(getActivity().findViewById(android.R.id.empty));
+
         if (mListView != null) {
             mListView.setAdapter(mAdapter);
         }
+
 
         mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
@@ -229,6 +248,8 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
         }
         mAdapter.swapCursor(data);
 
+        //displayEmptyListMessage(data.getCount() > 0);
+        displayList(data.getCount() <= 0);
         //displayList();
     }
     @Override
@@ -309,12 +330,131 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
         mAdapter.getFilter().filter(textToSearch);
     }
 
+
+
+    private void showInsertNewMedicationDialog(final String patientMedicalNumber) {
+        final Dialog dialog = new Dialog(getActivity());
+
+        dialog.setContentView(R.layout.custom_dialog_add_medication);
+
+        dialog.setTitle("New Pain Medication");
+
+        dialog.show();
+
+        final EditText entry_medication_name = (EditText) dialog.findViewById(R.id.txt_new_medication);
+        final View view_error_message = dialog.findViewById(R.id.layout_medication_error);
+        final TextView textView_error_message = (TextView) dialog.findViewById(R.id.txt_medication_error);
+
+        entry_medication_name.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                view_error_message.setVisibility(View.GONE);
+            }
+        });
+
+        Button btnCancel = (Button) dialog.findViewById(R.id.btnCancel);
+        Button btnSet = (Button) dialog.findViewById(R.id.btnSet);
+
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        btnSet.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+
+                final String medicationName = entry_medication_name.getText().toString();
+
+                boolean existMedication = false;
+                //check if medication exists for the Patient
+                List<PainMedication> medications = PainMedication.getAll(patientMedicalNumber);
+
+                for (PainMedication medication : medications) {
+                    existMedication = medication.getMedicationName().toUpperCase()
+                            .equals(medicationName.toUpperCase());
+                    if (existMedication) {
+                        break;
+                    }
+                }
+                if (existMedication) {
+                    view_error_message.setVisibility(View.VISIBLE);
+                    textView_error_message.setText(getString(R.string.txt_error_medication_exists));
+
+                }else if(medicationName.isEmpty()){
+                    view_error_message.setVisibility(View.VISIBLE);
+                    textView_error_message.setText(getString(R.string.txt_error_medication_empty));
+                } else {
+                    Toast.makeText(getActivity(), "New Medication inserted successfully: " + medicationName.toUpperCase(), Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                }
+
+                //Log.i("Medication", "New Medication inserted: " + entry_medication_name.getText().toString());
+
+            }
+        });
+    }
+
+    public static class AlertMedicationDeleteFragment extends DialogFragment {
+
+        public static AlertMedicationDeleteFragment newInstance(int title,String message, String medicationName) {
+            AlertMedicationDeleteFragment frag = new AlertMedicationDeleteFragment();
+            Bundle args = new Bundle();
+            args.putInt("title", title);
+            args.putString("message", message);
+            args.putString("medication", medicationName);
+            frag.setArguments(args);
+            return frag;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final int title = getArguments().getInt("title");
+            final String message = getArguments().getString("message");
+            final String medicationName = getArguments().getString("medication");
+
+            return new AlertDialog.Builder(getActivity())
+                    .setIcon(R.drawable.ic_medicine)
+                    .setMessage(message)
+                    .setTitle(title)
+                    .setPositiveButton(R.string.alert_dialog_ok,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int whichButton) {
+
+                                    Toast.makeText(getActivity(),"Medication " + medicationName + " removed successfully",Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                    .setNegativeButton(R.string.alert_dialog_cancel,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int whichButton) {
+
+                                    //Toast.makeText(getActivity(),"Medication removed successfully",Toast.LENGTH_SHORT);
+                                }
+                            }).create();
+        }
+    }
     //-------------------------------------------------------------------------------------------------------------
     // Adapter
     //-------------------------------------------------------------------------------------------------------------
     public class MedicinesCursorCardAdapter extends CardCursorAdapter {
 
         private String mDetailedMedicineInfo;
+
 
         public MedicinesCursorCardAdapter(Context context) {
             super(context);
@@ -334,10 +474,17 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
             //Set the header title
             header.setTitle(card.mainHeader);
-            header.setPopupMenu(R.menu.popup_patient, new CardHeader.OnClickCardHeaderPopupMenuListener() {
+            header.setPopupMenu(R.menu.popup_medicines, new CardHeader.OnClickCardHeaderPopupMenuListener() {
                 @Override
                 public void onMenuItemClick(BaseCard card, MenuItem item) {
-                    Toast.makeText(getContext(), "Click on card="+card.getId()+" item=" +  item.getTitle(), Toast.LENGTH_SHORT).show();
+                    final int id = item.getItemId();
+                    final String mMedicineName = ((MedicineCursorCard)card).mainTitle;
+                    if(id == R.id.menu_pop_delete_medicine){
+                        AlertMedicationDeleteFragment.newInstance(R.id.txt_medication_delete,
+                                "Are you sure to delete " + mMedicineName + " ?", mMedicineName)
+                        .show(getFragmentManager(),"Alert_Medication_Delete");
+                    }
+                    //Toast.makeText(getContext(), "Click on card="+card.getId()+" item=" +  item.getTitle(), Toast.LENGTH_SHORT).show();
                 }
             });
 

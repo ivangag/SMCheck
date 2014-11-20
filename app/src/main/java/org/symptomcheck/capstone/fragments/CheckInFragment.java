@@ -103,7 +103,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root= inflater.inflate(R.layout.fragment_card_checkins_list_cursor, container, false);
-        //setupListFragment(root);
+        setupListFragment(root);
         setHasOptionsMenu(true);
         return root;
     }
@@ -191,6 +191,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         mAdapter = new CheckinCursorCardAdapter(getActivity());
 
         mListView = (CardListView) getActivity().findViewById(R.id.card_checkins_list_cursor);
+        //mListView.setEmptyView(getActivity().findViewById(android.R.id.empty));
         if (mListView != null) {
             mListView.setAdapter(mAdapter);
         }
@@ -331,10 +332,12 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
             //Set the header title
             header.setTitle(card.mainHeader);
-            header.setPopupMenu(R.menu.popup_patient, new CardHeader.OnClickCardHeaderPopupMenuListener() {
+
+            header.setPopupMenu(R.menu.popup_checkin, new CardHeader.OnClickCardHeaderPopupMenuListener() {
                 @Override
                 public void onMenuItemClick(BaseCard card, MenuItem item) {
-                    Toast.makeText(getContext(), "Click on card="+card.getId()+" item=" +  item.getTitle(), Toast.LENGTH_SHORT).show();
+
+                   // Toast.makeText(getContext(), "Click on card="+card.getId()+" item=" +  item.getTitle(), Toast.LENGTH_SHORT).show();
                 }
             });
 

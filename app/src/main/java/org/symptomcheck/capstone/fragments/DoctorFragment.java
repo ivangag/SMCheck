@@ -86,7 +86,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root= inflater.inflate(R.layout.fragment_card_doctors_list_cursor, container, false);
-        //setupListFragment(root);
+        setupListFragment(root);
         setHasOptionsMenu(true);
         return root;
     }
@@ -162,6 +162,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
         mAdapter = new DoctorCursorCardAdapter(getActivity());
 
         mListView = (CardListView) getActivity().findViewById(R.id.card_doctors_list_cursor);
+        //mListView.setEmptyView(getActivity().findViewById(android.R.id.empty));
         if (mListView != null) {
             mListView.setAdapter(mAdapter);
         }

@@ -287,7 +287,8 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
     }
 
     private void executeCheckInSaving(final CheckIn checkIn) {
-        final ProgressDialog ringProgressDialog = ProgressDialog.show(this, "Please wait ...", "Check-In submission in progress ...", true);
+        final ProgressDialog ringProgressDialog = ProgressDialog.show(this, "Please wait ...",
+                "Check-In submission in progress ...", true);
         ringProgressDialog.setCancelable(true);
         new Thread(new Runnable() {
             @Override
@@ -544,7 +545,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                         public void onClick(View v) {
                             txtMedicineTakingTime.setVisibility(View.VISIBLE);
                             parentActivity.mReportMedicationsResponse.put(mMedicineName, YES);
-                            showTimePickerDialog(rootView);
+                            showTimePickerDialog(rootView,mMedicineName);
                         }
                     });
                     final boolean YES = ((RadioButton)medicinesQuestionsView.findViewById(R.id.radioBtnMedicineYES)).isChecked();
@@ -553,7 +554,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                     txtMedicineTakingTime.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            showTimePickerDialog(rootView);
+                            showTimePickerDialog(rootView,mMedicineName);
                         }
                     });
                     break;
@@ -574,12 +575,12 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
             super.onResume();
         }
 
-        private void showTimePickerDialog(View v) {
+        private void showTimePickerDialog(View v, String mMedicineName) {
             final Dialog dialog = new Dialog(getActivity());
 
             dialog.setContentView(R.layout.custom_dialog_datetime);
 
-            dialog.setTitle("Set Schedule Call");
+            dialog.setTitle(String.format("When did you take the %s",mMedicineName));
 
             dialog.show();
 
@@ -633,7 +634,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
 
                     txtMedicineTakingTime.setText(dateAndTime.toString());
 
-                    ((CheckInFlowActivity)getActivity()).mReportMedicationsTakingTime.put(mMedicineName, String.valueOf(milliFrom1970GMT));
+                    ((CheckInFlowActivity)getActivity()).mReportMedicationsTakingTime.put(CheckInQuestionFragment.this.mMedicineName, String.valueOf(milliFrom1970GMT));
 
                     Log.i("CheckInFlow", "milliFrom1970GMT= " + milliFrom1970GMT);
                     Toast.makeText(getActivity(), "Date: " + date + " Time: " + time, Toast.LENGTH_SHORT).show();
@@ -641,9 +642,8 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                     dialog.dismiss();
                 }
             });
-            //DialogFragment newFragment = new TimePickerFragment();
-            //newFragment.show(getFragmentManager(), "timePicker");
         }
+
         @Override
         public void setUserVisibleHint(boolean isVisibleToUser) {
             super.setUserVisibleHint(isVisibleToUser);

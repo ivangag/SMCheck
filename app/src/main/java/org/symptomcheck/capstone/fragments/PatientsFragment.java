@@ -99,7 +99,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root= inflater.inflate(R.layout.fragment_card_patients_list_cursor, container, false);
-        //setupListFragment(root);
+        setupListFragment(root);
         setHasOptionsMenu(true);
         return root;
     }
@@ -140,7 +140,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
     public void onActivityCreated(Bundle savedInstanceState) {
         init();
         super.onActivityCreated(savedInstanceState);
-       //hideList(false);
+        hideList(false);
     }
 
     @Override
@@ -169,6 +169,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         final MenuItem refreshItem = mOptionsMenu.findItem(R.id.menu_refresh);
         if (refreshItem != null) {
             if (refreshing) {
+                hideList(true);
                 refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
                 refreshItem.setActionView(null);
@@ -186,6 +187,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         }
         mAdapter = new PatientCursorCardAdapter(getActivity());
         mListView = (CardListView) getActivity().findViewById(R.id.card_patients_list_cursor);
+        //mListView.setEmptyView(getActivity().findViewById(android.R.id.empty));
         if (mListView != null) {
             mListView.setAdapter(mAdapter);
         }
@@ -218,7 +220,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         }
         mAdapter.swapCursor(data);
 
-        //displayList();
+        displayList(data.getCount() <= 0);
     }
     /**
      * Crfate a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
@@ -338,7 +340,6 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
                             ((ICardEventListener)(activity)).OnMedicinesOpenRequired(cardId);
                         }
                     }
-                    Toast.makeText(getContext(), "Click on card="+card.getId()+" item=" +  item.getTitle(), Toast.LENGTH_SHORT).show();
                 }
             });
 

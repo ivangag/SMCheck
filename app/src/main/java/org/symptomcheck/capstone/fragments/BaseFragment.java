@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.animation.AnimationUtils;
 
 import com.activeandroid.content.ContentProvider;
 
@@ -27,6 +29,96 @@ public  abstract class BaseFragment extends Fragment {
     public final static int FRAGMENT_TYPE_MEDICINES = 3;
 
     public static final String TITLE_NONE = "";
+
+    protected boolean mListShown;
+    protected View mProgressContainer;
+    protected View mListContainer;
+    protected View mEmptyListContainer;
+
+    /**
+     * Setup the list fragment
+     *
+     * @param root
+     */
+    protected void setupListFragment(View root) {
+
+        switch (getFragmentType()){
+            case FRAGMENT_TYPE_PATIENT:
+                mListContainer = root.findViewById(R.id.card_patients_listContainer);
+                break;
+            case FRAGMENT_TYPE_DOCTORS:
+                mListContainer = root.findViewById(R.id.card_doctors_listContainer);
+                break;
+            case FRAGMENT_TYPE_CHECKIN:
+                mListContainer = root.findViewById(R.id.card_checkins_listContainer);
+                break;
+            case FRAGMENT_TYPE_MEDICINES:
+                mListContainer = root.findViewById(R.id.card_medicines_listContainer);
+                break;
+            default:
+                break;
+        }
+
+        mProgressContainer = root.findViewById(R.id.cards_progressContainer);
+        mEmptyListContainer = root.findViewById(R.id.cards_empty_list);
+        mListShown = true;
+    }
+
+    protected void displayEmptyListMessage(boolean show){
+        mEmptyListContainer.setVisibility(show ? View.VISIBLE : View.GONE);
+        mListContainer.setVisibility(show ? View.GONE : View.VISIBLE);
+    }
+    protected void displayList(boolean isEmpty){
+        if (isResumed()) {
+            setListVisibility(true,isEmpty);
+        } else {
+            setListVisibilityNoAnimation(true,isEmpty);
+        }
+    }
+
+    /**
+     * @param shown
+     * @param animate
+     * @param isEmpty
+     */
+    protected void setListShown(boolean shown, boolean animate, boolean isEmpty) {
+        if (mListShown == shown) {
+            return;
+        }
+        mListShown = shown;
+        if (shown) {
+            if (animate) {
+                mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity(), android.R.anim.fade_out));
+                mListContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity(), android.R.anim.fade_in));
+            }
+            mProgressContainer.setVisibility(View.GONE);
+            mListContainer.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+            mEmptyListContainer.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        } else {
+            if (animate) {
+                mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity(), android.R.anim.fade_in));
+                mListContainer.startAnimation(AnimationUtils.loadAnimation(
+                        getActivity(), android.R.anim.fade_out));
+            }
+            mProgressContainer.setVisibility(View.VISIBLE);
+            mListContainer.setVisibility(View.INVISIBLE);
+            mEmptyListContainer.setVisibility(View.GONE);
+        }
+    }
+    protected void hideList(boolean animate){
+        setListShown(false, animate, false);
+    }
+
+    public void setListVisibility(boolean shown, boolean isEmpty) {
+        setListShown(shown, true,isEmpty);
+    }
+
+    public void setListVisibilityNoAnimation(boolean shown, boolean isEmpty) {
+        setListShown(shown, false,isEmpty);
+    }
 
     public abstract int getFragmentType();
 
