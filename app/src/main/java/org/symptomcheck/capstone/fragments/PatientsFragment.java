@@ -172,6 +172,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
                 hideList(true);
                 refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
+                displayList(false);
                 refreshItem.setActionView(null);
             }
         }
