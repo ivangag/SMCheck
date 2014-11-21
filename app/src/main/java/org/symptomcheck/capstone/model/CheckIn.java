@@ -32,6 +32,9 @@ public class CheckIn extends Model implements IModelBuilder {
     public transient Patient patient;
     @Column
     private transient int needSync = 1;
+    
+    @Column
+    private transient String checkInUniqueId;
 
     @Column
     private String imageUrl;
@@ -142,10 +145,11 @@ public class CheckIn extends Model implements IModelBuilder {
 
     public static String getDetailedInfo(CheckIn checkIn, boolean useStoredQuestions){
         StringBuilder sb = new StringBuilder();
-        sb.append("Pain Level: " + checkIn.getIssuePainLevel()).append("\n");
-        sb.append("Feed Status: " + checkIn.getIssueFeedStatus()).append("\n");
-
-        sb.append("----------------------------\n");
+        sb.append("Pain Level: " + checkIn.getIssuePainLevel())
+        .append("\n----------------------------\n")
+        .append("Feed Status: " + checkIn.getIssueFeedStatus())
+        .append("\n----------------------------\n");
+        /*
         List<Question> questions = useStoredQuestions ? checkIn.getItemsQuestion() : checkIn.getQuestions();
         for (Question question : questions) {
             final String time = question.getMedicationTime();
@@ -156,6 +160,7 @@ public class CheckIn extends Model implements IModelBuilder {
                     .append("\n----------------------------\n");
 
         }
+        */
         return sb.toString();
     }
 

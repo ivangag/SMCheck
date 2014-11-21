@@ -259,7 +259,7 @@ public class MainActivity extends Activity implements ICardEventListener {
         boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
 
         MenuItem menuCheckInTest = menu.findItem(R.id.action_test);
-        menuCheckInTest.setVisible(false);
+        menuCheckInTest.setVisible(true);
         /*
         if((menuCheckInTest != null)
                 && (user != null)) {
@@ -505,6 +505,7 @@ public class MainActivity extends Activity implements ICardEventListener {
         int id = item.getItemId();
 
         if(id == R.id.action_test){
+            Patient.checkExperienceStatus();
             /*
             try {
                 if(DAOManager.get().getUser().getUserType().equals(UserType.DOCTOR)) {

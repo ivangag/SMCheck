@@ -15,7 +15,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -274,7 +273,6 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
             Toast.makeText(this, msgError, Toast.LENGTH_LONG).show();
         } else {
             // Save Check-In and trigger local => cloud sync
-            //executeCheckInSaving(makeCheckInFromUserChoices());
             mCheckInFromUserChoices = makeCheckInFromUserChoices();
             showDialog();
         }
@@ -386,17 +384,6 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         public CharSequence getPageTitle(int position) {
             Locale l = Locale.getDefault();
             String title = null;
-            /*
-            switch (position) {
-                case 0:
-                    return getString(R.string.pain_status).toUpperCase(l);
-                case 1:
-                    return getString(R.string.feed_status).toUpperCase(l);
-                case 2:
-                    return getString(R.string.title_section3).toUpperCase(l);
-            }
-            return null;
-            */
             if (position == 0) {
                 title = getString(R.string.pain_status).toUpperCase(l);
             } else if (position == getCount() - 1) {
@@ -410,14 +397,6 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         }
     }
 
-    public static void startCheckInFlow(Context context/*, String param1, String param2*/) {
-        Intent intent = new Intent(context, CheckInFlowActivity.class);
-        //intent.setAction(ACTION_GCM_DEVICE_REGISTRATION);
-        //intent.putExtra(EXTRA_PARAM1, param1);
-        //intent.putExtra(EXTRA_PARAM2, param2);
-        context.startService(intent);
-    }
-
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -429,7 +408,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         View medicinesQuestionsView;
         TextView txtMedicineTakingTime;
         FragmentType mFragmentType;
-        int mPositionFragment;
+        int mPageFragment;
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -482,7 +461,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
             txtMedicineTakingTime = (TextView)rootView.findViewById(R.id.txt_check_in_medicine_take_time);
 
             final CheckInFlowActivity parentActivity = ((CheckInFlowActivity)getActivity());
-            mPositionFragment = getArguments().getInt(ARG_SECTION_NUMBER);
+            mPageFragment = getArguments().getInt(ARG_SECTION_NUMBER);
 
             switch (mFragmentType){
                 case FRAGMENT_TYPE_PAIN_LEVEL:
@@ -530,7 +509,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                     });
                     break;
                 case FRAGMENT_TYPE_MEDICINES:
-                    mMedicineName = parentActivity.mMedicines.get(mPositionFragment - 2).getMedicationName();
+                    mMedicineName = parentActivity.mMedicines.get(mPageFragment - 2).getMedicationName();
                     title.setText(String.format(getString(R.string.medicine_title_question),mMedicineName));
                     medicinesQuestionsView = rootView.findViewById(R.id.viewRadioBtnMedQuestions);
                     medicinesQuestionsView.findViewById(R.id.radioBtnMedicineNO).setOnClickListener(new View.OnClickListener() {
@@ -653,7 +632,6 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                 // If we are becoming invisible, then...
                 if (!isVisibleToUser) {
                     //Log.d("MyFragment", "Not visible anymore.  Stopping audio.");
-                    // TODO stop audio playback
                     switch (fragmentType){
                         case FRAGMENT_TYPE_PAIN_LEVEL:
                             if(painQuestionsView != null){
@@ -671,10 +649,8 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                             }
                             break;
                         case FRAGMENT_TYPE_FEED_STATUS:
-
                             break;
                         case FRAGMENT_TYPE_MEDICINES:
-
                             break;
                     }
                 }

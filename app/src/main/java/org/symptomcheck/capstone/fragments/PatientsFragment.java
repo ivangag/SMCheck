@@ -369,7 +369,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
 
             //This provides a simple (and useless) expand area
             String detailedInfo = "";
-            final Patient patient = Patient.getById((long) cursor.getInt(ID_COLUMN));
+            final Patient patient = Patient.getByMedicalNumber(cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.PATIENT_ID)));
             if(patient != null) {
                 detailedInfo = Patient.getDetailedInfo(patient);
             }

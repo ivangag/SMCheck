@@ -101,7 +101,7 @@ public  abstract class BaseFragment extends Fragment {
             }
             mProgressContainer.setVisibility(View.VISIBLE);
             mListContainer.setVisibility(View.INVISIBLE);
-            mEmptyListContainer.setVisibility(View.GONE);
+            mEmptyListContainer.setVisibility(View.INVISIBLE);
         }
     }
     protected void hideList(boolean animate){

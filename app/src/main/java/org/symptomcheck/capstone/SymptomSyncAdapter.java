@@ -154,7 +154,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
      * and Patient Medications list updated from the Doctor
      * @param sync sync type to be performed
      */
-    private void updateCloudData(String sync, UserInfo user) {
+    private synchronized void updateCloudData(String sync, UserInfo user) {
         String method = new Object(){}.getClass().getEnclosingMethod().getName();
         Log.i(TAG, method);
         //if(sync.equals(ActiveContract.SYNC_NONE)) {
@@ -224,7 +224,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
      * Download data from the cloud in order to sync local repo with the remote one
      * @param sync sync type to be performed
      */
-    void updateLocalData(String sync, UserInfo user) {
+    private synchronized void updateLocalData(String sync, UserInfo user) {
         switch (user.getUserType()) {
             case DOCTOR:
                 if (sync.equals(ActiveContract.SYNC_ALL)) {
@@ -360,6 +360,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         try {
             if(patients != null){
                 List<CheckIn> checkInsToSync = CheckIn.getAllToSync();
+
                 DAOManager.get().deleteCheckIns();
                 for(Patient patient : patients){
                     List<CheckIn> checkIns = (List<CheckIn>) mSymptomClient.findCheckInsByPatient(patient.getMedicalRecordNumber());
@@ -395,12 +396,14 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         try {
             if(patients != null){
                 List<PainMedication> medicationsToSync = PainMedication.getAllToSync();
+
                 DAOManager.get().deleteMedicines();
                 for(Patient patient : patients){
                     List<PainMedication> medications = (List<PainMedication>) mSymptomClient.findPainMedicationsByPatient(patient.getMedicalRecordNumber());
                     medications.addAll(medicationsToSync);
-                    if((medications.size() > 0))
-                        DAOManager.get().savePainMedications(medications, patient.getMedicalRecordNumber(),false);
+                    if((medications.size() > 0)) {
+                        DAOManager.get().savePainMedications(medications, patient.getMedicalRecordNumber(), false);
+                    }
                 }
             }else {
                 Log.e(TAG, "syncPatientsMedicines=> sync not possible: patients = null!");

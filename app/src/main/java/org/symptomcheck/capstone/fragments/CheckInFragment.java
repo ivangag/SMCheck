@@ -49,9 +49,13 @@ import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.CheckIn;
+import org.symptomcheck.capstone.model.FeedStatus;
+import org.symptomcheck.capstone.model.PainLevel;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
+import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.DateTimeUtils;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
@@ -181,20 +185,15 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
     private void init() {
 
         final Long patientId = getArguments().getLong(ARG_PATIENT_ID);
-
         if((patientId > 0)){
             mPatientOwner = Patient.getById(patientId);
             mSelectionQuery =  ActiveContract.CHECKIN_COLUMNS.PATIENT + " = "  + patientId;
         }else if (DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)){
             mPatientOwner = Patient.getByMedicalNumber(DAOManager.get().getUser().getUserIdentification());
         }
-        //Vehicle vehicle = new Vehicle();
-        //vehicle.setVIN("VIN" + count);
-        //long count = vehicle.save();
         mAdapter = new CheckinCursorCardAdapter(getActivity());
 
         mListView = (CardListView) getActivity().findViewById(R.id.card_checkins_list_cursor);
-        //mListView.setEmptyView(getActivity().findViewById(android.R.id.empty));
         if (mListView != null) {
             mListView.setAdapter(mAdapter);
         }
@@ -231,6 +230,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         mAdapter.swapCursor(data);
 
         displayList(data.getCount() <= 0);
+        OnFilterData(Costants.STRINGS.EMPTY);
         //displayList();
     }
     @Override
@@ -373,13 +373,17 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             //This provides a simple (and useless) expand area
 
             String mDetailedCheckInInfo = "";
-            final CheckIn checkIn = CheckIn.getById(cursor.getInt(ID_COLUMN));
-            if(checkIn != null) {
-                card.secondaryTitle = checkIn.getIssueDateTimeClear();// + " (" + checkIn.getIssueDateTime() + ")"; // fromMilliseconds.format("YYYY-MM-DD hh:ss");
-                mDetailedCheckInInfo = CheckIn.getDetailedInfo(checkIn, true);
-            }
+            final String painLevel = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL));
+            final String feedStatus = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS));
+            final String instantIssueTime = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME));
+            //final CheckIn checkIn = CheckIn.getById(cursor.getInt(ID_COLUMN));
+            ///if(checkIn != null) {
+                card.secondaryTitle = DateTimeUtils.convertEpochToHumanTime(instantIssueTime);
+                mDetailedCheckInInfo = CheckIn.getDetailedInfo(new CheckIn(instantIssueTime,
+                        PainLevel.valueOf(painLevel), FeedStatus.valueOf(feedStatus) ), true);
+            //}
             CustomExpandCard expand = new CustomExpandCard(super.getContext(),mDetailedCheckInInfo);
-            expand.setTitle("Check-In Details");
+            //expand.setTitle("Check-In Details");
             //Add Expand Area to Card
             card.addCardExpand(expand);
 
