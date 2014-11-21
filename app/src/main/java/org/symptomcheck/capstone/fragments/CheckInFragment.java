@@ -352,7 +352,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
             String mDetailedCheckInInfo = "";
             if(checkIn != null) {
-                card.secondaryTitle = DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime());
+                card.secondaryTitle = DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Costants.TIME.DEFAULT_FORMAT);
                 mDetailedCheckInInfo = CheckIn.getDetailedInfo(checkIn,true);
             }
             // Add expand card

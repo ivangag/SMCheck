@@ -28,6 +28,7 @@ import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.ui.MainActivity;
+import org.symptomcheck.capstone.utils.Costants;
 import org.symptomcheck.capstone.utils.NotificationHelper;
 
 /**
@@ -62,10 +63,10 @@ public class GcmIntentService extends IntentService {
              */
             if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
                 NotificationHelper.sendNotification(getApplicationContext(),NOTIFICATION_ID,
-                        "Gcm message","Send error: " + extras.toString(),MainActivity.class,false);
+                        "Gcm message","Send error: " + extras.toString(),MainActivity.class,false,Costants.STRINGS.EMPTY,null);
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
                 NotificationHelper.sendNotification(getApplicationContext(),NOTIFICATION_ID,
-                        "Gcm message","Deleted messages on server: " + extras.toString(),MainActivity.class,false);
+                        "Gcm message","Deleted messages on server: " + extras.toString(),MainActivity.class,false, Costants.STRINGS.EMPTY,null);
             // If it's a regular GCM message, do some work.
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
 
@@ -79,7 +80,7 @@ public class GcmIntentService extends IntentService {
 
                 // Post notification of received message.
                 NotificationHelper.sendNotification(getApplicationContext(),NOTIFICATION_ID,
-                        "Gcm message", "Received: " + extras.toString(), MainActivity.class,false);
+                        "Gcm message", "Received: " + extras.toString(), MainActivity.class,false,Costants.STRINGS.EMPTY,null);
             }
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.

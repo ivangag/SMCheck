@@ -26,6 +26,7 @@ import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.activeandroid.query.Update;
 import com.squareup.picasso.Picasso;
 
 import org.symptomcheck.capstone.R;
@@ -45,6 +46,8 @@ import org.symptomcheck.capstone.model.PatientExperience;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.preference.UserPreferencesManager;
+import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.NotificationHelper;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -504,9 +507,26 @@ public class MainActivity extends Activity implements ICardEventListener {
         int id = item.getItemId();
 
         if(id == R.id.action_test){
-            List<PatientExperience> patientExperiences = PatientExperience.checkBadExperiences();
-            for (PatientExperience patientExperience : patientExperiences){
-                Log.d(TAG,"BadExperience: " + patientExperience.toString() + "\n");
+            List<PatientExperience> newBadPatientExperiences = PatientExperience.checkBadExperiences();
+            DAOManager.get().savePatientExperiences(newBadPatientExperiences);
+            for (PatientExperience experience : newBadPatientExperiences){
+                Log.d(TAG,"NewBadExperiences: " + experience.toString());
+            }
+            newBadPatientExperiences = PatientExperience.getAllNotSeen();
+            for (PatientExperience experience : newBadPatientExperiences){
+                Log.d(TAG,String.format("NotSeenExperiences: " + experience.toString()));
+            }
+            if(newBadPatientExperiences.size() > 0){
+                PatientExperience experience = newBadPatientExperiences.get(0);
+                (new Update(PatientExperience.class))
+                        .set("checkedByDoctor = 1")
+                        .where("_id = ?", experience.getId())
+                        .execute();
+                Bundle data = new Bundle();
+                data.putString("EXPERIENCE_ID",experience.getExperienceId());
+                NotificationHelper.sendNotification(this, 3,
+                        "Bad Patient Experience", "Experience of one or more Patients require your attention",
+                        SettingsActivity.class, true, "BAD_EXPERIENCE",data);
             }
             /*
             try {

@@ -14,6 +14,7 @@ import com.google.gson.GsonBuilder;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.ui.LoginActivity;
+import org.symptomcheck.capstone.utils.Costants;
 import org.symptomcheck.capstone.utils.NotificationHelper;
 import org.symptomcheck.capstone.preference.UserPreferencesManager;
 
@@ -173,7 +174,8 @@ public class DownloadHelper {
             UserPreferencesManager.get().setLogged(context,false);
             UserPreferencesManager.get().setBearerToken(context, "");
             NotificationHelper.sendNotification(context, 2,
-                    "Login", "Your session is expired. Please re-enter credential", LoginActivity.class, true);
+                    "Login", "Your session is expired. Please re-enter credential",
+                    LoginActivity.class, true, Costants.STRINGS.EMPTY,null);
         }
     }
 }

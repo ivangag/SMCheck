@@ -379,7 +379,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
                 detailedInfo = Patient.getDetailedInfo(patient);
             }
             CustomExpandCard expand = new CustomExpandCard(super.getContext(), detailedInfo);
-            expand.setTitle("Patient Details");
+            //expand.setTitle("Patient Details");
             //Add Expand Area to Card
             card.addCardExpand(expand);
 

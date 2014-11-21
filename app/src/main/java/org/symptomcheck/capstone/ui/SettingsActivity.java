@@ -19,7 +19,9 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.RingtonePreference;
+import android.support.v4.app.NavUtils;
 import android.text.TextUtils;
+import android.view.MenuItem;
 import android.view.View;
 
 import org.symptomcheck.capstone.R;
@@ -69,6 +71,7 @@ public class SettingsActivity extends Activity {
 
         setContentView(R.layout.activity_settings);
 
+        getActionBar().setDisplayHomeAsUpEnabled(true);
         // Display the fragment as the main content.
 
         // here we would customize Settings Screen according to User type (PATIENT, DOCTOR, ADMIN)
@@ -104,6 +107,16 @@ public class SettingsActivity extends Activity {
         fragmentTransaction.commit();
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     /**
      * Shows the simplified activity_settings UI if the device configuration if the

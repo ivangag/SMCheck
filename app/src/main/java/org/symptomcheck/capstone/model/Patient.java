@@ -18,6 +18,7 @@ import com.google.common.collect.Lists;
 
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.DateTimeUtils;
 
 import hirondelle.date4j.DateTime;
 
@@ -130,7 +131,8 @@ public class Patient extends Model implements IModelBuilder{
 	
 	@Override
 	public String toString() {
-		return "Name: " + this.firstName + " "+ this.lastName + " - Medical Number; " + this.medicalRecordNumber;
+		return "Name: " + this.firstName + " "+ this.lastName +
+                " - Medical Number; " + this.medicalRecordNumber;
 	}
 
 	/**
@@ -206,8 +208,7 @@ public class Patient extends Model implements IModelBuilder{
         sb.append("\n----------------------------\n");
         sb.append("MedicalNumber: ").append(patient.getMedicalRecordNumber());
         sb.append("\n----------------------------\n");
-        sb.append("BirthDate: ").append(patient.getBirthDateClear());
-        sb.append("\n----------------------------\n");
+        sb.append("BirthDate: ").append(DateTimeUtils.convertEpochToHumanTime(patient.getBirthDate(),"DD/MM/YYYY"));
 
         return sb.toString();
     }

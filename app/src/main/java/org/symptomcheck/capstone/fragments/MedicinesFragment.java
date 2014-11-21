@@ -137,7 +137,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                 SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_MEDICINES);
                 return true;
             case R.id.action_add_medicines:
-                showInsertNewMedicationDialog(mPatientOwner.getMedicalRecordNumber());
+                showInsertNewMedicationDialog(mPatientOwner);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -363,12 +363,12 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
 
 
-    private void showInsertNewMedicationDialog(final String patientMedicalNumber) {
+    private void showInsertNewMedicationDialog(final Patient patient) {
         final Dialog dialog = new Dialog(getActivity());
 
         dialog.setContentView(R.layout.custom_dialog_add_medication);
 
-        dialog.setTitle("New Pain Medication");
+        dialog.setTitle(String.format("Medicine for %s",patient.getLastName()));
 
         dialog.show();
 
@@ -412,7 +412,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
                 boolean existMedication = false;
                 //check if medication exists for the Patient
-                List<PainMedication> medications = PainMedication.getAll(patientMedicalNumber);
+                List<PainMedication> medications = PainMedication.getAll(patient.getMedicalRecordNumber());
 
                 for (PainMedication medication : medications) {
                     existMedication = medication.getMedicationName().toUpperCase()
@@ -449,12 +449,15 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
     public static class AlertMedicationDeleteFragment extends DialogFragment {
 
-        public static AlertMedicationDeleteFragment newInstance(int title,String message, String medicationName) {
+        public static AlertMedicationDeleteFragment newInstance(
+                int title,String message, String medicationName, String productId, Long baseId) {
             AlertMedicationDeleteFragment frag = new AlertMedicationDeleteFragment();
             Bundle args = new Bundle();
             args.putInt("title", title);
             args.putString("message", message);
             args.putString("medication", medicationName);
+            args.putString("productId", productId);
+            args.putLong("baseId", baseId);
             frag.setArguments(args);
             return frag;
         }
@@ -464,6 +467,8 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             final int title = getArguments().getInt("title");
             final String message = getArguments().getString("message");
             final String medicationName = getArguments().getString("medication");
+            final String productId = getArguments().getString("productId");
+            final Long id = getArguments().getLong("baseId");
 
             return new AlertDialog.Builder(getActivity())
                     .setIcon(R.drawable.ic_medicine)
@@ -473,7 +478,10 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {
-                                    Toast.makeText(getActivity(),"Medication " + medicationName + " removed successfully",Toast.LENGTH_SHORT).show();
+                                    //PainMedication.delete(PainMedication.class,id);
+                                    SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_MEDICINES);
+                                    Toast.makeText(getActivity(),"Medication "
+                                            + medicationName + " (" + id + ")" + " removed successfully",Toast.LENGTH_SHORT).show();
 
                                 }
                             })
@@ -509,7 +517,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                             if(painMedicationRes) {
                                 Toast.makeText(getActivity(), "Medication added correctly", Toast.LENGTH_LONG).show();
                                 Log.i("AddNewMedication", "Medication " + medication.getMedicationName() + " Patient: " + medication.getPatientMedicalNumber());
-                                ((IFragmentListener)MedicinesFragment.this).OnFilterData(Costants.STRINGS.EMPTY);
+                                MedicinesFragment.this.OnFilterData(Costants.STRINGS.EMPTY);
                             }else {
                                 Toast.makeText(getActivity(), "Error", Toast.LENGTH_LONG).show();
                             }
@@ -574,7 +582,8 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                     final String mMedicineName = ((MedicineCursorCard) card).mainTitle;
                     if (id == R.id.menu_pop_delete_medicine) {
                         AlertMedicationDeleteFragment.newInstance(R.id.txt_medication_delete,
-                                "Are you sure to delete " + mMedicineName + " ?", mMedicineName)
+                                "Are you sure to delete " + mMedicineName + " ?", mMedicineName,
+                                painMedication.getProductId(), painMedication.getId())
                                 .show(getFragmentManager(), "Alert_Medication_Delete");
                     }
                     //Toast.makeText(getContext(), "Click on card="+card.getId()+" item=" +  item.getTitle(), Toast.LENGTH_SHORT).show();

@@ -96,9 +96,9 @@
 
     <string name="pref_title_checkin_frequency">Check-In Reminder frequency</string>
     <string-array name="pref_checkin_frequency_titles">
-        <item>4 time per day</item>
-        <item>5 time per day</item>
-        <item>6 time per day</item>
+        <item>4 times a day</item>
+        <item>5 times a day</item>
+        <item>6 times a day</item>
     </string-array>
     <string-array name="pref_checkin_frequency_values">
     <item>4</item>

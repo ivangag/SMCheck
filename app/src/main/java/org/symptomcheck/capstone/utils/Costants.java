@@ -6,10 +6,11 @@ package org.symptomcheck.capstone.utils;
 public class Costants {
 
     public final static class STRINGS{
-        public final static String EMPTY = "";
+        public static final String EMPTY = "";
     }
 
     public final static class TIME {
-        public final static String GMT00 = "GMT+00";
+        public static final String GMT00 = "GMT+00";
+        public static final String DEFAULT_FORMAT = STRINGS.EMPTY;
     }
 }

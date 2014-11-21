@@ -223,7 +223,7 @@ public class CheckIn extends Model implements IModelBuilder {
                 .execute().size();
     }
 
-    public static int getCountFromMidNight(){
+    public static int getCountInThisDay(){
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, 0);

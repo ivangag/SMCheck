@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 
 import org.symptomcheck.capstone.R;
@@ -31,12 +32,25 @@ public class NotificationHelper {
     // Put the message into a notification and post it.
     // This is just one simple example of what you might choose to do with
     // a GCM message.
-    public static void sendNotification(Context context, int NOTIFICATION_ID,
-                                        String titleMsg, String msg, Class<?> pendingIntClass, boolean cancelAllPresent) {
+    public static void sendNotification(Context context,
+                                        int NOTIFICATION_ID,
+                                        String titleMsg,
+                                        String msg,
+                                        Class<?> pendingIntClass,
+                                        boolean cancelAllPresent,
+                                        String action,
+                                        Bundle data) {
         NotificationManager mNotificationManager = (NotificationManager)
                 context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         Intent notificationIntent = new Intent(context, pendingIntClass);
+        if(!action.isEmpty()){
+            notificationIntent.setAction(action);
+        }
+        if(data != null){
+            notificationIntent.putExtras(data);
+        }
+
         //
         if(cancelAllPresent)
             notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);

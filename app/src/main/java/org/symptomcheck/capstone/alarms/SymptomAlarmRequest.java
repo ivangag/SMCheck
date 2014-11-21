@@ -23,9 +23,6 @@ import hirondelle.date4j.DateTime;
  */
 public class SymptomAlarmRequest {
 
-    public static int ALARM_REMINDER;
-    public static int ALARM_CHECK_ALERTS;
-
     public enum AlarmRequestedType{
         ALARM_CHECK_IN_REMINDER,
         ALARM_CHECK_ALERTS
@@ -70,11 +67,10 @@ public class SymptomAlarmRequest {
         }
     }
 
-    // BEGIN_INCLUDE(set_alarm)
     /**
-     * Sets a repeating alarm that runs once a day at approximately 8:30 a.m. When the
+     * Sets a repeating alarm that runs N times a day at time chosen by Patient (e.g. 8:30 a.m.) When the
      * alarm fires, the app broadcasts an Intent to this WakefulBroadcastReceiver.
-     * @param context
+     * @param context Context
      */
     private void setReminderAlarm(Context context) {
 
@@ -85,14 +81,11 @@ public class SymptomAlarmRequest {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        // Set the alarm's trigger time to 8:30 a.m.
-        //calendar.set(Calendar.HOUR_OF_DAY, 8);
-        //calendar.set(Calendar.MINUTE, 30);
 
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
-        long millisecondsTo24 = calendar.getTimeInMillis();
+        long timeMissingToEndOfDay = calendar.getTimeInMillis();
 
         final int checkInPeriodicity =  UserPreferencesManager.get().getCheckInTimes(context);
         final int hour =  UserPreferencesManager.get().getStartCheckInHour(context);
@@ -100,26 +93,22 @@ public class SymptomAlarmRequest {
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, minutes);
         calendar.set(Calendar.SECOND, 0);
-        long millisecondsStartTime = calendar.getTimeInMillis();
-        boolean setNextDay =  DateTime.now(TimeZone.getDefault()).getMilliseconds(TimeZone.getDefault())
-                              >  millisecondsStartTime;
 
-        long diffTo24 = ((millisecondsTo24 - millisecondsStartTime));
-        long intervalRepeatFrequency =  diffTo24 / checkInPeriodicity;
+        long timeOfNextStart = calendar.getTimeInMillis();
+        final long timeRemainingToEndOfDay = ((timeMissingToEndOfDay - timeOfNextStart));
+        final long intervalRepeatFrequency =  timeRemainingToEndOfDay / checkInPeriodicity;
+        boolean setNextDay =
+                (DateTime.now(TimeZone.getDefault()).getMilliseconds(TimeZone.getDefault()) >  timeOfNextStart)
+                || (CheckIn.getCountInThisDay() >= UserPreferencesManager.get().getCheckInTimes(context));
 
-        if(CheckIn.getCountFromMidNight() >= UserPreferencesManager.get().getCheckInTimes(context)){
-            setNextDay = true;
-        }
-
-        millisecondsStartTime = calendar.getTimeInMillis() + (setNextDay ? AlarmManager.INTERVAL_DAY : 0);
+        timeOfNextStart = timeOfNextStart + (setNextDay ? AlarmManager.INTERVAL_DAY : 0);
 
         Log.d(TAG,
                 "checkInPeriodicity: " + checkInPeriodicity + " - " +
                 "time: " + hour + ":" + minutes +
                 " - intervalRepeatFrequency: " + intervalRepeatFrequency +
-                " - millisecondsStartTime: " + millisecondsStartTime +
+                " - timeOfNextStart: " + timeOfNextStart +
                 " - setNextDay? " + (setNextDay ? "YES"  :"NO")
-
         );
 
         /*
@@ -166,8 +155,7 @@ public class SymptomAlarmRequest {
         // Set the alarm to fire at approximately Start Check-In Time chosen by Patient, according to the device's
         // clock, and to repeat once a day.
         alarmReminderMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP,
-                millisecondsStartTime,
-                //AlarmManager.INTERVAL_DAY,
+                timeOfNextStart,
                 intervalRepeatFrequency,
                 alarmReminderIntent);
         /*
@@ -176,32 +164,29 @@ public class SymptomAlarmRequest {
                 SystemClock.elapsedRealtime() +
                         15 * 1000, alarmReminderIntent);*/
 
-        // Enable {@code SampleBootReceiver} to automatically restart the alarm when the
+        // Enable {@code SymptomBootReceiver} to automatically restart the alarm when the
         // device is rebooted.
         ComponentName receiver = new ComponentName(context, SymptomBootReceiver.class);
         PackageManager pm = context.getPackageManager();
-        //AlarmManager.INTERVAL_DAY / N
         pm.setComponentEnabledSetting(receiver,
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                 PackageManager.DONT_KILL_APP);
 
 
-        Log.i(TAG, "setReminderAlarm...");
+        Log.i(TAG, "setReminderAlarm");
     }
-    // END_INCLUDE(set_alarm)
 
     /**
      * Cancels the alarm.
-     * @param context
+     * @param context Context
      */
-    // BEGIN_INCLUDE(cancel_alarm)
     private void cancelReminderAlarm(Context context) {
         // If the alarm has been set, cancel it.
         if (alarmReminderMgr != null) {
             alarmReminderMgr.cancel(alarmReminderIntent);
         }
 
-        // Disable {@code SampleBootReceiver} so that it doesn't automatically restart the
+        // Disable {@code SymptomBootReceiver} so that it doesn't automatically restart the
         // alarm when the device is rebooted.
         ComponentName receiver = new ComponentName(context, SymptomBootReceiver.class);
         PackageManager pm = context.getPackageManager();
@@ -212,5 +197,5 @@ public class SymptomAlarmRequest {
 
         Log.i(TAG,"cancelReminderAlarm");
     }
-    // END_INCLUDE(cancel_alarm)
+
 }
