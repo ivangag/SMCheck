@@ -3,6 +3,9 @@ package org.symptomcheck.capstone.preference;
 import android.content.Context;
 import android.preference.PreferenceManager;
 
+import org.symptomcheck.capstone.SyncUtils;
+import org.symptomcheck.capstone.utils.Costants;
+
 /**
  * Created by igaglioti on 06/11/2014.
  */
@@ -15,8 +18,17 @@ public class UserPreferencesManager {
     private static final String PROPERTY_BEARER_TOKEN = "bearer_token";
     private static final String PROPERTY_APP_VERSION = "app_version";
     private static final String PROPERTY_IS_LOGGED = "is_logged" ;
+
+    public static final String KEY_CHECK_IN_FREQ = "checkin_frequency";
+    public static final String KEY_CHECK_IN_START = "checkin_start_time";
+    public static final String KEY_SYNC_FREQ = "sync_frequency";
+    public static final String KEY_SYNC_ONLY_WIFI = "sync_only_wifi";
+    public static final String KEY_NEW_NOTIFICATIONS_ALERT = "notifications_new_message";
     private static UserPreferencesManager ourInstance = new UserPreferencesManager();
     private static Context mContext;
+
+    public static final int DEFAULT_CHECK_IN_TIMES = 4;
+
 
 
     public static UserPreferencesManager get() {
@@ -40,6 +52,65 @@ public class UserPreferencesManager {
     public boolean getLoginRememberMe(Context context){
        return PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean(REMEMBER_LOGIN, false);
+    }
+    public int getStartCheckInHour(Context context){
+       int hour = 8;
+       String hourStr = PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(KEY_CHECK_IN_START, Costants.STRINGS.EMPTY);
+        if(!hourStr.isEmpty()
+            && hourStr.contains(":")){
+            try {
+                hour = Integer.valueOf(hourStr.substring(0, hourStr.indexOf(':')));
+            }catch (Exception ignored){
+            }
+        }
+        return hour;
+    }
+    public int getStartCheckInMinute(Context context){
+        int minute = 0;
+        String minuteStr = PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(KEY_CHECK_IN_START, Costants.STRINGS.EMPTY);
+        if(!minuteStr.isEmpty()
+                && minuteStr.contains(":")){
+            try {
+                minute = Integer.valueOf(minuteStr.substring(minuteStr.indexOf(':') + 1));
+            }catch (Exception ignored){
+            }
+        }
+        return minute;
+    }
+
+    /**
+     * Get minutes (in seconds) of Syncing frequency chosen by User
+     * @param context Context
+     * @return Minutes in seconds (e.g. for 3 minutes it returns 180 seconds)
+     */
+    public int getCheckInTimes(Context context){
+        int times = DEFAULT_CHECK_IN_TIMES;
+        String str = PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(KEY_CHECK_IN_FREQ, Costants.STRINGS.EMPTY);
+        if(!str.isEmpty()){
+            times = Integer.valueOf(str);
+        }
+        return times;
+    }
+
+    /**
+     * Get minutes (in seconds) of Syncing frequency chosen by User
+     * @param context Context
+     * @return Minutes in seconds (e.g. for 3 minutes it returns 180 seconds)
+     */
+    public long getSyncFrequency(Context context){
+        long minutes = SyncUtils.SYNC_FREQUENCY;
+        String minuteStr = PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(KEY_SYNC_FREQ, Costants.STRINGS.EMPTY);
+        if(!minuteStr.isEmpty()){
+            try {
+                minutes = Integer.valueOf(minuteStr) * 60;
+            }catch (Exception ignored){
+            }
+        }
+        return minutes;
     }
 
     /*

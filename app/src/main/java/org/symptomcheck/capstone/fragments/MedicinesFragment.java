@@ -70,6 +70,7 @@ import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.utils.Costants;
 
 import java.util.List;
+import java.util.UUID;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
@@ -206,6 +207,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                 refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
                 displayList(false);
+                OnFilterData(Costants.STRINGS.EMPTY);
                 refreshItem.setActionView(null);
             }
         }
@@ -279,6 +281,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
         mAdapter.swapCursor(data);
 
         displayList(data.getCount() <= 0);
+        OnFilterData(Costants.STRINGS.EMPTY);
     }
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
@@ -427,7 +430,14 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                     textView_error_message.setText(getString(R.string.txt_error_medication_empty));
                 } else {
                     //Toast.makeText(getActivity(), "New Medication inserted successfully: " + medicationName.toUpperCase(), Toast.LENGTH_SHORT).show();
-                    executePainMedicationsUpdate(getActivity(),new PainMedication(medicationName,"",mPatientOwner.getMedicalRecordNumber()));
+                    PainMedication.Builder builder = (new PainMedication.Builder());
+                    executePainMedicationsUpdate(getActivity(), builder.setMedicationName(medicationName)
+                            .setLastTakingDateTime("")
+                            .setPatientMedicalNumber(mPatientOwner.getMedicalRecordNumber())
+                            .setProductId(UUID.randomUUID().toString())
+                            .Build()
+                            //new PainMedication(medicationName,"",mPatientOwner.getMedicalRecordNumber())
+                    );
                     dialog.dismiss();
                 }
 
@@ -543,6 +553,8 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
         @Override
         protected Card getCardFromCursor(Cursor cursor) {
+
+            final PainMedication painMedication = PainMedication.getByProductId(cursor.getString(cursor.getColumnIndex(ActiveContract.MEDICINES_COLUMNS.PRODUCT_ID)));
             MedicineCursorCard card = new MedicineCursorCard(super.getContext());
             setCardFromCursor(card,cursor);
 
@@ -605,7 +617,6 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
             //This provides a simple (and useless) expand area
             String detailedMedicineInfo  = "";
-            final PainMedication painMedication = PainMedication.getById(cursor.getInt(ID_COLUMN));
             if(painMedication != null) {
                 //card.secondaryTitle = painMedication.getIssueDateTimeClear(); // fromMilliseconds.format("YYYY-MM-DD hh:ss");
                 detailedMedicineInfo = PainMedication.getDetailedInfo(painMedication);

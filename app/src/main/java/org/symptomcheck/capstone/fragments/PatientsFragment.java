@@ -55,6 +55,7 @@ import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
+import org.symptomcheck.capstone.utils.Costants;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
@@ -176,6 +177,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
                 refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
                 displayList(false);
+                OnFilterData(Costants.STRINGS.EMPTY);
                 refreshItem.setActionView(null);
             }
         }
@@ -226,6 +228,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         mAdapter.swapCursor(data);
 
         displayList(data.getCount() <= 0);
+        OnFilterData(Costants.STRINGS.EMPTY);
     }
     /**
      * Crfate a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
@@ -319,6 +322,8 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
 
         @Override
         protected Card getCardFromCursor(Cursor cursor) {
+
+            final Patient patient = Patient.getByMedicalNumber(cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.PATIENT_ID)));
             PatientCursorCard card = new PatientCursorCard(super.getContext());
             setCardFromCursor(card,cursor);
 
@@ -332,17 +337,18 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
                 @Override
                 public void onMenuItemClick(BaseCard card, MenuItem item) {
                     int id = item.getItemId();
+                    long ownerId = patient.getId();
                     Activity activity = getActivity();
-                    Long cardId = Long.valueOf(card.getId());
+                    //Long cardId = Long.valueOf(card.getId());
                     if(id == R.id.menu_pop_open_check_ins){
                         if((activity != null)
                             && (activity instanceof ICardEventListener)){
-                            ((ICardEventListener)(activity)).OnCheckInOpenRequired(cardId);
+                            ((ICardEventListener)(activity)).OnCheckInOpenRequired(ownerId);
                         }
                     }else if(id == R.id.menu_pop_open_medicines){
                         if((activity != null)
                                 && (activity instanceof ICardEventListener)){
-                            ((ICardEventListener)(activity)).OnMedicinesOpenRequired(cardId);
+                            ((ICardEventListener)(activity)).OnMedicinesOpenRequired(ownerId);
                         }
                     }
                 }
@@ -369,7 +375,6 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
 
             //This provides a simple (and useless) expand area
             String detailedInfo = "";
-            final Patient patient = Patient.getByMedicalNumber(cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.PATIENT_ID)));
             if(patient != null) {
                 detailedInfo = Patient.getDetailedInfo(patient);
             }

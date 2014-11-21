@@ -6,14 +6,17 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.SystemClock;
 import android.util.Log;
 
 import org.symptomcheck.capstone.dao.DAOManager;
+import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.UserType;
-import org.symptomcheck.capstone.network.DownloadHelper;
+import org.symptomcheck.capstone.preference.UserPreferencesManager;
 
 import java.util.Calendar;
+import java.util.TimeZone;
+
+import hirondelle.date4j.DateTime;
 
 /**
  * Created by igaglioti on 05/11/2014.
@@ -24,7 +27,7 @@ public class SymptomAlarmRequest {
     public static int ALARM_CHECK_ALERTS;
 
     public enum AlarmRequestedType{
-        ALARM_REMINDER,
+        ALARM_CHECK_IN_REMINDER,
         ALARM_CHECK_ALERTS
     }
 
@@ -44,7 +47,7 @@ public class SymptomAlarmRequest {
 
     public void setAlarm(Context ctx,AlarmRequestedType alarmRequestedType){
         switch (alarmRequestedType){
-            case ALARM_REMINDER:
+            case ALARM_CHECK_IN_REMINDER:
                 if(DAOManager.get().getUser().getUserType() == UserType.PATIENT)
                     setReminderAlarm(ctx);
                 break;
@@ -57,7 +60,7 @@ public class SymptomAlarmRequest {
 
     public void cancelAlarm(Context ctx,AlarmRequestedType alarmRequestedType){
         switch (alarmRequestedType){
-            case ALARM_REMINDER:
+            case ALARM_CHECK_IN_REMINDER:
                 cancelReminderAlarm(ctx);
                 break;
             case ALARM_CHECK_ALERTS:
@@ -79,11 +82,45 @@ public class SymptomAlarmRequest {
         Intent intent = new Intent(context, ReminderReceiver.class);
         alarmReminderIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
+
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
         // Set the alarm's trigger time to 8:30 a.m.
-        calendar.set(Calendar.HOUR_OF_DAY, 8);
-        calendar.set(Calendar.MINUTE, 30);
+        //calendar.set(Calendar.HOUR_OF_DAY, 8);
+        //calendar.set(Calendar.MINUTE, 30);
+
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        long millisecondsTo24 = calendar.getTimeInMillis();
+
+        final int checkInPeriodicity =  UserPreferencesManager.get().getCheckInTimes(context);
+        final int hour =  UserPreferencesManager.get().getStartCheckInHour(context);
+        final int minutes =  UserPreferencesManager.get().getStartCheckInMinute(context);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minutes);
+        calendar.set(Calendar.SECOND, 0);
+        long millisecondsStartTime = calendar.getTimeInMillis();
+        boolean setNextDay =  DateTime.now(TimeZone.getDefault()).getMilliseconds(TimeZone.getDefault())
+                              >  millisecondsStartTime;
+
+        long diffTo24 = ((millisecondsTo24 - millisecondsStartTime));
+        long intervalRepeatFrequency =  diffTo24 / checkInPeriodicity;
+
+        if(CheckIn.getCountFromMidNight() >= UserPreferencesManager.get().getCheckInTimes(context)){
+            setNextDay = true;
+        }
+
+        millisecondsStartTime = calendar.getTimeInMillis() + (setNextDay ? AlarmManager.INTERVAL_DAY : 0);
+
+        Log.d(TAG,
+                "checkInPeriodicity: " + checkInPeriodicity + " - " +
+                "time: " + hour + ":" + minutes +
+                " - intervalRepeatFrequency: " + intervalRepeatFrequency +
+                " - millisecondsStartTime: " + millisecondsStartTime +
+                " - setNextDay? " + (setNextDay ? "YES"  :"NO")
+
+        );
 
         /*
          * If you don't have precise time requirements, use an inexact repeating alarm
@@ -126,10 +163,18 @@ public class SymptomAlarmRequest {
         /*alarmReminderMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
                 1000 * 30 * 1, alarmReminderIntent);*/
 
+        // Set the alarm to fire at approximately Start Check-In Time chosen by Patient, according to the device's
+        // clock, and to repeat once a day.
+        alarmReminderMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+                millisecondsStartTime,
+                //AlarmManager.INTERVAL_DAY,
+                intervalRepeatFrequency,
+                alarmReminderIntent);
+        /*
         // Wake up the device to fire a one-time alarm in one minute.
         alarmReminderMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() +
-                        15 * 1000, alarmReminderIntent);
+                        15 * 1000, alarmReminderIntent);*/
 
         // Enable {@code SampleBootReceiver} to automatically restart the alarm when the
         // device is rebooted.

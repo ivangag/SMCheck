@@ -14,30 +14,24 @@ import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
 import org.symptomcheck.capstone.R;
-import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.adapters.DrawerItem;
 import org.symptomcheck.capstone.adapters.DrawerItemAdapter;
+import org.symptomcheck.capstone.alarms.SymptomAlarmRequest;
 import org.symptomcheck.capstone.bus.DownloadEvent;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.fragments.CheckInFragment;
@@ -47,25 +41,16 @@ import org.symptomcheck.capstone.fragments.IFragmentListener;
 import org.symptomcheck.capstone.fragments.MedicinesFragment;
 import org.symptomcheck.capstone.fragments.PatientsFragment;
 import org.symptomcheck.capstone.model.CheckIn;
-import org.symptomcheck.capstone.model.FeedStatus;
-import org.symptomcheck.capstone.model.PainLevel;
-import org.symptomcheck.capstone.model.PainMedication;
-import org.symptomcheck.capstone.model.Patient;
-import org.symptomcheck.capstone.model.Question;
+import org.symptomcheck.capstone.model.PatientExperience;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
-import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.preference.UserPreferencesManager;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
 
 import de.greenrobot.event.EventBus;
-import hirondelle.date4j.DateTime;
 
 
 public class MainActivity extends Activity implements ICardEventListener {
@@ -126,6 +111,7 @@ public class MainActivity extends Activity implements ICardEventListener {
         mTitle = mDrawerTitle = getTitle();
 
         user = DAOManager.get().getUser();
+
 
         if(user != null) {
             initUserResource();
@@ -343,7 +329,20 @@ public class MainActivity extends Activity implements ICardEventListener {
     private void openSettings(){
         //SettingsActivity.startSettingActivity(getApplicationContext());
         Intent intent = new Intent(this,SettingsActivity.class);
-        startActivity(intent);
+        //startActivity(intent);
+        startActivityForResult(intent, SettingsActivity.MODIFY_USER_SETTINGS);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == SettingsActivity.MODIFY_USER_SETTINGS) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                Log.d(TAG,"!!User Settings Modified!!");
+                SymptomAlarmRequest.get().setAlarm(this, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
+            }
+        }
     }
 
     private void askForLogout(DialogFragment logoutFragment){
@@ -505,7 +504,10 @@ public class MainActivity extends Activity implements ICardEventListener {
         int id = item.getItemId();
 
         if(id == R.id.action_test){
-            Patient.checkExperienceStatus();
+            List<PatientExperience> patientExperiences = PatientExperience.checkBadExperiences();
+            for (PatientExperience patientExperience : patientExperiences){
+                Log.d(TAG,"BadExperience: " + patientExperience.toString() + "\n");
+            }
             /*
             try {
                 if(DAOManager.get().getUser().getUserType().equals(UserType.DOCTOR)) {

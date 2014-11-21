@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import hirondelle.date4j.DateTime;
 
@@ -33,8 +34,8 @@ public class CheckIn extends Model implements IModelBuilder {
     @Column
     private transient int needSync = 1;
     
-    @Column
-    private transient String checkInUniqueId;
+    @Column(unique = true)
+    private String unitId;
 
     @Column
     private String imageUrl;
@@ -132,6 +133,7 @@ public class CheckIn extends Model implements IModelBuilder {
         Long timestamp = DateTime.now(TimeZone.getTimeZone(Costants.TIME.GMT00)).getMilliseconds(TimeZone.getTimeZone(Costants.TIME.GMT00));
         //Long timestamp = calendar.getTimeInMillis();
         CheckIn checkIn = new CheckIn(timestamp.toString(), painLevel, feedStatus);
+        checkIn.setUnitId(UUID.randomUUID().toString());
         for (PainMedication medication : Medications.keySet()) {
             Question question = new Question(String.format("Did you Take %s ?",
                     medication.getMedicationName()),
@@ -149,7 +151,7 @@ public class CheckIn extends Model implements IModelBuilder {
         .append("\n----------------------------\n")
         .append("Feed Status: " + checkIn.getIssueFeedStatus())
         .append("\n----------------------------\n");
-        /*
+
         List<Question> questions = useStoredQuestions ? checkIn.getItemsQuestion() : checkIn.getQuestions();
         for (Question question : questions) {
             final String time = question.getMedicationTime();
@@ -160,16 +162,16 @@ public class CheckIn extends Model implements IModelBuilder {
                     .append("\n----------------------------\n");
 
         }
-        */
+
         return sb.toString();
     }
 
 
-    public static CheckIn getById(int id) {
+    public static CheckIn getByUnitId(String unitId) {
         // This is how you execute a query
         return new Select()
                 .from(CheckIn.class)
-                        .where("_id = ?", id)
+                        .where("unitId = ?", unitId)
                         //.orderBy("Name ASC")
                 .executeSingle();
     }
@@ -214,4 +216,27 @@ public class CheckIn extends Model implements IModelBuilder {
                 .execute();
     }
 
+    public static int getCountAllFromDate(String time){
+        return new Select()
+                .from(CheckIn.class)
+                .where("issueDateTime >= ?", time)
+                .execute().size();
+    }
+
+    public static int getCountFromMidNight(){
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        long millisecondsFromMidNight = calendar.getTimeInMillis();
+        return getCountAllFromDate(String.valueOf(millisecondsFromMidNight));
+    }
+    public String getUnitId() {
+        return unitId;
+    }
+
+    public void setUnitId(String unitId) {
+        this.unitId = unitId;
+    }
 }

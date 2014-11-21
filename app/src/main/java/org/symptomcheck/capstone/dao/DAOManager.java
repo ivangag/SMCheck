@@ -10,10 +10,12 @@ import org.symptomcheck.capstone.model.Doctor;
 import org.symptomcheck.capstone.model.IModelBuilder;
 import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.Patient;
+import org.symptomcheck.capstone.model.PatientExperience;
 import org.symptomcheck.capstone.model.Question;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.provider.ActiveContract;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -124,6 +126,10 @@ public class DAOManager {
         return new ActiveHandler<UserInfo>().getItem(UserInfo.class);
     }
 
+    public synchronized void deletePatientExperiences() {
+        //delete the foreign key objects also
+        new ActiveHandler<PatientExperience>().deleteItems(PatientExperience.class);
+    }
     public synchronized void deleteMedicines() {
         //delete the foreign key objects also
         new ActiveHandler<PainMedication>().deleteItems(PainMedication.class);
@@ -136,6 +142,10 @@ public class DAOManager {
             medication.setNeedSync(needSync ? 1 : 0);
         }
         return ((new ActiveHandler<PainMedication>().saveItems(medications)) > 0);
+    }
+
+    public synchronized boolean savePatientExperiences(List<PatientExperience> patientExperiences) {
+        return (new ActiveHandler<PatientExperience>()).saveItems(patientExperiences) > 0;
     }
 
 
@@ -161,6 +171,7 @@ public class DAOManager {
                     //.where("CustomerUniqueId = ?", Ancodice)
                     .execute();
         }
+
 
 
         public long saveItems(List<T> items){

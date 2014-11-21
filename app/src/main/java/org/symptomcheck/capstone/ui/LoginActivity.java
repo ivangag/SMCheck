@@ -409,7 +409,7 @@ public class LoginActivity extends Activity{
         String errorMsg = "";
         if (result.onSuccess) {
             //SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_ALL);
-            SymptomAlarmRequest.get().setAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_REMINDER);
+            SymptomAlarmRequest.get().setAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
             UserPreferencesManager.get().setLoginRememberMe(context,mCheckInRememberMe.isChecked());
             //UserPreferencesManager.get().setLoginUsername(context,username);
             //UserPreferencesManager.get().setLoginPassword(context,password);

@@ -26,6 +26,9 @@ public class PainMedication extends Model implements IModelBuilder {
     @Column
     private transient int needSync = 1;
 
+    @Column(unique = true)
+    private String productId;
+
     public PainMedication(){}
 
     public PainMedication(String medicationName, String lastTakingDateTime){
@@ -34,17 +37,20 @@ public class PainMedication extends Model implements IModelBuilder {
     }
 
     public PainMedication(String medicationName, String lastTakingDateTime,
-    		String patientMedicalNumber){
+    		String patientMedicalNumber,String productId){
     	this.medicationName = medicationName;
     	this.lastTakingDateTime = lastTakingDateTime;
     	this.patientMedicalNumber = patientMedicalNumber;
+    	this.productId = productId;
     }
     
 	public PainMedication(String medicationName) {
 		this.medicationName = medicationName;
 	}
 
-	public String getMedicationName() {
+
+
+    public String getMedicationName() {
 		return medicationName;
 	}
 	public void setMedicationName(String medicationName) {
@@ -95,9 +101,18 @@ public class PainMedication extends Model implements IModelBuilder {
         this.needSync = needSync;
     }
 
+    public String getProductId() {
+        return productId;
+    }
+
+    public void setProductId(String productId) {
+        this.productId = productId;
+    }
+
     public static class Builder{
         private String medicationName;
         private String lastTakingDateTime;
+        private String productId;
         private String patientMedicalNumber;
         public Builder setMedicationName(String medicationName){
             this.medicationName = medicationName;
@@ -107,6 +122,10 @@ public class PainMedication extends Model implements IModelBuilder {
             this.patientMedicalNumber = patientMedicalNumber;
             return this;
         }
+        public Builder setProductId(String productId){
+            this.productId = productId;
+            return this;
+        }
 
         public Builder setLastTakingDateTime(String lastTakingDateTime){
             this.lastTakingDateTime = lastTakingDateTime;
@@ -114,13 +133,21 @@ public class PainMedication extends Model implements IModelBuilder {
         }
 
         public PainMedication Build(){
-            return new PainMedication(this.medicationName,this.lastTakingDateTime,this.patientMedicalNumber);
+            return new PainMedication(this.medicationName,this.lastTakingDateTime,this.patientMedicalNumber,this.productId);
         }
     }
 
     @Override
     public void buildInternalArray() {
 
+    }
+
+    public static PainMedication getByProductId(String productId) {
+        // This is how you execute a query
+        return new Select()
+                .from(PainMedication.class)
+                .where("productId = ?", productId)
+                .executeSingle();
     }
 
     public static List<PainMedication> getAllToSync() {

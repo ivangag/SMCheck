@@ -125,7 +125,7 @@
             android:value="symptomcheck.db" />
         <meta-data
             android:name="AA_DB_VERSION"
-            android:value="8" />
+            android:value="9" />
         <meta-data
             android:name="AA_SERIALIZERS"
             android:value="org.symptomcheck.capstone.mode.StringArraySerializer" />

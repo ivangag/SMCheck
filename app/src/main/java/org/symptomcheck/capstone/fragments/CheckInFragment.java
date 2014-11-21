@@ -175,6 +175,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
                 refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
                 displayList(false);
+                OnFilterData(Costants.STRINGS.EMPTY);
                 refreshItem.setActionView(null);
             }
         }
@@ -228,10 +229,9 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             return;
         }
         mAdapter.swapCursor(data);
-
         displayList(data.getCount() <= 0);
+
         OnFilterData(Costants.STRINGS.EMPTY);
-        //displayList();
     }
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
@@ -324,9 +324,9 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
         @Override
         protected Card getCardFromCursor(Cursor cursor) {
+            final CheckIn checkIn = CheckIn.getByUnitId(cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.UNIT_ID)));
             CheckinCursorCard card = new CheckinCursorCard(super.getContext());
             setCardFromCursor(card,cursor);
-
 
             //Create a CardHeader
             CardHeader header = new CardHeader(getActivity());
@@ -336,15 +336,11 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
             //Set the header title
             header.setTitle(card.mainHeader);
-
             header.setPopupMenu(R.menu.popup_checkin, new CardHeader.OnClickCardHeaderPopupMenuListener() {
                 @Override
                 public void onMenuItemClick(BaseCard card, MenuItem item) {
-
-                   // Toast.makeText(getContext(), "Click on card="+card.getId()+" item=" +  item.getTitle(), Toast.LENGTH_SHORT).show();
                 }
             });
-
             //Add Header to card
             card.addCardHeader(header);
 
@@ -354,50 +350,22 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             thumb.setDrawableResource(card.resourceIdThumb);
             card.addCardThumbnail(thumb);
 
-
-            //Simple clickListener
-            card.setOnClickListener(new Card.OnCardClickListener() {
-                @Override
-                public void onClick(Card card, View view) {
-                    //Toast.makeText(getContext(), "Card id=" + card.getId() + " Title=" + card.getCardHeader().getTitle(), Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            card.setOnExpandAnimatorEndListener(new Card.OnExpandAnimatorEndListener() {
-                @Override
-                public void onExpandEnd(Card card) {
-                    //Toast.makeText(getContext(), "Card Expanded id=" + card.getId(),Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            //This provides a simple (and useless) expand area
-
             String mDetailedCheckInInfo = "";
-            final String painLevel = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL));
-            final String feedStatus = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS));
-            final String instantIssueTime = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME));
-            //final CheckIn checkIn = CheckIn.getById(cursor.getInt(ID_COLUMN));
-            ///if(checkIn != null) {
-                card.secondaryTitle = DateTimeUtils.convertEpochToHumanTime(instantIssueTime);
-                mDetailedCheckInInfo = CheckIn.getDetailedInfo(new CheckIn(instantIssueTime,
-                        PainLevel.valueOf(painLevel), FeedStatus.valueOf(feedStatus) ), true);
-            //}
+            if(checkIn != null) {
+                card.secondaryTitle = DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime());
+                mDetailedCheckInInfo = CheckIn.getDetailedInfo(checkIn,true);
+            }
+            // Add expand card
             CustomExpandCard expand = new CustomExpandCard(super.getContext(),mDetailedCheckInInfo);
-            //expand.setTitle("Check-In Details");
-            //Add Expand Area to Card
             card.addCardExpand(expand);
 
             return card;
         }
 
-        private void setCardFromCursor(CheckinCursorCard card,Cursor cursor) {
+        private void setCardFromCursor(CheckinCursorCard card, Cursor cursor) {
             final int checkInId = cursor.getInt(ID_COLUMN);
             card.setId(""+ checkInId);
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL));
-
-            //final String instantIssueTime = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME));
-            //DateTime fromMilliseconds = DateTime.forInstant(Long.valueOf(instantIssueTime), TimeZone.getDefault());
-
             card.mainHeader = getString(R.string.checkin_header);
             card.resourceIdThumb=R.drawable.ic_check_in;
 

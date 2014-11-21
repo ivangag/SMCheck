@@ -195,8 +195,9 @@ public  abstract class BaseFragment extends Fragment {
                             .query(uriContentProvider,
                                     ActiveContract.MEDICINES_TABLE_PROJECTION,
                                     ActiveContract.MEDICINES_COLUMNS.NAME + " LIKE ? OR " +
+                                    ActiveContract.MEDICINES_COLUMNS.PRODUCT_ID + " LIKE ? OR " +
                                             ActiveContract.MEDICINES_COLUMNS.PATIENT_ID + " LIKE ?",
-                                    new String[]{"%" + filterPattern + "%", "%" + filterPattern + "%"}
+                                    new String[]{"%" + filterPattern + "%", "%" + filterPattern + "%","%" + filterPattern + "%"}
                                     , ActiveContract.MEDICINES_COLUMNS.NAME + " asc");
                     break;
                 default:

@@ -42,6 +42,7 @@ public class ActiveContract {
 
     public static String[] CHECK_IN_TABLE_PROJECTION = new String[]{
                     BaseColumns._ID + ","
+                            + CHECKIN_COLUMNS.UNIT_ID + ","
                             + CHECKIN_COLUMNS.PAIN_LEVEL + ","
                             + CHECKIN_COLUMNS.FEED_STATUS + ","
                             + CHECKIN_COLUMNS.PATIENT + ","
@@ -50,6 +51,7 @@ public class ActiveContract {
 
     public static String[] MEDICINES_TABLE_PROJECTION = new String[]{
                     BaseColumns._ID + ","
+                            + MEDICINES_COLUMNS.PRODUCT_ID + ","
                             + MEDICINES_COLUMNS.NAME + ","
                             + MEDICINES_COLUMNS.PATIENT_ID + ","
                             + MEDICINES_COLUMNS.TAKING_TIME
@@ -72,10 +74,12 @@ public class ActiveContract {
         public static final String FEED_STATUS = "issueFeedStatus";
         public static final String ISSUE_TIME = "issueDateTime";
         public static final String PATIENT = "Patient";
+        public static final String UNIT_ID = "unitId";
     }
     public static class MEDICINES_COLUMNS{
         public static final String NAME = "medicationName";
         public static final String TAKING_TIME = "lastTakingDateTime";
         public static final String PATIENT_ID = "patientMedicalNumber";
+        public static final String PRODUCT_ID = "productId";
     }
 }

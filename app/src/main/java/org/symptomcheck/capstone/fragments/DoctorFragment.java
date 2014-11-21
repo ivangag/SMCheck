@@ -53,6 +53,7 @@ import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
+import org.symptomcheck.capstone.utils.Costants;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
@@ -172,6 +173,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
                 refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
                 displayList(false);
+                OnFilterData(Costants.STRINGS.EMPTY);
                 refreshItem.setActionView(null);
             }
         }
@@ -223,6 +225,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
         mAdapter.swapCursor(data);
 
         displayList(data.getCount() <= 0);
+        OnFilterData(Costants.STRINGS.EMPTY);
 
     }
     /**

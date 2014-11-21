@@ -26,6 +26,7 @@ import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.preference.TimePreference;
+import org.symptomcheck.capstone.preference.UserPreferencesManager;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application activity_settings. On
@@ -40,15 +41,11 @@ import org.symptomcheck.capstone.preference.TimePreference;
  */
 public class SettingsActivity extends Activity {
 
-    public static final String KEY_CHECK_IN_FREQ = "checkin_frequency";
-    public static final String KEY_CHECK_IN_START = "checkin_start_time";
-    public static final String KEY_SYNC_FREQ = "sync_frequency";
-    public static final String KEY_SYNC_ONLY_WIFI = "sync_only_wifi";
-    public static final String KEY_NEW_NOTIFICATIONS_ALERT = "notifications_new_message";
-
 
     UserInfo mUser;
 
+    public final static int MODIFY_USER_SETTINGS = 1;
+    public static boolean mIsSettingsModified;
     /*
     public static void startSettingActivity(Context context){
         Intent intent = new Intent(context,SettingsActivity.class);
@@ -177,17 +174,11 @@ public class SettingsActivity extends Activity {
                 || !isXLargeTablet(context);
     }
 
-/*    /*//**
-     /*//* {@inheritDoc}
-    /*//*
     @Override
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public void onBuildHeaders(List<Header> target) {
-        //if (!isSimplePreferences(this)) {
-            loadHeadersFromResource(R.xml.pref_headers, target);
-        //}
-    }*/
-
+    public void onBackPressed() {
+        this.setResult(mIsSettingsModified ? RESULT_OK : RESULT_OK);
+        super.onBackPressed();
+    }
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
@@ -232,6 +223,7 @@ public class SettingsActivity extends Activity {
                 }
 
             } else if (preference instanceof TimePreference){
+                mIsSettingsModified = true;
                 // For all other preferences, set the summary to the value's
                 // simple string representation.
                 preference.setSummary(stringValue);
@@ -304,7 +296,7 @@ public class SettingsActivity extends Activity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference(KEY_SYNC_FREQ));
+            bindPreferenceSummaryToValue(findPreference(UserPreferencesManager.KEY_SYNC_FREQ));
             //bindPreferenceSummaryToValue(findPreference(KEY_SYNC_ONLY_WIFI));
         }
     }
@@ -326,8 +318,8 @@ public class SettingsActivity extends Activity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference(KEY_CHECK_IN_FREQ));
-            bindPreferenceSummaryToValue(findPreference(KEY_CHECK_IN_START));
+            bindPreferenceSummaryToValue(findPreference(UserPreferencesManager.KEY_CHECK_IN_FREQ));
+            bindPreferenceSummaryToValue(findPreference(UserPreferencesManager.KEY_CHECK_IN_START));
         }
     }
 }

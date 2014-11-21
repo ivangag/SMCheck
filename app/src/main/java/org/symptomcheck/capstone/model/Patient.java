@@ -2,8 +2,6 @@ package org.symptomcheck.capstone.model;
 
 import android.provider.BaseColumns;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +16,7 @@ import com.activeandroid.query.Select;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
+import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.utils.Costants;
 
 import hirondelle.date4j.DateTime;
@@ -62,7 +61,11 @@ public class Patient extends Model implements IModelBuilder{
 		this.firstName = firstName;
 	}
 
-	public String getMedicalRecordNumber(){
+    public Patient(String medicalRecordNumber) {
+        this.medicalRecordNumber = medicalRecordNumber;
+    }
+
+    public String getMedicalRecordNumber(){
 		return this.medicalRecordNumber;
 	}
 	
@@ -224,72 +227,5 @@ public class Patient extends Model implements IModelBuilder{
     }
 
 
-    public static void checkExperienceStatus() {
-        HashMap<String, List<CheckIn>> painLevelWarningCheck = new HashMap<String, List<CheckIn>>();
-        HashMap<String, List<CheckIn>> feedStatusWarningCheck = new HashMap<String, List<CheckIn>>();
-        List<CheckIn> painPartialLevelWarningList = Lists.newArrayList();
-        List<CheckIn> feedPartialLevelWarningList = Lists.newArrayList();
-        PainLevel painLevelToCheck = PainLevel.WELL_CONTROLLED;
-        FeedStatus feedStatusToCheck = FeedStatus.CANNOT_EAT;
-        boolean checkPainLevelWarning;
-        boolean checkFeedStatusWarning;
-        List<Patient> patients = getAll();
-        PainLevel painLevel1,painLevel2;
-        FeedStatus feedStatus1,feedStatus2;
-        for (Patient patient : patients) {
-            List<CheckIn> checkIns = CheckIn.getAllByPatient(patient);
-            painPartialLevelWarningList.clear();
-            feedPartialLevelWarningList.clear();
-            if (checkIns.size() > 1) {
-                for (int idx = 0; idx < checkIns.size(); idx++) {
-                    painLevel1 = checkIns.get(idx).getIssuePainLevel();
-                    feedStatus1 = checkIns.get(idx).getIssueFeedStatus();
-                    if (idx < checkIns.size() - 1) {
-                        painLevel2 = checkIns.get(idx + 1).getIssuePainLevel();
-                        feedStatus2 = checkIns.get(idx + 1).getIssueFeedStatus();
-                    } else {
-                        painLevel2 = checkIns.get(idx - 1).getIssuePainLevel();
-                        feedStatus2 = checkIns.get(idx - 1).getIssueFeedStatus();
-                    }
-                    checkPainLevelWarning = painLevel1.equals(painLevelToCheck) && painLevel1.equals(painLevel2);
-                    if (checkPainLevelWarning) {
-                        painPartialLevelWarningList.add(checkIns.get(idx));
-                    }
-                    checkFeedStatusWarning = feedStatus1.equals(feedStatusToCheck) && feedStatus1.equals(feedStatus2);
-                    if (checkFeedStatusWarning) {
-                        feedPartialLevelWarningList.add(checkIns.get(idx));
-                    }
 
-                }
-                painLevelWarningCheck.put(patient.getMedicalRecordNumber(), Lists.newArrayList(painPartialLevelWarningList));
-                feedStatusWarningCheck.put(patient.getMedicalRecordNumber(), Lists.newArrayList(feedPartialLevelWarningList));
-            }
-        }
-        for(String patient : painLevelWarningCheck.keySet()){
-            final int sizeList = painLevelWarningCheck.get(patient).size();
-            if( sizeList > 0){
-                CheckIn newestCheckIn = painLevelWarningCheck.get(patient).get(0);
-                CheckIn oldestCheckIn = painLevelWarningCheck.get(patient).get(sizeList - 1);
-                long diffTime = Long.valueOf(newestCheckIn.getIssueDateTime())
-                        - Long.valueOf(oldestCheckIn.getIssueDateTime());
-                long hourDiff = diffTime / 3600 / 1000;
-                if(hourDiff >= 12){
-                    // Raise Alert!!!!
-                }
-            }
-        }
-        for(String patient : feedStatusWarningCheck.keySet()){
-            final int sizeList = feedStatusWarningCheck.get(patient).size();
-            if( sizeList > 0){
-                CheckIn newestCheckIn = feedStatusWarningCheck.get(patient).get(0);
-                CheckIn oldestCheckIn = feedStatusWarningCheck.get(patient).get(sizeList - 1);
-                long diffTime = Long.valueOf(newestCheckIn.getIssueDateTime())
-                        - Long.valueOf(oldestCheckIn.getIssueDateTime());
-                long hourDiff = diffTime / 3600 / 1000;
-                if(hourDiff >= 12){
-                    // Raise Feed Alert!!!!
-                }
-            }
-        }
-    }
 }

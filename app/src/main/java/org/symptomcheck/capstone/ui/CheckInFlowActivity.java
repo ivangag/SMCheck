@@ -39,6 +39,7 @@ import com.google.common.collect.Lists;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
+import org.symptomcheck.capstone.alarms.SymptomAlarmRequest;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.FeedStatus;
@@ -304,6 +305,8 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                         @Override
                         public void run() {
                             if(checkinRes) {
+                                // re-set the alarm to as this could be the last Check-In of the day
+                                SymptomAlarmRequest.get().setAlarm(getApplicationContext(), SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
                                 finish();
                                 Toast.makeText(getApplicationContext(), "Check-In Submitted Correctly", Toast.LENGTH_LONG).show();
                             }else {
