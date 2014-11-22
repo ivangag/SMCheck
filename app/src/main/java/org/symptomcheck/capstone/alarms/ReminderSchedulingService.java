@@ -114,7 +114,7 @@ public class ReminderSchedulingService extends IntentService {
         Log.i(TAG,"sendNotification");
 
         // re-set the alarm to as this could be the last Check-In of the day
-        SymptomAlarmRequest.get().setAlarm(this, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
+        //SymptomAlarmRequest.get().setAlarm(this, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
 
         mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);

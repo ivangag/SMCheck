@@ -86,6 +86,7 @@ public class DAOManager {
         (new ActiveHandler<CheckIn>()).deleteItems(CheckIn.class);
     }
 
+/*
 
     public synchronized boolean saveCheckIns(List<CheckIn> checkIns, String medicalRecordNumber,
                                           String userIdentification, boolean needSync) {
@@ -96,7 +97,7 @@ public class DAOManager {
         //retrieve Patient for foreign key relation
         List<Patient> patients = new Select().
                 from(Patient.class)
-                .where(ActiveContract.PATIENT_COLUMNS.PATIENT_ID + " = ?", medicalRecordNumber)
+                .where(ActiveContract.PATIENT_COLUMNS.PATIENT + " = ?", medicalRecordNumber)
                 .execute();
 
 
@@ -115,6 +116,41 @@ public class DAOManager {
                 final long countCheckIns =  (new ActiveHandler<CheckIn>().saveItems(checkIns));
                 final long countQuestions = (new ActiveHandler<Question>().saveItems(questions));
                 result = needSync ? (countCheckIns > 0) : ((countCheckIns > 0) && (countQuestions > 0));
+            }
+        }
+        return result;
+    }
+*/
+
+    public synchronized boolean saveCheckIns(List<CheckIn> checkIns, String medicalRecordNumber,
+                                          String userIdentification) {
+
+        boolean result = false;
+
+        Patient patient = null;
+        //retrieve Patient for foreign key relation
+        List<Patient> patients = new Select().
+                from(Patient.class)
+                .where(ActiveContract.PATIENT_COLUMNS.PATIENT_ID + " = ?", medicalRecordNumber)
+                .execute();
+
+
+        if (patients.size() > 0) {
+            patient = patients.get(0);
+            if (patient != null) {
+                List<Question> questions = new ArrayList<Question>(checkIns.size());
+                for (CheckIn checkIn : checkIns) {
+                    checkIn.patient = patient;
+                    //checkIn.setNeedSync(needSync ? 1 : 0);
+                    for (Question question : checkIn.getQuestions()) {
+                        question.checkIn = checkIn;
+                        questions.add(question);
+                    }
+                }
+                final long countCheckIns =  (new ActiveHandler<CheckIn>().saveItems(checkIns));
+                final long countQuestions = (new ActiveHandler<Question>().saveItems(questions));
+                //result = needSync ? (countCheckIns > 0) : ((countCheckIns > 0) && (countQuestions > 0));
+                result = countCheckIns > 0;
             }
         }
         return result;

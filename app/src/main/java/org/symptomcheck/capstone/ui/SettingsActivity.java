@@ -245,7 +245,10 @@ public class SettingsActivity extends Activity {
                 // simple string representation.
                 preference.setSummary(stringValue);
             }
-
+            final Preference nextScheduleCheckInPreference = preference.getPreferenceManager().findPreference(UserPreferencesManager.KEY_NEXT_SCHEDULED_CHECKIN);
+            if(nextScheduleCheckInPreference != null){
+                nextScheduleCheckInPreference.setSummary(UserPreferencesManager.get().getNextScheduledCheckin(preference.getContext()));
+            }
             return true;
         }
     };
@@ -333,6 +336,7 @@ public class SettingsActivity extends Activity {
             // guidelines.
             bindPreferenceSummaryToValue(findPreference(UserPreferencesManager.KEY_CHECK_IN_FREQ));
             bindPreferenceSummaryToValue(findPreference(UserPreferencesManager.KEY_CHECK_IN_START));
+            bindPreferenceSummaryToValue(findPreference(UserPreferencesManager.KEY_NEXT_SCHEDULED_CHECKIN));
         }
     }
 }

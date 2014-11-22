@@ -22,5 +22,10 @@
         android:negativeButtonText="@null"
         android:positiveButtonText="@null" />
 
+    <EditTextPreference
+       android:key="next_schedule_checkin"
+       android:title="@string/pref_title_checkin_next_time"
+       android:editable="false"
+        />
     </PreferenceCategory>
 </PreferenceScreen>

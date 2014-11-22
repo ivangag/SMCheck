@@ -153,6 +153,11 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
         return title;
     }
 
+    @Override
+    public String getIdentityOwnerId() {
+        return Costants.STRINGS.EMPTY;
+    }
+
 
     /**
      * Set the state of the Refresh button. If a sync is active, turn on the ProgressBar widget.

@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="@string/txt_loading_progress"
+            android:text="@string/txt_syncing_progress"
             android:paddingTop="4dip"
             android:singleLine="true"/>
 

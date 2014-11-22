@@ -106,13 +106,15 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
     /**
      * Returns a new instance of this fragment for the given section
      * number.
+     * @param patientId
      */
-    public static MedicinesFragment newInstance(long patientId) {
+    public static MedicinesFragment newInstance(String patientId) {
         MedicinesFragment fragment = new MedicinesFragment();
         Bundle args = new Bundle();
-        if (patientId > 0) {
-            args.putLong(ARG_PATIENT_ID, patientId);
-        }
+        //if (patientId != -1) {
+        //args.putLong(ARG_PATIENT_ID, patientId);
+        args.putString(ARG_PATIENT_ID, patientId);
+        //}
         fragment.setArguments(args);
         return fragment;
     }
@@ -187,6 +189,11 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
         return title;
     }
 
+    @Override
+    public String getIdentityOwnerId() {
+        return getArguments().getString(ARG_PATIENT_ID, Costants.STRINGS.EMPTY);
+    }
+
 
     /**
      * Set the state of the Refresh button. If a sync is active, turn on the ProgressBar widget.
@@ -230,14 +237,17 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
     private void init() {
 
 
-        final Long patientId = getArguments().getLong(ARG_PATIENT_ID);
-        if ((patientId > 0)) {
-            mPatientOwner = Patient.getById(patientId);
-            if (mPatientOwner != null) {
-                mSelection = ActiveContract.MEDICINES_COLUMNS.PATIENT_ID + " = '" + mPatientOwner.getMedicalRecordNumber() + "'";
-            }
-        } else if (DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)) {
-            mPatientOwner = Patient.getByMedicalNumber(DAOManager.get().getUser().getUserIdentification());
+        final String patientMedicalNumber = getArguments().getString(ARG_PATIENT_ID, Costants.STRINGS.EMPTY);
+//        if((patientId > 0)){
+//            mPatientOwner = Patient.getById(patientId);
+//        }else if (DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)){
+//            mPatientOwner = Patient.getByMedicalNumber(DAOManager.get().getUser().getUserIdentification());
+//        }
+        if(!patientMedicalNumber.isEmpty()) {
+            mPatientOwner = Patient.getByMedicalNumber(patientMedicalNumber);
+        }
+        if (mPatientOwner != null) {
+            mSelection = ActiveContract.MEDICINES_COLUMNS.PATIENT + " = '" + mPatientOwner.getMedicalRecordNumber() + "'";
         }
         mAdapter = new MedicinesCursorCardAdapter(getActivity());
 
@@ -263,14 +273,11 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-
-        Loader<Cursor> loader = null;
-        loader = new CursorLoader(getActivity(),
+        return new CursorLoader(getActivity(),
                 ContentProvider.createUri(PainMedication.class, null),
                 ActiveContract.MEDICINES_TABLE_PROJECTION, mSelection, null,
                 ActiveContract.MEDICINES_COLUMNS.NAME + " asc"
         );
-        return loader;
     }
 
     @Override
@@ -563,6 +570,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
         protected Card getCardFromCursor(Cursor cursor) {
 
             final PainMedication painMedication = PainMedication.getByProductId(cursor.getString(cursor.getColumnIndex(ActiveContract.MEDICINES_COLUMNS.PRODUCT_ID)));
+
             MedicineCursorCard card = new MedicineCursorCard(super.getContext());
             setCardFromCursor(card,cursor);
 
@@ -644,6 +652,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.MEDICINES_COLUMNS.NAME));
 
             card.mainHeader = getString(R.string.medicine_header);
+            card.secondaryTitle = mPatientOwner.getFirstName() + " " + mPatientOwner.getLastName();
             card.resourceIdThumb=R.drawable.ic_medicine;
 
         }

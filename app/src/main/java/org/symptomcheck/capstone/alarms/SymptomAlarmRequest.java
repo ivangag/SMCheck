@@ -94,21 +94,43 @@ public class SymptomAlarmRequest {
         calendar.set(Calendar.MINUTE, minutes);
         calendar.set(Calendar.SECOND, 0);
 
-        long timeOfNextStart = calendar.getTimeInMillis();
-        final long timeRemainingToEndOfDay = ((timeMissingToEndOfDay - timeOfNextStart));
-        final long intervalRepeatFrequency =  timeRemainingToEndOfDay / checkInPeriodicity;
+        long timeOfNextStartAsPreferences = calendar.getTimeInMillis();
+        final long timeNow = DateTime.now(TimeZone.getDefault()).getMilliseconds(TimeZone.getDefault());
+        final int checkInThisDay = CheckIn.getCountInThisDay();
         boolean setNextDay =
-                (DateTime.now(TimeZone.getDefault()).getMilliseconds(TimeZone.getDefault()) >  timeOfNextStart)
-                || (CheckIn.getCountInThisDay() >= UserPreferencesManager.get().getCheckInTimes(context));
+                    (timeNow >  timeOfNextStartAsPreferences)
+                        || (checkInThisDay >= UserPreferencesManager.get().getCheckInTimes(context));
 
-        timeOfNextStart = timeOfNextStart + (setNextDay ? AlarmManager.INTERVAL_DAY : 0);
+        long timeOfNextStartAsDue = timeOfNextStartAsPreferences;
+        timeOfNextStartAsPreferences = timeOfNextStartAsPreferences + (setNextDay ? AlarmManager.INTERVAL_DAY : 0);
+        long timeRemainingToEndOfDay;
+        if (timeMissingToEndOfDay < timeOfNextStartAsPreferences){
+            timeRemainingToEndOfDay = (timeMissingToEndOfDay + AlarmManager.INTERVAL_DAY )- timeOfNextStartAsPreferences ;
+        }else {
+            timeRemainingToEndOfDay = timeMissingToEndOfDay - timeOfNextStartAsPreferences;
+        }
+        final long intervalRepeatFrequency =  timeRemainingToEndOfDay / checkInPeriodicity;
+        if(setNextDay) { //check if it would be done next day
+            if (checkInThisDay >= 4) { // if checkin required is reached minimum required then schedule for the next day
+                //timeOfNextStartAsPreferences = timeOfNextStartAsPreferences + (AlarmManager.INTERVAL_DAY);
+                timeOfNextStartAsDue += (AlarmManager.INTERVAL_DAY);
+            } else { // otherwise schedule it for the next half hour
+                timeOfNextStartAsDue += checkInThisDay + intervalRepeatFrequency;
+                //timeOfNextStartAsPreferences = timeNow + AlarmManager.INTERVAL_HALF_HOUR;
+            }
+        }
+        String nextTime = DateTime.forInstant(timeOfNextStartAsPreferences,TimeZone.getDefault()).format("DD-MM hh:mm");
+        String nextTimeStartAsDue = DateTime.forInstant(timeOfNextStartAsDue,TimeZone.getDefault()).format("DD-MM hh:mm");
+        UserPreferencesManager.get().setNextScheduledCheckin(context,nextTimeStartAsDue);
 
         Log.d(TAG,
-                "checkInPeriodicity: " + checkInPeriodicity + " - " +
-                "time: " + hour + ":" + minutes +
-                " - intervalRepeatFrequency: " + intervalRepeatFrequency +
-                " - timeOfNextStart: " + timeOfNextStart +
-                " - setNextDay? " + (setNextDay ? "YES"  :"NO")
+                "checkInPeriodicity:" + checkInPeriodicity + " - " +
+                "checkInThisDay:" + checkInThisDay + " - " +
+                "time:" + hour + ":" + minutes +
+                " - intervalRepeatFrequency:" + intervalRepeatFrequency +
+                " - timeOfNextStart:" + timeOfNextStartAsPreferences + "(" + nextTime + ")" +
+                " - nextTimeStartAsDue:" + "(" + nextTimeStartAsDue + ")" +
+                " - setNextDay?" + (setNextDay ? "YES"  :"NO")
         );
 
         /*
@@ -155,7 +177,7 @@ public class SymptomAlarmRequest {
         // Set the alarm to fire at approximately Start Check-In Time chosen by Patient, according to the device's
         // clock, and to repeat once a day.
         alarmReminderMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP,
-                timeOfNextStart,
+                timeOfNextStartAsDue,
                 intervalRepeatFrequency,
                 alarmReminderIntent);
         /*

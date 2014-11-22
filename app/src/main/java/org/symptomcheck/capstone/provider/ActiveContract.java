@@ -53,7 +53,7 @@ public class ActiveContract {
                     BaseColumns._ID + ","
                             + MEDICINES_COLUMNS.PRODUCT_ID + ","
                             + MEDICINES_COLUMNS.NAME + ","
-                            + MEDICINES_COLUMNS.PATIENT_ID + ","
+                            + MEDICINES_COLUMNS.PATIENT + ","
                             + MEDICINES_COLUMNS.TAKING_TIME
             };
 
@@ -79,7 +79,7 @@ public class ActiveContract {
     public static class MEDICINES_COLUMNS{
         public static final String NAME = "medicationName";
         public static final String TAKING_TIME = "lastTakingDateTime";
-        public static final String PATIENT_ID = "patientMedicalNumber";
+        public static final String PATIENT = "patientMedicalNumber";
         public static final String PRODUCT_ID = "productId";
     }
 }

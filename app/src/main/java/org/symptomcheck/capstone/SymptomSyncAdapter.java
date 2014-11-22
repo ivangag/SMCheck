@@ -364,11 +364,14 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
                 DAOManager.get().deleteCheckIns();
                 for(Patient patient : patients){
                     List<CheckIn> checkIns = (List<CheckIn>) mSymptomClient.findCheckInsByPatient(patient.getMedicalRecordNumber());
+                    for(int idx=0; idx< checkIns.size(); idx++){
+                        checkIns.get(idx).setNeedSync(0);
+                    }
                     checkIns.addAll(checkInsToSync);
                     if((checkIns.size() > 0))
                         DAOManager.get().saveCheckIns(checkIns,
                                 patient.getMedicalRecordNumber(),
-                                user.getUserIdentification(), false);
+                                user.getUserIdentification());
                 }
             }else {
                 Log.e(TAG, "syncPatientsCheckIns=> sync not possible: patients = null!");

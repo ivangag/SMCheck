@@ -82,9 +82,9 @@ public class PainMedication extends Model implements IModelBuilder {
         final Patient patient = Patient.getByMedicalNumber(painMedication.getPatientMedicalNumber());
         StringBuilder sb = new StringBuilder();
 
-        sb.append("Name: ").append(painMedication.getMedicationName());
+        sb.append("Medicine Name: ").append(painMedication.getMedicationName());
         sb.append("\n----------------------------\n");
-        sb.append("Patient")
+        sb.append("Patient details")
                 .append("\n")
                 .append(patient != null ? Patient.getDetailedInfo(patient) : "NA");
 

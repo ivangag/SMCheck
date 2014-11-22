@@ -31,7 +31,7 @@ public class Question extends Model implements IModelBuilder{
 
     @Column(name = "CheckIn")
     public transient CheckIn checkIn;
-    private static List<Question> all;
+
 
     public Question(){}
 	public Question(String question, String response, QuestionType questionType, String medicatationTakingTime){

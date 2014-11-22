@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -17,6 +18,7 @@ import org.symptomcheck.capstone.model.Doctor;
 import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.provider.ActiveContract;
+import org.symptomcheck.capstone.utils.Costants;
 
 /**
  * Created by Ivan on 08/11/2014.
@@ -34,6 +36,11 @@ public  abstract class BaseFragment extends Fragment {
     protected View mProgressContainer;
     protected View mListContainer;
     protected View mEmptyListContainer;
+
+
+    public abstract int getFragmentType();
+    public abstract String getTitleText();
+    public abstract String getIdentityOwnerId(); // unique if of reference entity (for instance CheckIn=>PatientUniqueId)
 
     /**
      * Setup the list fragment
@@ -116,7 +123,6 @@ public  abstract class BaseFragment extends Fragment {
         setListShown(shown, false,isEmpty);
     }
 
-    public abstract int getFragmentType();
 
     protected void setIconActionBar(){
         int iconId = -1;
@@ -141,15 +147,51 @@ public  abstract class BaseFragment extends Fragment {
         }
     }
 
+
+    private String buildQuerySelection(){
+        //***START rebuild selection ****/
+//        long id;
+//        if(DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)){
+//            id = Patient.getByMedicalNumber(DAOManager.get().getUser().getUserIdentification()).getId();
+//        }else{
+//            id = cursor.getInt(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PATIENT));
+//        }
+//        if(!mPatientOwner.getId().equals(id)){
+//            // rebuild query selection based on base sqlite _id, it could be changed due to a full database rebuilding
+//            mSelectionQuery =  ActiveContract.CHECKIN_COLUMNS.PATIENT + " = "  + id;
+//        }
+        //***END rebuild selection ****/
+
+        final String uniqueId = getIdentityOwnerId();
+        String selection = Costants.STRINGS.EMPTY;
+        switch (getFragmentType()){
+            case FRAGMENT_TYPE_PATIENT:
+                break;
+            case FRAGMENT_TYPE_DOCTORS:
+                break;
+            case FRAGMENT_TYPE_CHECKIN:
+                selection = ActiveContract.CHECKIN_COLUMNS.PATIENT + " = " + Patient.getByMedicalNumber(uniqueId).getId();
+                break;
+            case FRAGMENT_TYPE_MEDICINES:
+                selection =  ActiveContract.MEDICINES_COLUMNS.PATIENT + " = '" + uniqueId + "'";
+                break;
+            default:
+                break;
+        }
+        Log.d("BaseFragment::buildQuerySelection", selection);
+        return selection;
+    }
+
     protected Cursor queryAllField(String filterPattern,String selection){
 
         Cursor cursor = null;
-
+        selection = buildQuerySelection();
         Uri uriContentProvider = getDefaultUriProvider();
         if (filterPattern.isEmpty()){
            cursor = getDefaultCursorProvider(uriContentProvider,selection);
         }else {
-            if(selection != null){
+            if((selection != null)
+                  && !selection.isEmpty() ) {
                 selection = selection + " AND ";
             }
             filterPattern = filterPattern.trim();
@@ -185,8 +227,8 @@ public  abstract class BaseFragment extends Fragment {
                     cursor = getActivity().getContentResolver()
                             .query(uriContentProvider,
                                     ActiveContract.CHECK_IN_TABLE_PROJECTION,
-                                   selection + ActiveContract.CHECKIN_COLUMNS.FEED_STATUS + " LIKE ? OR " +
-                                            ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL + " LIKE ?",
+                                   selection + "( " + ActiveContract.CHECKIN_COLUMNS.FEED_STATUS + " LIKE ? OR " +
+                                            ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL + " LIKE ? )",
                                     new String[]{"%" + filterPattern + "%", "%" + filterPattern + "%"}
                                     , ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME + " desc");
                     break;
@@ -194,9 +236,9 @@ public  abstract class BaseFragment extends Fragment {
                     cursor = getActivity().getContentResolver()
                             .query(uriContentProvider,
                                     ActiveContract.MEDICINES_TABLE_PROJECTION,
-                                    ActiveContract.MEDICINES_COLUMNS.NAME + " LIKE ? OR " +
+                                    selection + "( " + ActiveContract.MEDICINES_COLUMNS.NAME + " LIKE ? OR " +
                                     ActiveContract.MEDICINES_COLUMNS.PRODUCT_ID + " LIKE ? OR " +
-                                            ActiveContract.MEDICINES_COLUMNS.PATIENT_ID + " LIKE ?",
+                                            ActiveContract.MEDICINES_COLUMNS.PATIENT + " LIKE ? )",
                                     new String[]{"%" + filterPattern + "%", "%" + filterPattern + "%","%" + filterPattern + "%"}
                                     , ActiveContract.MEDICINES_COLUMNS.NAME + " asc");
                     break;
@@ -230,29 +272,33 @@ public  abstract class BaseFragment extends Fragment {
 
     protected Cursor getDefaultCursorProvider(Uri uriContentProvider, String selection) {
         Cursor cursor = null;
-        switch (getFragmentType()){
-            case FRAGMENT_TYPE_PATIENT:
-                cursor = getActivity().getContentResolver()
-                                .query(uriContentProvider,
-                                ActiveContract.PATIENT_TABLE_PROJECTION, selection, null, ActiveContract.PATIENT_COLUMNS.FIRST_NAME + " asc");
-                break;
-            case FRAGMENT_TYPE_DOCTORS:
-                cursor = getActivity().getContentResolver()
-                        .query(uriContentProvider,
-                                ActiveContract.DOCTOR_TABLE_PROJECTION, selection, null,  ActiveContract.DOCTORS_COLUMNS.FIRST_NAME + " asc");
-                break;
-            case FRAGMENT_TYPE_CHECKIN:
-                cursor = getActivity().getContentResolver()
-                        .query(uriContentProvider,
-                                ActiveContract.CHECK_IN_TABLE_PROJECTION, selection, null, ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME + " desc");
-                break;
-            case FRAGMENT_TYPE_MEDICINES:
-                cursor = getActivity().getContentResolver()
-                        .query(uriContentProvider,
-                                ActiveContract.MEDICINES_TABLE_PROJECTION, selection, null, ActiveContract.MEDICINES_COLUMNS.NAME + " asc");
-                break;
-            default:
-                break;
+        if(getActivity() != null) {
+            switch (getFragmentType()) {
+                case FRAGMENT_TYPE_PATIENT:
+                    cursor = getActivity().getContentResolver()
+                            .query(uriContentProvider,
+                                    ActiveContract.PATIENT_TABLE_PROJECTION, selection, null, ActiveContract.PATIENT_COLUMNS.FIRST_NAME + " asc");
+                    break;
+                case FRAGMENT_TYPE_DOCTORS:
+                    cursor = getActivity().getContentResolver()
+                            .query(uriContentProvider,
+                                    ActiveContract.DOCTOR_TABLE_PROJECTION, selection, null, ActiveContract.DOCTORS_COLUMNS.FIRST_NAME + " asc");
+                    break;
+                case FRAGMENT_TYPE_CHECKIN:
+                    cursor = getActivity().getContentResolver()
+                            .query(uriContentProvider,
+                                    ActiveContract.CHECK_IN_TABLE_PROJECTION, selection, null,
+                                    ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME + " desc");
+                    break;
+                case FRAGMENT_TYPE_MEDICINES:
+                    cursor = getActivity().getContentResolver()
+                            .query(uriContentProvider,
+                                    ActiveContract.MEDICINES_TABLE_PROJECTION, selection, null,
+                                    ActiveContract.MEDICINES_COLUMNS.NAME + " asc");
+                    break;
+                default:
+                    break;
+            }
         }
         return cursor;
     }
@@ -276,7 +322,7 @@ public  abstract class BaseFragment extends Fragment {
             getActivity().setTitle(titleResId);
     }
 
-    public abstract String getTitleText();
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

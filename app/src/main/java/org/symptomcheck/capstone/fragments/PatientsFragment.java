@@ -157,6 +157,11 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         return title;
     }
 
+    @Override
+    public String getIdentityOwnerId() {
+        return Costants.STRINGS.EMPTY;
+    }
+
 
     /**
      * Set the state of the Refresh button. If a sync is active, turn on the ProgressBar widget.
@@ -337,7 +342,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
                 @Override
                 public void onMenuItemClick(BaseCard card, MenuItem item) {
                     int id = item.getItemId();
-                    long ownerId = patient.getId();
+                    final String ownerId = patient.getMedicalRecordNumber();
                     Activity activity = getActivity();
                     //Long cardId = Long.valueOf(card.getId());
                     if(id == R.id.menu_pop_open_check_ins){

@@ -123,5 +123,7 @@
     <string name="txt_loading_progress">Loading...</string>
     <string name="checkins_header">Check-Ins</string>
     <string name="medicine_header">Medicine</string>
+    <string name="txt_syncing_progress">Syncing in progress...</string>
+    <string name="pref_title_checkin_next_time">Next Check-In Time</string>
     <item name="txt_medication_delete" type="id">Medication Delete</item>
 </resources>

@@ -30,6 +30,7 @@ import android.content.SyncStatusObserver;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -89,13 +90,15 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
     /**
      * Returns a new instance of this fragment for the given section
      * number.
+     * @param patientId
      */
-    public static CheckInFragment newInstance(long patientId) {
+    public static CheckInFragment newInstance(String patientId) {
         CheckInFragment fragment = new CheckInFragment();
         Bundle args = new Bundle();
-        if (patientId != -1) {
-            args.putLong(ARG_PATIENT_ID, patientId);
-        }
+        //if (patientId != -1) {
+            //args.putLong(ARG_PATIENT_ID, patientId);
+            args.putString(ARG_PATIENT_ID, patientId);
+        //}
         fragment.setArguments(args);
         return fragment;
     }
@@ -142,7 +145,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
     public void onActivityCreated(Bundle savedInstanceState) {
         init();
         super.onActivityCreated(savedInstanceState);
-        hideList(false);
+        //hideList(false);
     }
 
     @Override
@@ -153,6 +156,11 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
                     mPatientOwner.getLastName() + "'s " + getString(R.string.checkins_header);
         }
         return title;
+    }
+
+    @Override
+    public String getIdentityOwnerId() {
+        return getArguments().getString(ARG_PATIENT_ID, Costants.STRINGS.EMPTY);
     }
 
 
@@ -185,15 +193,20 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
     Patient mPatientOwner = null;
     private void init() {
 
-        final Long patientId = getArguments().getLong(ARG_PATIENT_ID);
-        if((patientId > 0)){
-            mPatientOwner = Patient.getById(patientId);
-            mSelectionQuery =  ActiveContract.CHECKIN_COLUMNS.PATIENT + " = "  + patientId;
-        }else if (DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)){
-            mPatientOwner = Patient.getByMedicalNumber(DAOManager.get().getUser().getUserIdentification());
+        final String patientMedicalNumber = getArguments().getString(ARG_PATIENT_ID, Costants.STRINGS.EMPTY);
+//        if((patientId > 0)){
+//            mPatientOwner = Patient.getById(patientId);
+//        }else if (DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)){
+//            mPatientOwner = Patient.getByMedicalNumber(DAOManager.get().getUser().getUserIdentification());
+//        }
+        if(!patientMedicalNumber.isEmpty()) {
+            mPatientOwner = Patient.getByMedicalNumber(patientMedicalNumber);
         }
-        mAdapter = new CheckinCursorCardAdapter(getActivity());
+        if (mPatientOwner != null) {
+            mSelectionQuery = ActiveContract.CHECKIN_COLUMNS.PATIENT + " = " + mPatientOwner.getId();
+        }
 
+        mAdapter = new CheckinCursorCardAdapter(getActivity());
         mListView = (CardListView) getActivity().findViewById(R.id.card_checkins_list_cursor);
         if (mListView != null) {
             mListView.setAdapter(mAdapter);
@@ -207,20 +220,16 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         });
         // Force start background query to load sessions
         getLoaderManager().restartLoader(0, null, this);
-
-
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-        Loader<Cursor> loader = null;
-        loader = new CursorLoader(getActivity(),
+        return new CursorLoader(getActivity(),
                 ContentProvider.createUri(CheckIn.class, null),
                 ActiveContract.CHECK_IN_TABLE_PROJECTION, mSelectionQuery, null,
                 ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME + " asc"
         );
-        return loader;
     }
 
     @Override
@@ -229,6 +238,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             return;
         }
         mAdapter.swapCursor(data);
+
         displayList(data.getCount() <= 0);
 
         OnFilterData(Costants.STRINGS.EMPTY);
@@ -325,6 +335,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         @Override
         protected Card getCardFromCursor(Cursor cursor) {
             final CheckIn checkIn = CheckIn.getByUnitId(cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.UNIT_ID)));
+
             CheckinCursorCard card = new CheckinCursorCard(super.getContext());
             setCardFromCursor(card,cursor);
 

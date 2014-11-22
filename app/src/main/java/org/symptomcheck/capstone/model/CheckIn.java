@@ -147,9 +147,9 @@ public class CheckIn extends Model implements IModelBuilder {
 
     public static String getDetailedInfo(CheckIn checkIn, boolean useStoredQuestions){
         StringBuilder sb = new StringBuilder();
-        sb.append("Pain Level: " + checkIn.getIssuePainLevel())
-        .append("\n----------------------------\n")
-        .append("Feed Status: " + checkIn.getIssueFeedStatus())
+        sb.append("Pain Level: ").append(checkIn.getIssuePainLevel())
+                .append("\n----------------------------\n")
+                .append("Feed Status: ").append(checkIn.getIssueFeedStatus())
         .append("\n----------------------------\n");
 
         List<Question> questions = useStoredQuestions ? checkIn.getItemsQuestion() : checkIn.getQuestions();
@@ -158,7 +158,6 @@ public class CheckIn extends Model implements IModelBuilder {
             sb.append(time)
                     .append(time.equals(Costants.STRINGS.EMPTY) ? Costants.STRINGS.EMPTY : "\n")
                     .append(question.getQuestion()).append(" ").append(question.getResponse())
-                    //.append(DateTime.forInstant(Long.valueOf(question.getMedicatationTakingTime()), TimeZone.getDefault()).format("YYYY-MM-DD hh:ss"))
                     .append("\n----------------------------\n");
 
         }

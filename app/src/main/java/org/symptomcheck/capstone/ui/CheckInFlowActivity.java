@@ -333,8 +333,9 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
     }
 
     private boolean saveCheckIn(CheckIn checkIn){
+        checkIn.setNeedSync(1);
         return DAOManager.get().saveCheckIns(Lists.newArrayList(checkIn),
-                mUser.getUserIdentification(),mUser.getUserIdentification(),true);
+                mUser.getUserIdentification(),mUser.getUserIdentification());
     }
 
     @Override

@@ -42,11 +42,14 @@ import org.symptomcheck.capstone.fragments.IFragmentListener;
 import org.symptomcheck.capstone.fragments.MedicinesFragment;
 import org.symptomcheck.capstone.fragments.PatientsFragment;
 import org.symptomcheck.capstone.model.CheckIn;
+import org.symptomcheck.capstone.model.Doctor;
+import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.PatientExperience;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.preference.UserPreferencesManager;
 import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.DateTimeUtils;
 import org.symptomcheck.capstone.utils.NotificationHelper;
 
 import java.util.ArrayList;
@@ -187,9 +190,9 @@ public class MainActivity extends Activity implements ICardEventListener {
             mDrawerLayout.setDrawerListener(mDrawerToggle);
 
             if (user.getUserType().equals(UserType.DOCTOR)) {
-                selectDrawerItem(CASE_SHOW_DOCTOR_PATIENTS,-1);
+                selectDrawerItem(CASE_SHOW_DOCTOR_PATIENTS);
             } else if (user.getUserType().equals(UserType.PATIENT)) {
-                selectDrawerItem(CASE_SHOW_PATIENT_CHECKINS,-1);
+                selectDrawerItem(CASE_SHOW_PATIENT_CHECKINS);
             }
         }else{
             Toast.makeText(this,"User not more Logged!!!!!",Toast.LENGTH_LONG).show();
@@ -214,6 +217,7 @@ public class MainActivity extends Activity implements ICardEventListener {
                             //.resize(96, 96)
                             //.centerCrop()
                             .into(mImageView);
+                    detailUser += "\nID " + Doctor.getByDoctorNumber(user.getUserIdentification()).getUniqueDoctorId();
                 } else if (userType.equals(UserType.PATIENT)) {
                     mFragmentTitles = getResources().getStringArray(R.array.patient_fragments_array);
                     mDrawerImagesResources = new int[]{
@@ -226,7 +230,10 @@ public class MainActivity extends Activity implements ICardEventListener {
                             //.resize(96, 96)
                             //.centerCrop()
                             .into(mImageView);
-
+                    detailUser +=
+                            "\nBorn on " + DateTimeUtils.convertEpochToHumanTime(Patient.getByMedicalNumber(user.getUserIdentification()).getBirthDate(),"DD/MM/YYYY")
+                            +"\nMedical Number " + user.getUserIdentification()
+                             ;
                 }
             } catch (Exception e) {
                 Toast.makeText(this, "Picasso error:" + e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
@@ -236,7 +243,7 @@ public class MainActivity extends Activity implements ICardEventListener {
                     + "[" + user.getUserIdentification() + "]");
             mTextViewUserDetails.setText(
                     user.getUserType().toString().toUpperCase()
-                            + "\n"
+                            + " "
                             + detailUser);
         }
     }
@@ -259,7 +266,7 @@ public class MainActivity extends Activity implements ICardEventListener {
     }
 
 
-    private Fragment selectFragment(ShowFragmentType fragmentType, long ownerId) {
+    private Fragment selectFragment(ShowFragmentType fragmentType, String ownerId) {
 
         Fragment fragment = null;
                 switch (fragmentType) {
@@ -286,14 +293,15 @@ public class MainActivity extends Activity implements ICardEventListener {
                 }
         return fragment;
     }
-    private Fragment selectFragment(int position, long ownerId) {
+    private Fragment selectFragment(int position) {
 
         Fragment fragment = null;
         switch (user.getUserType()) {
             case DOCTOR:
                 switch (position) {
                     case CASE_SHOW_DOCTOR_PATIENTS:
-                        fragment = new PatientsFragment();
+                        //fragment = new PatientsFragment();
+                        fragment = selectFragment(ShowFragmentType.DOCTOR_PATIENTS,user.getUserIdentification());
                         break;
                     case CASE_SHOW_DOCTOR_SETTINGS:
                         openSettings();
@@ -306,13 +314,16 @@ public class MainActivity extends Activity implements ICardEventListener {
             case PATIENT:
                 switch (position) {
                     case CASE_SHOW_PATIENT_CHECKINS:
-                        fragment = CheckInFragment.newInstance(ownerId);
+                        //fragment = CheckInFragment.newInstance(ownerId);
+                        fragment = selectFragment(ShowFragmentType.PATIENT_CHECKINS, user.getUserIdentification());
                         break;
                     case CASE_SHOW_PATIENT_DOCTORS:
-                        fragment = new DoctorFragment();
+                        //fragment = new DoctorFragment();
+                        fragment = selectFragment(ShowFragmentType.PATIENT_DOCTORS,user.getUserIdentification());
                         break;
                     case CASE_SHOW_PATIENT_MEDICINES:
-                        fragment = MedicinesFragment.newInstance(ownerId);
+                        //fragment = MedicinesFragment.newInstance(ownerId);
+                        fragment = selectFragment(ShowFragmentType.PATIENT_MEDICINES, user.getUserIdentification());
                         break;
                     case CASE_SHOW_PATIENT_SETTINGS:
                         openSettings();
@@ -567,7 +578,7 @@ public class MainActivity extends Activity implements ICardEventListener {
     }
 
     @Override
-    public void OnCheckInOpenRequired(long patientId) {
+    public void OnCheckInOpenRequired(String patientId) {
         final ShowFragmentType fragmentType = ShowFragmentType.PATIENT_CHECKINS;
         mPreviousFragment = mCurrentFragment;
         mCurrentFragment = selectFragment(fragmentType,patientId);
@@ -577,7 +588,7 @@ public class MainActivity extends Activity implements ICardEventListener {
     }
 
     @Override
-    public void OnMedicinesOpenRequired(long patientId) {
+    public void OnMedicinesOpenRequired(String patientId) {
         final ShowFragmentType fragmentType = ShowFragmentType.PATIENT_MEDICINES;
         mPreviousFragment = mCurrentFragment;
         mCurrentFragment = selectFragment(fragmentType,patientId);
@@ -590,15 +601,15 @@ public class MainActivity extends Activity implements ICardEventListener {
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView parent, View view, int position, long id) {
-            selectDrawerItem(position,-1);
+            selectDrawerItem(position);
         }
     }
 
     /** Swaps fragments in the main content view */
-    private void selectDrawerItem(int position, long ownerId) {
+    private void selectDrawerItem(int position) {
         if(mSelectedFragmentPosition != position) {
             mPreviousFragment = mCurrentFragment;
-            mCurrentFragment = selectFragment(position,ownerId);
+            mCurrentFragment = selectFragment(position);
             if(!(mCurrentFragment instanceof DialogFragment)) {
                 if (mCurrentFragment != null){
                     mSelectedFragmentPosition = position;

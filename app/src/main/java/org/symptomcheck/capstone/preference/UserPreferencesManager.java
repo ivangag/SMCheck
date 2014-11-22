@@ -24,6 +24,7 @@ public class UserPreferencesManager {
     public static final String KEY_SYNC_FREQ = "sync_frequency";
     public static final String KEY_SYNC_ONLY_WIFI = "sync_only_wifi";
     public static final String KEY_NEW_NOTIFICATIONS_ALERT = "notifications_new_message";
+    public static final String KEY_NEXT_SCHEDULED_CHECKIN = "next_schedule_checkin";
     private static UserPreferencesManager ourInstance = new UserPreferencesManager();
     private static Context mContext;
 
@@ -154,6 +155,10 @@ public class UserPreferencesManager {
         PreferenceManager.getDefaultSharedPreferences(context).edit()
                 .putString(PROPERTY_REG_ID, gcmRegId).commit();
     }
+    public void setNextScheduledCheckin(Context context, String nextTime) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putString(KEY_NEXT_SCHEDULED_CHECKIN, nextTime).commit();
+    }
     public void setAppVers(Context context, int appVers) {
         PreferenceManager.getDefaultSharedPreferences(context).edit()
                 .putInt(PROPERTY_APP_VERSION, appVers).commit();
@@ -169,4 +174,10 @@ public class UserPreferencesManager {
         return PreferenceManager.getDefaultSharedPreferences(context)
                 .getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
     }
+
+    public String getNextScheduledCheckin(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(KEY_NEXT_SCHEDULED_CHECKIN, Costants.STRINGS.EMPTY);
+    }
+
 }
