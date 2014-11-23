@@ -518,6 +518,21 @@ public class MainActivity extends Activity implements ICardEventListener {
         int id = item.getItemId();
 
         if(id == R.id.action_test){
+            List<PatientExperience> patientExperiences = PatientExperience.getByPatient("patient001");
+            if(patientExperiences.size() > 0){
+                PatientExperience experience = patientExperiences.get(0);
+                (new Update(PatientExperience.class))
+                        .set("checkedByDoctor = 1")
+                        .where("_id = ?", experience.getId())
+                        .execute();
+                Bundle data = new Bundle();
+                data.putString("EXPERIENCE_ID",experience.getExperienceId());
+                data.putString(PatientExperiencesActivity.PATIENT_ID,experience.getPatientId());
+                NotificationHelper.sendNotification(this, 3,
+                        "Bad Patient Experience", "Experience of one or more Patients require your attention",
+                        PatientExperiencesActivity.class, true, "BAD_EXPERIENCE",data);
+            }
+            /*
             List<PatientExperience> newBadPatientExperiences = PatientExperience.checkBadExperiences();
             DAOManager.get().savePatientExperiences(newBadPatientExperiences);
             for (PatientExperience experience : newBadPatientExperiences){
@@ -535,10 +550,11 @@ public class MainActivity extends Activity implements ICardEventListener {
                         .execute();
                 Bundle data = new Bundle();
                 data.putString("EXPERIENCE_ID",experience.getExperienceId());
+                data.putString(PatientExperiencesActivity.PATIENT_ID,experience.getPatientId());
                 NotificationHelper.sendNotification(this, 3,
                         "Bad Patient Experience", "Experience of one or more Patients require your attention",
-                        SettingsActivity.class, true, "BAD_EXPERIENCE",data);
-            }
+                        PatientExperiencesActivity.class, true, "BAD_EXPERIENCE",data);
+            }*/
             /*
             try {
                 if(DAOManager.get().getUser().getUserType().equals(UserType.DOCTOR)) {

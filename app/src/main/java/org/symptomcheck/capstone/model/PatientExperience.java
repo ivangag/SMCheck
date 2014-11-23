@@ -121,6 +121,15 @@ public class PatientExperience extends Model implements IModelBuilder{
                 .execute();
     }
 
+
+    public static List<PatientExperience> getByPatient(String patientMedicalNumber) {
+        return new Select()
+                .from(PatientExperience.class)
+                .where("patientId = ?", patientMedicalNumber)
+                .orderBy("experienceDuration DESC")
+                .execute();
+    }
+
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
@@ -128,6 +137,8 @@ public class PatientExperience extends Model implements IModelBuilder{
                 .append("PatientId: ").append(this.patientId)
                 .append("\n-------------------------\n")
                 .append("Type: ").append(this.experienceType)
+                .append("\n-------------------------\n")
+                .append("Duration: ").append(this.experienceDuration).append(" hours")
                 .append("\n-------------------------\n")
                 .append("Start: ").append(DateTimeUtils.convertEpochToHumanTime(startExperienceTime, Costants.TIME.DEFAULT_FORMAT))
                 .append("\n-------------------------\n")
@@ -138,6 +149,10 @@ public class PatientExperience extends Model implements IModelBuilder{
         return sb.toString();
     }
 
+
+    public static String getDetailedInfo(PatientExperience patientExperience) {
+        return patientExperience.toString();
+    }
     public static List<PatientExperience> checkBadExperiences() {
         HashMap<Patient, List<CheckIn>> painLevelOnlySevereWarningCheck = new HashMap<Patient, List<CheckIn>>();
         HashMap<Patient, List<CheckIn>> painLevelModerateOrSevereWarningCheck = new HashMap<Patient, List<CheckIn>>();

@@ -17,6 +17,7 @@ import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.Doctor;
 import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.Patient;
+import org.symptomcheck.capstone.model.PatientExperience;
 import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.utils.Costants;
 
@@ -26,9 +27,10 @@ import org.symptomcheck.capstone.utils.Costants;
 public  abstract class BaseFragment extends Fragment {
 
     public final static int FRAGMENT_TYPE_PATIENT   = 0;
-    public final static int FRAGMENT_TYPE_DOCTORS   = 1;
+    public final static int FRAGMENT_TYPE_DOCTORS   =  1;
     public final static int FRAGMENT_TYPE_CHECKIN = 2;
     public final static int FRAGMENT_TYPE_MEDICINES = 3;
+    public final static int FRAGMENT_TYPE_EXPERIENCES = 4;
 
     public static final String TITLE_NONE = "";
 
@@ -61,6 +63,9 @@ public  abstract class BaseFragment extends Fragment {
                 break;
             case FRAGMENT_TYPE_MEDICINES:
                 mListContainer = root.findViewById(R.id.card_medicines_listContainer);
+                break;
+            case FRAGMENT_TYPE_EXPERIENCES:
+                mListContainer = root.findViewById(R.id.card_experiences_listContainer);
                 break;
             default:
                 break;
@@ -136,6 +141,10 @@ public  abstract class BaseFragment extends Fragment {
             case FRAGMENT_TYPE_CHECKIN:
                 iconId = R.drawable.ic_check_in;
                 break;
+            case FRAGMENT_TYPE_EXPERIENCES:
+                iconId = R.drawable.ic_medicine;
+                break;
+
             default:
                 break;
 
@@ -174,6 +183,9 @@ public  abstract class BaseFragment extends Fragment {
                 break;
             case FRAGMENT_TYPE_MEDICINES:
                 selection =  ActiveContract.MEDICINES_COLUMNS.PATIENT + " = '" + uniqueId + "'";
+                break;
+            case FRAGMENT_TYPE_EXPERIENCES:
+                selection =  ActiveContract.EXPERIENCES_COLUMNS.PATIENT + " = '" + uniqueId + "'";
                 break;
             default:
                 break;
@@ -242,6 +254,16 @@ public  abstract class BaseFragment extends Fragment {
                                     new String[]{"%" + filterPattern + "%", "%" + filterPattern + "%","%" + filterPattern + "%"}
                                     , ActiveContract.MEDICINES_COLUMNS.NAME + " asc");
                     break;
+                case FRAGMENT_TYPE_EXPERIENCES:
+                    cursor = getActivity().getContentResolver()
+                            .query(uriContentProvider,
+                                    ActiveContract.EXPERIENCES_TABLE_PROJECTION,
+                                    selection + "( " + ActiveContract.EXPERIENCES_COLUMNS.EXPERIENCE_TYPE + " LIKE ? OR " +
+                                    ActiveContract.EXPERIENCES_COLUMNS.START_EXPERIENCE_TIME + " LIKE ? OR " +
+                                            ActiveContract.EXPERIENCES_COLUMNS.END_EXPERIENCE_TIME + " LIKE ? )",
+                                    new String[]{"%" + filterPattern + "%", "%" + filterPattern + "%","%" + filterPattern + "%"}
+                                    , ActiveContract.EXPERIENCES_COLUMNS.END_EXPERIENCE_TIME + " desc");
+                    break;
                 default:
                     break;
             }
@@ -263,6 +285,9 @@ public  abstract class BaseFragment extends Fragment {
                 break;
             case FRAGMENT_TYPE_MEDICINES:
                 uriContentProvider = ContentProvider.createUri(PainMedication.class, null);
+                break;
+            case FRAGMENT_TYPE_EXPERIENCES:
+                uriContentProvider = ContentProvider.createUri(PatientExperience.class, null);
                 break;
             default:
                 break;
@@ -296,6 +321,13 @@ public  abstract class BaseFragment extends Fragment {
                                     ActiveContract.MEDICINES_TABLE_PROJECTION, selection, null,
                                     ActiveContract.MEDICINES_COLUMNS.NAME + " asc");
                     break;
+             case FRAGMENT_TYPE_EXPERIENCES:
+                    cursor = getActivity().getContentResolver()
+                            .query(uriContentProvider,
+                                    ActiveContract.EXPERIENCES_TABLE_PROJECTION, selection, null,
+                                    ActiveContract.EXPERIENCES_COLUMNS.END_EXPERIENCE_TIME + " desc");
+                    break;
+
                 default:
                     break;
             }
@@ -335,7 +367,8 @@ public  abstract class BaseFragment extends Fragment {
                 //
                 // http://developer.android.com/design/patterns/navigation.html#up-vs-back
                 //
-                NavUtils.navigateUpFromSameTask(getActivity());
+                if(getActivity() != null)
+                    NavUtils.navigateUpFromSameTask(getActivity());
                 return true;
         }
         return super.onOptionsItemSelected(item);

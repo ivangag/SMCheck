@@ -173,6 +173,7 @@
             android:name="org.symptomcheck.capstone.ui.CheckInFlowActivity"
             android:exported="true"
             android:label="@string/title_check_in_flow"
+            android:configChanges="orientation|screenSize|keyboardHidden"
             android:uiOptions="none" >
             <meta-data
                 android:name="android.support.UI_OPTIONS"
@@ -180,12 +181,20 @@
         </activity>
         <activity
             android:name="org.symptomcheck.capstone.ui.SettingsActivity"
-            android:parentActivityName="org.symptomcheck.capstone.ui.MainActivity"
-            android:label="@string/title_activity_settings" >
+            android:label="@string/title_activity_settings"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:parentActivityName="org.symptomcheck.capstone.ui.MainActivity" >
+
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.symptomcheck.capstone.ui.MainActivity" />
+        </activity>
+        <activity
+            android:name="org.symptomcheck.capstone.ui.PatientExperiencesActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:label="@string/title_activity_patient_experiences" >
         </activity>
     </application>
 

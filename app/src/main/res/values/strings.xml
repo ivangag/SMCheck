@@ -67,16 +67,15 @@
     <string name="medicines_header">Medicines</string>
     <string name="title_activity_settings">Symptom Management Settings</string>
 
-    <!--Preference resources-->
+    <!-- Preference resources -->
     <string name="pref_title_start_check_in_time">Start Daily Time</string>
     <string name="pref_title_start_sync_time">First Sync Time</string>
     <string name="pref_header_check_in">Check-In Reminder</string>
     <string name="pref_title_sync_only_wifi">Wifi only</string>
     <string name="pref_description_sync_only_wifi">Enable periodic sync only if connected via Wifi</string>
-
     <string name="pref_header_data_sync">Data &amp; sync</string>
-
     <string name="pref_title_sync_frequency">Sync frequency</string>
+
     <string-array name="pref_sync_frequency_titles">
         <item>15 minutes</item>
         <item>30 minutes</item>
@@ -95,24 +94,22 @@
     </string-array>
 
     <string name="pref_title_checkin_frequency">Check-In Reminder frequency</string>
+
     <string-array name="pref_checkin_frequency_titles">
         <item>4 times a day</item>
         <item>5 times a day</item>
         <item>6 times a day</item>
     </string-array>
     <string-array name="pref_checkin_frequency_values">
-    <item>4</item>
-    <item>5</item>
-    <item>6</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
     </string-array>
 
     <string name="pref_header_notifications">Notifications</string>
-
     <string name="pref_title_new_message_notifications">New message notifications</string>
-
     <string name="pref_title_ringtone">Ringtone</string>
     <string name="pref_ringtone_silent">Silent</string>
-
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="logout_question">Do you want logout?</string>
     <string name="hint_new_medication">Enter new Medicine name</string>
@@ -125,5 +122,11 @@
     <string name="medicine_header">Medicine</string>
     <string name="txt_syncing_progress">Syncing in progress...</string>
     <string name="pref_title_checkin_next_time">Next Check-In Time</string>
+
     <item name="txt_medication_delete" type="id">Medication Delete</item>
+
+    <string name="title_activity_patient_experiences">PatientExperiencesActivity</string>
+    <string name="experiences_header">Bad Experiences</string>
+    <string name="experience_header">Experience</string>
+
 </resources>

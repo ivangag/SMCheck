@@ -56,6 +56,16 @@ public class ActiveContract {
                             + MEDICINES_COLUMNS.PATIENT + ","
                             + MEDICINES_COLUMNS.TAKING_TIME
             };
+    public static String[] EXPERIENCES_TABLE_PROJECTION = new String[]{
+                    BaseColumns._ID + ","
+                            + EXPERIENCES_COLUMNS.PATIENT + ","
+                            + EXPERIENCES_COLUMNS.START_EXPERIENCE_TIME + ","
+                            + EXPERIENCES_COLUMNS.END_EXPERIENCE_TIME + ","
+                            + EXPERIENCES_COLUMNS.SEEN_BY_DOCTOR + ","
+                            + EXPERIENCES_COLUMNS.UNIT_ID + ","
+                            + EXPERIENCES_COLUMNS.EXPERIENCE_DURATION + ","
+                            + EXPERIENCES_COLUMNS.EXPERIENCE_TYPE
+            };
 
     public static class PATIENT_COLUMNS{
         public static final String PATIENT_ID = "patientId";
@@ -81,5 +91,14 @@ public class ActiveContract {
         public static final String TAKING_TIME = "lastTakingDateTime";
         public static final String PATIENT = "patientMedicalNumber";
         public static final String PRODUCT_ID = "productId";
+    }
+    public static class EXPERIENCES_COLUMNS{
+        public static final String UNIT_ID = "experienceId";
+        public static final String START_EXPERIENCE_TIME = "startExperienceTime";
+        public static final String END_EXPERIENCE_TIME = "endExperienceTime";
+        public static final String EXPERIENCE_DURATION = "experienceDuration";
+        public static final String EXPERIENCE_TYPE = "experienceType";
+        public static final String PATIENT = "patientId";
+        public static final String SEEN_BY_DOCTOR = "checkedByDoctor";
     }
 }
