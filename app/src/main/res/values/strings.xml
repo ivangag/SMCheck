@@ -128,5 +128,7 @@
     <string name="title_activity_patient_experiences">PatientExperiencesActivity</string>
     <string name="experiences_header">Bad Experiences</string>
     <string name="experience_header">Experience</string>
+    <string name="exit_question">Are you sure to exit?</string>
+    <string name="alert_exit_cancel">No</string>
 
 </resources>

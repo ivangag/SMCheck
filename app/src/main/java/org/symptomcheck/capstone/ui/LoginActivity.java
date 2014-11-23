@@ -1,3 +1,20 @@
+/*
+ * ******************************************************************************
+ *   Copyright (c) 2014-2015 Ivan Gaglioti.
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *  *****************************************************************************
+ */
 package org.symptomcheck.capstone.ui;
 
 import android.animation.Animator;
@@ -34,6 +51,7 @@ import org.symptomcheck.capstone.gcm.GcmRegistrationService;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
+import org.symptomcheck.capstone.utils.NetworkHelper;
 import org.symptomcheck.capstone.utils.NotificationHelper;
 import org.symptomcheck.capstone.preference.UserPreferencesManager;
 
@@ -302,10 +320,7 @@ public class LoginActivity extends Activity{
                                     || mPassword.isEmpty();
             final String token = UserPreferencesManager.get().getBearerToken(getApplicationContext());
             try {
-                // Simulate network access.
-                //Thread.sleep(2000);
-
-
+                // Check network access.
                 SymptomManagerSvcApi client;
                 if(useToken){
                     client = DownloadHelper.get()
@@ -318,14 +333,20 @@ public class LoginActivity extends Activity{
                             withRetrofitClient(getApplicationContext());
                 }
 
-                userInfo = client.verifyUser();
-                userInfo.setLogged(true);
+                if(!NetworkHelper.isOnline(getApplicationContext())
+                        && useToken){
+                    errorLogin.onSuccess = true;
+                }else {
+                    userInfo = client.verifyUser();
+                    userInfo.setLogged(true);
 
-                DAOManager.get().saveUser(userInfo);
-                if(!useToken){
-                    //probably is the first access after wiping data
-                    SyncUtils.ForceRefresh();
-                    Thread.sleep(2000);
+                    DAOManager.get().saveUser(userInfo);
+
+                    if (!useToken) {
+                        //probably is the first access after wiping data
+                        SyncUtils.ForceRefresh();
+                        Thread.sleep(2000);
+                    }
                 }
 
             } catch (Exception e) {
@@ -345,7 +366,7 @@ public class LoginActivity extends Activity{
             if(login.onSuccess) {
                 handleGCMRegistrationRequest(getApplicationContext());
             }
-            handleAfterLoginAttempt(login,mEmail,mPassword);
+            handleAfterLoginAttempt(login);
         }
 
 
@@ -402,7 +423,7 @@ public class LoginActivity extends Activity{
         return true;
     }
 
-    public void handleAfterLoginAttempt(ErrorLogin result, String username, String password) {
+    public void handleAfterLoginAttempt(ErrorLogin result) {
 
         final Context context = getApplicationContext();
         boolean showFormError = !result.onSuccess;

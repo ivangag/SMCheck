@@ -1,3 +1,20 @@
+/*
+ * ******************************************************************************
+ *   Copyright (c) 2014-2015 Ivan Gaglioti.
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *  *****************************************************************************
+ */
 package org.symptomcheck.capstone.ui;
 
 import java.util.HashMap;
@@ -46,6 +63,7 @@ import org.symptomcheck.capstone.model.FeedStatus;
 import org.symptomcheck.capstone.model.PainLevel;
 import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.UserInfo;
+import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.utils.Costants;
 import org.symptomcheck.capstone.utils.NotificationHelper;
@@ -91,20 +109,27 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
 
     private Handler progressBarHandler;
 
+    ImageButton mBtnGoToPreviousTab;
+    ImageButton mBtnGoToNextTab;
+    ImageButton mBtnSubmit;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_in_flow);
 
+        // enable ActionBar app icon to behave as action to toggle nav drawer
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+
         progressBarHandler = new Handler();
         mUser = DAOManager.get().getUser();
 
-        if(mUser != null) {
+        if((mUser != null)
+            && (mUser.getUserType().equals(UserType.PATIENT))){
 
-            ImageButton btnGoToPreviousTab = (ImageButton) findViewById(R.id.btn_check_in_goto_previous);
-            ImageButton btnGoToNextTab = (ImageButton) findViewById(R.id.btn_check_in_goto_next);
-            ImageButton btnSubmit = (ImageButton) findViewById(R.id.btn_check_in_confirm_submission);
-
+            mBtnGoToPreviousTab = (ImageButton) findViewById(R.id.btn_check_in_goto_previous);
+            mBtnGoToNextTab = (ImageButton) findViewById(R.id.btn_check_in_goto_next);
+            mBtnSubmit = (ImageButton) findViewById(R.id.btn_check_in_confirm_submission);
 
             mMedicines = PainMedication.getAll(mUser.getUserIdentification());
             for(PainMedication medication : mMedicines){
@@ -122,7 +147,6 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                                 + " " + "Check-In");
             }
 
-
             // Create the adapter that will return a fragment for each of the three
             // primary sections of the activity.
             mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
@@ -137,11 +161,13 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
             mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
                 @Override
                 public void onPageSelected(int position) {
+                    handleNextPreviousVisibility();
                     if (actionBar != null) {
                        // actionBar.setSelectedNavigationItem(position);
                     }
                 }
             });
+
 
             // For each of the sections in the app, add a tab to the action bar.
             for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
@@ -157,24 +183,26 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                 }
             }
 
-
-            btnGoToPreviousTab.setOnClickListener(new View.OnClickListener() {
+            mBtnGoToPreviousTab.setVisibility(View.INVISIBLE);
+            mBtnGoToPreviousTab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if(mViewPager.getCurrentItem() > 0)
+                    if (mViewPager.getCurrentItem() > 0)
                         mViewPager.setCurrentItem(mViewPager.getCurrentItem() - 1);
+                    handleNextPreviousVisibility();
                 }
             });
 
-            btnGoToNextTab.setOnClickListener(new View.OnClickListener() {
+            mBtnGoToNextTab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if(mViewPager.getCurrentItem() < mSectionsPagerAdapter.getCount() - 1)
+                    if (mViewPager.getCurrentItem() < mSectionsPagerAdapter.getCount() - 1)
                         mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
+                    handleNextPreviousVisibility();
                 }
             });
 
-            btnSubmit.setOnClickListener(new View.OnClickListener() {
+            mBtnSubmit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     handleCheckInSubmissionRequest();
@@ -188,6 +216,19 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
 
     }
 
+    private void handleNextPreviousVisibility(){
+        if(mViewPager.getCurrentItem() == 0){
+            mBtnGoToPreviousTab.setVisibility(View.INVISIBLE);
+            mBtnGoToNextTab.setVisibility(View.VISIBLE);
+        }else{
+            mBtnGoToPreviousTab.setVisibility(View.VISIBLE);
+            if(mViewPager.getCurrentItem() == mSectionsPagerAdapter.getCount() - 1){
+                mBtnGoToNextTab.setVisibility(View.INVISIBLE);
+            }else{
+                mBtnGoToNextTab.setVisibility(View.VISIBLE);
+            }
+        }
+    }
 
 
     @Override

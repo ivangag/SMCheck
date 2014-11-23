@@ -37,13 +37,16 @@ import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.Doctor;
 import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.Patient;
+import org.symptomcheck.capstone.model.PatientExperience;
 import org.symptomcheck.capstone.model.Question;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
 import org.symptomcheck.capstone.provider.ActiveContract;
+import org.symptomcheck.capstone.ui.PatientExperiencesActivity;
 import org.symptomcheck.capstone.utils.NetworkHelper;
 import org.symptomcheck.capstone.preference.UserPreferencesManager;
+import org.symptomcheck.capstone.utils.NotificationHelper;
 
 import java.util.List;
 
@@ -139,13 +142,38 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (user.getLogged()) {
                     updateCloudData(active_repo_cloud_to_sync, user);
                     updateLocalData(active_repo_local_to_sync, user);
+                    checkPatientsBadExperience();
                 }
+
             }
 
         }
         EventBus.getDefault().post(new DownloadEvent.Builder().setStatus(true).setValueEvnt(count).Build());
 
         Log.i(TAG, "Network synchronization completed");
+    }
+
+    private void checkPatientsBadExperience(){
+        String method = new Object(){}.getClass().getEnclosingMethod().getName();
+        Log.i(TAG, method + " Checking...");
+        List<PatientExperience> patientExperiences = PatientExperience.checkBadExperiences();
+        final int count = patientExperiences.size();
+        Log.i(TAG, "BadExperienceFound:" + count);
+        if(count > 0){
+            final PatientExperience experience = patientExperiences.get(0);
+            final String patientId = experience.getPatientId();
+            Log.i(TAG, "BadExperiencePatient:" + patientId);
+            (new Update(PatientExperience.class))
+                    .set("checkedByDoctor = 1")
+                    .where("_id = ?", experience.getId())
+                    .execute();
+            Bundle data = new Bundle();
+            data.putString("EXPERIENCE_ID", experience.getExperienceId());
+            data.putString(PatientExperiencesActivity.PATIENT_ID, patientId);
+            NotificationHelper.sendNotification(getContext(), 3,
+                    "Bad Patient Experience", "Experience of one or more Patients require your attention",
+                    PatientExperiencesActivity.class, true, "BAD_EXPERIENCE", data);
+        }
     }
 
     /**

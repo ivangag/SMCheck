@@ -1,9 +1,3 @@
-/* 
- **
- ** Copyright 2014, Jules White
- **
- ** 
- */
 package org.symptomcheck.capstone.network;
 
 /**

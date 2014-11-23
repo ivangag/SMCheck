@@ -1,6 +1,6 @@
 /*
  * ******************************************************************************
- *   Copyright (c) 2013-2014 Gabriele Mariotti.
+ *   Copyright (c) 2014-2015 Ivan Gaglioti.
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -384,9 +384,13 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
                     + " " + mPatientOwner.getLastName() + " " +  getString(R.string.experience_header);
             final String start = DateTimeUtils.convertEpochToHumanTime(
                     cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.START_EXPERIENCE_TIME)), Costants.TIME.DEFAULT_FORMAT);
-            card.secondaryTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.EXPERIENCE_DURATION))
-               + " hours"
-               + " ( since " + start + ")";
+            final String end = DateTimeUtils.convertEpochToHumanTime(
+                    cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.END_EXPERIENCE_TIME)), Costants.TIME.DEFAULT_FORMAT);
+            card.secondaryTitle =
+                    "Duration "
+                    + cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.EXPERIENCE_DURATION))
+                    + " hours"
+              // + " (Last Experience Report " + end + ")";
                     /* DateTimeUtils.convertEpochToHumanTime(startExperienceTime, Costants.TIME.DEFAULT_FORMAT)
                     "Since " + cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.START_EXPERIENCE_TIME))
                     + "( " + cursor.getInt(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.EXPERIENCE_DURATION))

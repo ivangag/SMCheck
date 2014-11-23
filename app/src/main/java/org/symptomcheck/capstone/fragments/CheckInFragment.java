@@ -1,6 +1,6 @@
 /*
  * ******************************************************************************
- *   Copyright (c) 2013-2014 Gabriele Mariotti.
+ *   Copyright (c) 2014-2015 Ivan Gaglioti.
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -145,7 +145,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
     public void onActivityCreated(Bundle savedInstanceState) {
         init();
         super.onActivityCreated(savedInstanceState);
-        //hideList(false);
+        hideList(false);
     }
 
     @Override
