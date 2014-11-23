@@ -318,7 +318,8 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
     @Override
     public void OnFilterData(String textToSearch) {
-        mAdapter.getFilter().filter(textToSearch);
+        if(mAdapter != null)
+            mAdapter.getFilter().filter(textToSearch);
     }
 
     //-------------------------------------------------------------------------------------------------------------
@@ -376,7 +377,9 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         private void setCardFromCursor(CheckinCursorCard card, Cursor cursor) {
             final int checkInId = cursor.getInt(ID_COLUMN);
             card.setId(""+ checkInId);
-            card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL));
+            card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL))
+                        + " - " + cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS))
+                            ;
             card.mainHeader = getString(R.string.checkin_header);
             card.resourceIdThumb=R.drawable.ic_check_in;
 

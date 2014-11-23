@@ -42,6 +42,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import org.symptomcheck.capstone.R;
+import org.symptomcheck.capstone.alarms.SymptomAlarmRequest;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.preference.TimePreference;
@@ -65,20 +66,6 @@ public class SettingsActivity extends Activity {
 
     public final static int MODIFY_USER_SETTINGS = 1;
     public static boolean mIsSettingsModified;
-    /*
-    public static void startSettingActivity(Context context){
-        Intent intent = new Intent(context,SettingsActivity.class);
-        context.startActivity(intent);
-    }
-    */
-
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
-        //setupSimplePreferencesScreen();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,46 +120,6 @@ public class SettingsActivity extends Activity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * Shows the simplified activity_settings UI if the device configuration if the
-     * device configuration dictates that a simplified, single-pane UI should be
-     * shown.
-     */
-    private void setupSimplePreferencesScreen() {
-        if (!isSimplePreferences(this)) {
-            return;
-        }
-
-
-
-
-        // In the simplified UI, fragments are not used at all and we instead
-        // use the older PreferenceActivity APIs.
-
-        // Add 'general' preferences.
-        //addPreferencesFromResource(R.xml.pref_general);
-
-        // Add 'notifications' preferences, and a corresponding header.
-        PreferenceCategory fakeHeader = new PreferenceCategory(this);
-        fakeHeader.setTitle(R.string.pref_header_notifications);
-        //getPreferenceScreen().addPreference(fakeHeader);
-        //addPreferencesFromResource(R.xml.pref_notification);
-
-        // Add 'data and sync' preferences, and a corresponding header.
-        fakeHeader = new PreferenceCategory(this);
-        fakeHeader.setTitle(R.string.pref_header_data_sync);
-        //getPreferenceScreen().addPreference(fakeHeader);
-        //addPreferencesFromResource(R.xml.pref_data_sync);
-
-        // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
-        // their values. When their values change, their summaries are updated
-        // to reflect the new value, per the Android Design guidelines.
-        //bindPreferenceSummaryToValue(findPreference("example_text"));
-        //bindPreferenceSummaryToValue(findPreference("example_list"));
-        //bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
-        //bindPreferenceSummaryToValue(findPreference("sync_frequency"));
     }
 
     /**
@@ -252,8 +199,9 @@ public class SettingsActivity extends Activity {
                     }
                 }
 
-            } else if (preference instanceof TimePreference){
+            } else if (preference instanceof TimePreference) {
                 mIsSettingsModified = true;
+                SymptomAlarmRequest.get().setAlarm(preference.getContext(), SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
                 // For all other preferences, set the summary to the value's
                 // simple string representation.
                 preference.setSummary(stringValue);
@@ -263,10 +211,11 @@ public class SettingsActivity extends Activity {
                 preference.setSummary(stringValue);
             }
             final Preference nextScheduleCheckInPreference = preference.getPreferenceManager().findPreference(UserPreferencesManager.KEY_NEXT_SCHEDULED_CHECKIN);
-            if(nextScheduleCheckInPreference != null){
+            if (nextScheduleCheckInPreference != null) {
                 nextScheduleCheckInPreference.setSummary(UserPreferencesManager.get().getNextScheduledCheckin(preference.getContext()));
             }
             return true;
+
         }
     };
 

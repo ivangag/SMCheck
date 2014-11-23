@@ -307,7 +307,8 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
 
     @Override
     public void OnFilterData(String textToSearch) {
-        mAdapter.getFilter().filter(textToSearch);
+        if(mAdapter != null)
+            mAdapter.getFilter().filter(textToSearch);
     }
 
     //-------------------------------------------------------------------------------------------------------------

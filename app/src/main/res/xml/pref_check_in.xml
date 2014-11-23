@@ -8,6 +8,7 @@
     <org.symptomcheck.capstone.preference.TimePreference
         android:key="checkin_start_time"
         android:title="@string/pref_title_start_check_in_time"
+        android:summary="08:00"
         android:defaultValue="08:00"
         />
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to

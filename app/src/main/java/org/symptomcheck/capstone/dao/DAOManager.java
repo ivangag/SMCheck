@@ -197,8 +197,8 @@ public class DAOManager {
         return ((new ActiveHandler<PainMedication>().saveItems(medications)) > 0);
     }
 
-    public synchronized boolean savePatientExperiences(List<PatientExperience> patientExperiences) {
-        return (new ActiveHandler<PatientExperience>()).saveItems(patientExperiences) > 0;
+    public synchronized long savePatientExperiences(List<PatientExperience> patientExperiences) {
+        return (new ActiveHandler<PatientExperience>()).saveItems(patientExperiences);
     }
 
 

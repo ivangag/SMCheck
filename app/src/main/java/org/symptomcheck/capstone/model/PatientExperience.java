@@ -170,6 +170,11 @@ public class PatientExperience extends Model implements IModelBuilder{
     public static String getDetailedInfo(PatientExperience patientExperience) {
         return patientExperience.toString();
     }
+
+    /**
+     * Scan all Patients' CheckIns and update local database with Bad Patient Experience
+     * @return New Bad Experience(s) not handled yet by Doctor
+     */
     public static List<PatientExperience> checkBadExperiences() {
         HashMap<Patient, List<CheckIn>> painLevelOnlySevereWarningCheck = new HashMap<Patient, List<CheckIn>>();
         HashMap<Patient, List<CheckIn>> painLevelModerateOrSevereWarningCheck = new HashMap<Patient, List<CheckIn>>();
@@ -204,7 +209,8 @@ public class PatientExperience extends Model implements IModelBuilder{
                         painPartialLevelPrimaryWarningList.clear();
                     }
                     //check severe or moderate pain
-                    checkPainLevelSecondaryWarning = painLevel.equals(painLevelPrimaryToCheck) || painLevel.equals(painLevelSecondaryToCheck);
+                    checkPainLevelSecondaryWarning = painLevel.equals(painLevelPrimaryToCheck)
+                            || painLevel.equals(painLevelSecondaryToCheck);
                     if(checkPainLevelSecondaryWarning){
                         painPartialLevelSecondaryWarningList.add(checkIns.get(idx));
                     }else{
@@ -353,9 +359,10 @@ public class PatientExperience extends Model implements IModelBuilder{
                 }
             }
         }
-        for(PatientExperience patientExperience : patientExperiences){
-            patientExperience.save();
-        }
+        final long countSaved = DAOManager.get().savePatientExperiences(patientExperiences);
+//        for(PatientExperience patientExperience : patientExperiences){
+//            patientExperience.save();
+//        }
         return patientExperiences;
     }
 

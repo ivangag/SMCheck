@@ -309,7 +309,8 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
 
     @Override
     public void OnFilterData(String textToSearch) {
-        mAdapter.getFilter().filter(textToSearch);
+        if(mAdapter != null)
+            mAdapter.getFilter().filter(textToSearch);
     }
 
     public static final int ID_COLUMN = 0;

@@ -309,7 +309,8 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
 
     @Override
     public void OnFilterData(String textToSearch) {
-        mAdapter.getFilter().filter(textToSearch);
+        if(mAdapter != null)
+            mAdapter.getFilter().filter(textToSearch);
     }
 
 
@@ -380,8 +381,9 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
             card.setId(""+ experienceId);
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.EXPERIENCE_TYPE));
 
-            card.mainHeader =  mPatientOwner.getFirstName()
-                    + " " + mPatientOwner.getLastName() + " " +  getString(R.string.experience_header);
+            final Patient patient = Patient.getByMedicalNumber(cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.PATIENT)));
+
+            card.mainHeader =  patient.getFirstName() + " " + patient.getLastName() + " " +  getString(R.string.experience_header);
             final String start = DateTimeUtils.convertEpochToHumanTime(
                     cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.START_EXPERIENCE_TIME)), Costants.TIME.DEFAULT_FORMAT);
             final String end = DateTimeUtils.convertEpochToHumanTime(

@@ -107,7 +107,7 @@
     </string-array>
 
     <string name="pref_header_notifications">Notifications</string>
-    <string name="pref_title_new_message_notifications">New message notifications</string>
+    <string name="pref_title_new_message_notifications">Assistance Message Service</string>
     <string name="pref_title_ringtone">Ringtone</string>
     <string name="pref_ringtone_silent">Silent</string>
     <string name="pref_title_vibrate">Vibrate</string>
@@ -117,11 +117,11 @@
     <string name="txt_error_medication_empty">Medication name cannot empty</string>
     <string name="delete_medicine">Delete</string>
     <string name="txt_cards_empty_list">No Results</string>
-    <string name="txt_loading_progress">Loading...</string>
+    <string name="txt_loading_progress">Loading…</string>
     <string name="checkins_header">Check-Ins</string>
     <string name="medicine_header">Medicine</string>
-    <string name="txt_syncing_progress">Syncing in progress...</string>
-    <string name="pref_title_checkin_next_time">Next Check-In Time</string>
+    <string name="txt_syncing_progress">Syncing in progress…</string>
+    <string name="pref_title_checkin_next_time">Next Check-In</string>
 
     <item name="txt_medication_delete" type="id">Medication Delete</item>
 
@@ -130,5 +130,6 @@
     <string name="experience_header">Experience</string>
     <string name="exit_question">Are you sure to exit?</string>
     <string name="alert_exit_cancel">No</string>
+    <string name="pref_summary_new_message_notifications">Enable the sending/receiving of important messages</string>
 
 </resources>

@@ -114,26 +114,24 @@ public class SymptomAlarmRequest {
         long timeOfNextStartAsPreferences = calendar.getTimeInMillis();
         final long timeNow = DateTime.now(TimeZone.getDefault()).getMilliseconds(TimeZone.getDefault());
         final int checkInThisDay = CheckIn.getCountInThisDay();
-        boolean setNextDay =
-                    (timeNow >  timeOfNextStartAsPreferences)
-                        || (checkInThisDay >= UserPreferencesManager.get().getCheckInTimes(context));
+        boolean setNextDay = (timeNow >  timeOfNextStartAsPreferences)
+                                    || (checkInThisDay >= UserPreferencesManager.get().getCheckInTimes(context));
 
         long timeOfNextStartAsDue = timeOfNextStartAsPreferences;
         timeOfNextStartAsPreferences = timeOfNextStartAsPreferences + (setNextDay ? AlarmManager.INTERVAL_DAY : 0);
         long timeRemainingToEndOfDay;
         if (timeMissingToEndOfDay < timeOfNextStartAsPreferences){
-            timeRemainingToEndOfDay = (timeMissingToEndOfDay + AlarmManager.INTERVAL_DAY )- timeOfNextStartAsPreferences ;
+            timeRemainingToEndOfDay = timeMissingToEndOfDay - timeNow;
         }else {
             timeRemainingToEndOfDay = timeMissingToEndOfDay - timeOfNextStartAsPreferences;
         }
-        final long intervalRepeatFrequency =  timeRemainingToEndOfDay / checkInPeriodicity;
+        //final long intervalRepeatFrequency =  timeRemainingToEndOfDay / checkInPeriodicity;
+        final long intervalRepeatFrequency =  timeRemainingToEndOfDay / (checkInPeriodicity - checkInThisDay);
         if(setNextDay) { //check if it would be done next day
             if (checkInThisDay >= 4) { // if checkin required is reached minimum required then schedule for the next day
-                //timeOfNextStartAsPreferences = timeOfNextStartAsPreferences + (AlarmManager.INTERVAL_DAY);
                 timeOfNextStartAsDue += (AlarmManager.INTERVAL_DAY);
             } else { // otherwise schedule it for the next half hour
-                timeOfNextStartAsDue += checkInThisDay + intervalRepeatFrequency;
-                //timeOfNextStartAsPreferences = timeNow + AlarmManager.INTERVAL_HALF_HOUR;
+                timeOfNextStartAsDue = timeNow + AlarmManager.INTERVAL_FIFTEEN_MINUTES;
             }
         }
         String nextTime = DateTime.forInstant(timeOfNextStartAsPreferences,TimeZone.getDefault()).format("DD-MM hh:mm");
@@ -144,7 +142,7 @@ public class SymptomAlarmRequest {
                 "checkInPeriodicity:" + checkInPeriodicity + " - " +
                 "checkInThisDay:" + checkInThisDay + " - " +
                 "time:" + hour + ":" + minutes +
-                " - intervalRepeatFrequency:" + intervalRepeatFrequency +
+                " - intervalRepeatFrequency:" + intervalRepeatFrequency + "(" + ((double)(intervalRepeatFrequency/3600)) + ")" +
                 " - timeOfNextStart:" + timeOfNextStartAsPreferences + "(" + nextTime + ")" +
                 " - nextTimeStartAsDue:" + "(" + nextTimeStartAsDue + ")" +
                 " - setNextDay?" + (setNextDay ? "YES"  :"NO")

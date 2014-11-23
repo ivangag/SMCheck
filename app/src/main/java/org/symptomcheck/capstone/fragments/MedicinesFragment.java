@@ -365,7 +365,8 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
     @Override
     public void OnFilterData(String textToSearch) {
-        mAdapter.getFilter().filter(textToSearch);
+        if(mAdapter != null)
+            mAdapter.getFilter().filter(textToSearch);
     }
 
 
