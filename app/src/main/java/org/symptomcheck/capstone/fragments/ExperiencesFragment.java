@@ -41,6 +41,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.activeandroid.content.ContentProvider;
+import com.activeandroid.query.Update;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
@@ -183,8 +184,10 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
         }
     }
 
-    String mSelection = null;
+    String mSelection = Costants.STRINGS.EMPTY;
     private void init() {
+
+        PatientExperience.setAllAsSeen(true);
 
         final String patientMedicalNumber = getArguments().getString(ARG_PATIENT_ID, Costants.STRINGS.EMPTY);
         if(!patientMedicalNumber.isEmpty()) {
@@ -329,7 +332,7 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
                     cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.UNIT_ID)));
 
             ExperienceCursorCard card = new ExperienceCursorCard(super.getContext());
-            setCardFromCursor(card,cursor);
+            setCardFromCursor(card,cursor,patientExperience);
 
 
             //Create a CardHeader
@@ -360,6 +363,12 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
                 @Override
                 public void onExpandEnd(Card card) {
                     //Toast.makeText(getContext(), "Card Expanded id=" + card.getId(),Toast.LENGTH_SHORT).show();
+                    /*
+                    (new Update(PatientExperience.class))
+                            .set("checkedByDoctor = 1")
+                            .where("_id = ?", patientExperience.getId())
+                            .execute();*/
+                    //card.setBackgroundResourceId(R.drawable.card_background);
                 }
             });
 
@@ -376,7 +385,7 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
             return card;
         }
 
-        private void setCardFromCursor(ExperienceCursorCard card,Cursor cursor) {
+        private void setCardFromCursor(ExperienceCursorCard card, Cursor cursor, PatientExperience patientExperience) {
             final int experienceId = cursor.getInt(ID_COLUMN);
             card.setId(""+ experienceId);
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.EXPERIENCE_TYPE));
@@ -399,7 +408,16 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
                             + " hours of bad experience )";*/
 
             ;
-            card.resourceIdThumb=R.drawable.ic_medicine;
+            card.resourceIdBackground = R.drawable.card_background;
+            /*
+            if(patientExperience.getCheckedByDoctor() >= 1){
+                card.resourceIdBackground = R.drawable.card_background;
+            }else {
+                card.resourceIdBackground = R.drawable.card_background_color_orange;
+            }
+            */
+            card.resourceIdThumb=R.drawable.ic_experience_2;
+
 
         }
     }
@@ -413,6 +431,7 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
         String secondaryTitle;
         String mainHeader;
         int resourceIdThumb;
+        int resourceIdBackground;
         private ImageButton mButtonExpandCustom;
 
         public ExperienceCursorCard(Context context) {
@@ -432,6 +451,8 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
             if (mSecondaryTitleTextView != null)
                 mSecondaryTitleTextView.setText(secondaryTitle);
 
+            //Set Background resource
+            this.setBackgroundResourceId(resourceIdBackground);
             if(mButtonExpandCustom != null) {
                 mButtonExpandCustom.setBackgroundResource(R.drawable.card_menu_button_expand);
 

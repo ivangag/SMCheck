@@ -60,7 +60,8 @@
     <string name="feed_status_title_question">Does your pain stop you from eating/drinking?</string>
     <string name="no_response">NO</string>
     <string name="yes_response">YES</string>
-    <string name="alert_dialog_ok">Yes</string>
+    <string name="alert_dialog_yes">Yes</string>
+    <string name="alert_dialog_ok">OK</string>
     <string name="alert_dialog_cancel">Cancel</string>
     <string name="alert_dialog_title_checkin_submission">Do you confirm this CheckIn?</string>
     <string name="title_check_in_confirmation">Click here to confirm Check-In</string>
@@ -96,9 +97,9 @@
     <string name="pref_title_checkin_frequency">Check-In Reminder frequency</string>
 
     <string-array name="pref_checkin_frequency_titles">
-        <item>4 times a day</item>
-        <item>5 times a day</item>
-        <item>6 times a day</item>
+        <item>4 times per day</item>
+        <item>5 times per day</item>
+        <item>6 times per day</item>
     </string-array>
     <string-array name="pref_checkin_frequency_values">
         <item>4</item>
@@ -125,11 +126,15 @@
 
     <item name="txt_medication_delete" type="id">Medication Delete</item>
 
-    <string name="title_activity_patient_experiences">PatientExperiencesActivity</string>
+    <string name="title_activity_patient_experiences">Patients Experiences</string>
     <string name="experiences_header">Bad Experiences</string>
     <string name="experience_header">Experience</string>
     <string name="exit_question">Are you sure to exit?</string>
     <string name="alert_exit_cancel">No</string>
     <string name="pref_summary_new_message_notifications">Enable the sending/receiving of important messages</string>
+    <string name="text_bad_experience_notification">Experience of one or more Patients require your attention</string>
+    <string name="title_bad_experience_notification">Bad Patient Experience</string>
+    <string name="text_bad_experience_details">[2014–10–11 08:30 AM]\\nThe Patient John Smith had a bad experience claiming 12 hours of sever pain</string>
+    <string name="text_ok_go_to_all_experiences">Go To All Experiences Reports</string>
 
 </resources>

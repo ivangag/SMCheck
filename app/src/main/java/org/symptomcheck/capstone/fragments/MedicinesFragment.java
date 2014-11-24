@@ -482,7 +482,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                     .setIcon(R.drawable.ic_medicine)
                     .setMessage(message)
                     .setTitle(title)
-                    .setPositiveButton(R.string.alert_dialog_ok,
+                    .setPositiveButton(R.string.alert_dialog_yes,
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {

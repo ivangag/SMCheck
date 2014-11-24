@@ -19,35 +19,86 @@ package org.symptomcheck.capstone.ui;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.os.Build;
+import android.widget.Button;
+import android.widget.TextView;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.fragments.ExperiencesFragment;
+import org.symptomcheck.capstone.model.Patient;
+import org.symptomcheck.capstone.model.PatientExperience;
+import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.DateTimeUtils;
+
+import java.util.List;
 
 public class PatientExperiencesActivity extends Activity {
 
     public final static String PATIENT_ID = "patient_id";
+    public final static String ACTION_NEW_PATIENT_BAD_EXPERIENCE = "new_bad_experience_patient";
+    View viewIntroNewExperienceInfo;
+    TextView textViewDetails;
+    Button btnGoToAllExperiences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient_experiences);
+        viewIntroNewExperienceInfo = findViewById(R.id.viewIntroExperience);
+        textViewDetails = (TextView) findViewById(R.id.txt_view_bad_experience_test);
+        btnGoToAllExperiences = (Button) findViewById(R.id.btn_go_to_all_experiences);
         if (savedInstanceState == null) {
-            final String patientMedicalNumber = getIntent().getExtras().getString(PATIENT_ID);
-            getFragmentManager().beginTransaction()
-                    .add(R.id.container, ExperiencesFragment.newInstance("patient001"))
-                    .commit();
+            if((getIntent().getAction() != null)
+                    &&  getIntent().getAction().equals(ACTION_NEW_PATIENT_BAD_EXPERIENCE)) {
+                viewIntroNewExperienceInfo.setVisibility(View.VISIBLE);
+                List<PatientExperience> patientExperiences = PatientExperience.getAllNotSeen();
+                if(!patientExperiences.isEmpty()){
+                    textViewDetails.setText(Costants.STRINGS.EMPTY);
+                    Patient patient;
+                    for (PatientExperience patientExperience : patientExperiences){
+                        patient = Patient.getByMedicalNumber(patientExperience.getPatientId());
+                        String headStartTime = "[" + DateTimeUtils.convertEpochToHumanTime(patientExperience.getEndExperienceTime(),"YYYY-MM-DD hh:mm") + "]";
+                        headStartTime += "\n";
+                        String patientInfo = String.format(String.format("The Patient %s reported a bad experience claiming %d hours of %s",
+                                patient.getFirstName() + " " + patient.getLastName(), patientExperience.getExperienceDuration(), patientExperience.getExperienceType()));
+                        headStartTime += patientInfo + "\n";
+                        textViewDetails.append(headStartTime);
+                        textViewDetails.append("------------------------------\n");
+                    }
+                }else {
+                    showAllExperiencesList();
+                }
+
+               // show details
+            }else {
+
+                showAllExperiencesList();
+            }
         }
         // enable ActionBar app icon to behave as action to toggle nav drawer
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
+        if(btnGoToAllExperiences != null){
+            btnGoToAllExperiences.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    viewIntroNewExperienceInfo.setVisibility(View.GONE);
+                    showAllExperiencesList();
+                }
+            });
+        }
+    }
+
+    private void showAllExperiencesList() {
+        viewIntroNewExperienceInfo.setVisibility(View.GONE);
+        btnGoToAllExperiences.setVisibility(View.GONE);
+        getFragmentManager().beginTransaction()
+                .add(R.id.container, ExperiencesFragment.newInstance(Costants.STRINGS.EMPTY))
+                .commit();
     }
 
 

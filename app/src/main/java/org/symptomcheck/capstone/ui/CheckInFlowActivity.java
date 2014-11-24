@@ -626,7 +626,6 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                 @Override
                 public void onClick(View arg0) {
                     String am_pm = "";
-                    // TODO Auto-generated method stub
                     int m = dp.getMonth()+1;
                     int d = dp.getDayOfMonth();
                     int y = dp.getYear();
@@ -722,7 +721,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                     .setIcon(R.drawable.ic_check_in)
                     .setMessage(message)
                     .setTitle(title)
-                    .setPositiveButton(R.string.alert_dialog_ok,
+                    .setPositiveButton(R.string.alert_dialog_yes,
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {

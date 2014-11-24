@@ -1,17 +1,19 @@
 /*
- * Copyright 2013 The Android Open Source Project
+ * ******************************************************************************
+ *   Copyright (c) 2014-2015 Ivan Gaglioti.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *  *****************************************************************************
  */
 
 package org.symptomcheck.capstone;
@@ -40,6 +42,7 @@ import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.PatientExperience;
 import org.symptomcheck.capstone.model.Question;
 import org.symptomcheck.capstone.model.UserInfo;
+import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
 import org.symptomcheck.capstone.provider.ActiveContract;
@@ -81,7 +84,6 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public SymptomSyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
         super(context, autoInitialize, allowParallelSyncs);
-        //mContentResolver = context.getContentResolver();
     }
 
 
@@ -142,7 +144,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (user.getLogged()) {
                     updateCloudData(active_repo_cloud_to_sync, user);
                     updateLocalData(active_repo_local_to_sync, user);
-                    checkPatientsBadExperience();
+                    handleOtherUserSpecificTasks(user.getUserType());
                 }
 
             }
@@ -153,26 +155,45 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.i(TAG, "Network synchronization completed");
     }
 
+    private void handleOtherUserSpecificTasks(UserType userType){
+        switch (userType){
+
+            case PATIENT:
+                break;
+            case DOCTOR:
+                checkPatientsBadExperience();
+                break;
+            case ADMIN:
+                break;
+        }
+
+    }
+
     private void checkPatientsBadExperience(){
         String method = new Object(){}.getClass().getEnclosingMethod().getName();
         Log.i(TAG, method + " Checking...");
         List<PatientExperience> patientExperiences = PatientExperience.checkBadExperiences();
+        patientExperiences = PatientExperience.getAllNotNotified();
         final int count = patientExperiences.size();
         Log.i(TAG, "BadExperienceFound:" + count);
         if(count > 0){
             final PatientExperience experience = patientExperiences.get(0);
             final String patientId = experience.getPatientId();
             Log.i(TAG, "BadExperiencePatient:" + patientId);
-            (new Update(PatientExperience.class))
-                    .set("checkedByDoctor = 1")
-                    .where("_id = ?", experience.getId())
-                    .execute();
+            for(PatientExperience patientExperience : patientExperiences) {
+                (new Update(PatientExperience.class))
+                        .set("notifiedToDoctor = 1")
+                        .where("_id = ?", experience.getId())
+                        .execute();
+            }
             Bundle data = new Bundle();
-            data.putString("EXPERIENCE_ID", experience.getExperienceId());
-            data.putString(PatientExperiencesActivity.PATIENT_ID, patientId);
-            NotificationHelper.sendNotification(getContext(), 3,
-                    "Bad Patient Experience", "Experience of one or more Patients require your attention",
-                    PatientExperiencesActivity.class, true, "BAD_EXPERIENCE", data);
+            //data.putString("EXPERIENCE_ID", experience.getExperienceId());
+            //data.putString(PatientExperiencesActivity.PATIENT_ID, patientId);
+            final Context context = getContext();
+            NotificationHelper.sendNotification(context, 3,
+                    context.getResources().getString(R.string.title_bad_experience_notification),
+                    context.getResources().getString(R.string.text_bad_experience_notification),
+                    PatientExperiencesActivity.class, true, PatientExperiencesActivity.ACTION_NEW_PATIENT_BAD_EXPERIENCE, null);
         }
     }
 

@@ -1,7 +1,92 @@
+
+
+
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="org.symptomcheck.capstone.ui.PatientExperiencesActivity"
-    tools:ignore="MergeRootFrame" />
+    tools:ignore="MergeRootFrame" >
+
+    <ScrollView
+        android:id="@+id/viewIntroExperience"
+        android:layout_width="match_parent"
+        android:background="#FFBB33"
+        android:layout_height="match_parent">
+
+    <RelativeLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_gravity="end|top">
+
+        <LinearLayout
+            android:id="@+id/view_bad_experience_header"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:background="@drawable/ab_solid_capstone"
+            android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/imageChartApi"
+            android:src="@drawable/ic_experience_2"
+            android:layout_gravity="center"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/picasso" />
+        <TextView
+            android:id="@+id/txt_view_bad_experience_header"
+            android:text="@string/text_bad_experience_notification"
+            android:layout_gravity="fill"
+            android:layout_marginTop="0dp"
+            android:layout_width="match_parent"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_height="64dp"
+            android:gravity="center"
+            style="@style/Theme.Capstone"
+            android:textColor="@android:color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/view_bad_experience_header"
+                android:orientation="vertical">
+                <TextView
+                    android:text="@string/text_bad_experience_details"
+                    android:id="@+id/txt_view_bad_experience_test"
+                    android:textSize="16sp"
+                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+                    android:gravity="top|center"
+                    android:layout_marginTop="0dp"
+                    android:background="#FFBB33"
+                    style="@style/Theme.Capstone"
+                    android:textColor="@android:color/white" />
+            </LinearLayout>
+
+    </RelativeLayout>
+</ScrollView>
+
+    <Button android:id="@+id/btn_go_to_all_experiences"
+        style="?android:textAppearanceSmall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/text_ok_go_to_all_experiences"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal|bottom"
+        android:background="@drawable/ab_solid_capstone" />
+
+</FrameLayout>
+
+
+
+

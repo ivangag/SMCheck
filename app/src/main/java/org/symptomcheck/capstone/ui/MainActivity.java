@@ -24,7 +24,6 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -55,11 +54,11 @@ import org.symptomcheck.capstone.bus.DownloadEvent;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.fragments.CheckInFragment;
 import org.symptomcheck.capstone.fragments.DoctorFragment;
+import org.symptomcheck.capstone.fragments.ExperiencesFragment;
 import org.symptomcheck.capstone.fragments.ICardEventListener;
 import org.symptomcheck.capstone.fragments.IFragmentListener;
 import org.symptomcheck.capstone.fragments.MedicinesFragment;
 import org.symptomcheck.capstone.fragments.PatientsFragment;
-import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.Doctor;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.PatientExperience;
@@ -71,7 +70,6 @@ import org.symptomcheck.capstone.utils.DateTimeUtils;
 import org.symptomcheck.capstone.utils.NotificationHelper;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -93,7 +91,6 @@ public class MainActivity extends Activity implements ICardEventListener {
     private CharSequence mDrawerTitle;
     private TextView mTextViewHeaderUser;
     private TextView mTextViewUserDetails;
-    private ShareActionProvider mShareActionProvider;
     private Fragment mCurrentFragment;
     private Fragment mPreviousFragment;
     private int mSelectedFragmentPosition = -1;
@@ -101,6 +98,7 @@ public class MainActivity extends Activity implements ICardEventListener {
 
     public enum ShowFragmentType {
         DOCTOR_PATIENTS,
+        DOCTOR_PATIENTS_EXPERIENCES,
         SETTINGS,
         PATIENT_CHECKINS,
         PATIENT_DOCTORS,
@@ -109,8 +107,9 @@ public class MainActivity extends Activity implements ICardEventListener {
     }
 
     private static final int CASE_SHOW_DOCTOR_PATIENTS = 0;
-    private static final int CASE_SHOW_DOCTOR_SETTINGS = 1;
-    private static final int CASE_SHOW_DOCTOR_LOGOUT = 2;
+    private static final int CASE_SHOW_DOCTOR_PATIENTS_EXPERIENCES = 1;
+    private static final int CASE_SHOW_DOCTOR_SETTINGS = 2;
+    private static final int CASE_SHOW_DOCTOR_LOGOUT = 3;
     private static final int CASE_SHOW_PATIENT_CHECKINS = 0;
     private static final int CASE_SHOW_PATIENT_DOCTORS = 1;
     private static final int CASE_SHOW_PATIENT_MEDICINES = 2;
@@ -221,7 +220,10 @@ public class MainActivity extends Activity implements ICardEventListener {
             try {
                 if (userType.equals(UserType.DOCTOR)) {
                     mFragmentTitles = getResources().getStringArray(R.array.doctor_fragments_array);
-                    mDrawerImagesResources = new int[]{R.drawable.ic_patient, R.drawable.ic_action_settings,
+                    mDrawerImagesResources = new int[]{
+                            R.drawable.ic_patient,
+                            R.drawable.ic_experience_2,
+                            R.drawable.ic_action_settings,
                             R.drawable.ic_logout};
                     Picasso.with(this).load(R.drawable.ic_doctor)
                             //.resize(96, 96)
@@ -292,6 +294,9 @@ public class MainActivity extends Activity implements ICardEventListener {
             case PATIENT_MEDICINES:
                 fragment = MedicinesFragment.newInstance(ownerId);
                 break;
+            case DOCTOR_PATIENTS_EXPERIENCES:
+                fragment = ExperiencesFragment.newInstance(Costants.STRINGS.EMPTY); // we want ALL the Experiences of all patients
+                break;
             case SETTINGS:
                 openSettings();
                 break;
@@ -313,6 +318,10 @@ public class MainActivity extends Activity implements ICardEventListener {
                     case CASE_SHOW_DOCTOR_PATIENTS:
                         //fragment = new PatientsFragment();
                         fragment = selectFragment(ShowFragmentType.DOCTOR_PATIENTS, user.getUserIdentification());
+                        break;
+                    case CASE_SHOW_DOCTOR_PATIENTS_EXPERIENCES:
+                        //fragment = new PatientsFragment();
+                        fragment = selectFragment(ShowFragmentType.DOCTOR_PATIENTS_EXPERIENCES, user.getUserIdentification());
                         break;
                     case CASE_SHOW_DOCTOR_SETTINGS:
                         openSettings();
@@ -464,7 +473,7 @@ public class MainActivity extends Activity implements ICardEventListener {
         MenuItem searchItem = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         MenuItem shareItem = menu.findItem(R.id.action_share);
-        mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
+        ShareActionProvider mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
         mShareActionProvider.setShareHistoryFileName(ShareActionProvider.DEFAULT_SHARE_HISTORY_FILE_NAME);
 
         /*
@@ -538,19 +547,22 @@ public class MainActivity extends Activity implements ICardEventListener {
             Intent intent = new Intent(this, CheckInFlowActivity.class);
             startActivity(intent);
             List<PatientExperience> newBadPatientExperiences = PatientExperience.checkBadExperiences();
-            List<PatientExperience> patientExperiences = PatientExperience.getByPatient("patient001");
+            //List<PatientExperience> patientExperiences = PatientExperience.getByPatient("patient001");
+            List<PatientExperience> patientExperiences = PatientExperience.getAll();
             if (patientExperiences.size() > 0) {
-                PatientExperience experience = patientExperiences.get(0);
-                (new Update(PatientExperience.class))
-                        .set("checkedByDoctor = 1")
-                        .where("_id = ?", experience.getId())
-                        .execute();
+                //PatientExperience experience = patientExperiences.get(0);
+                for(PatientExperience experience : patientExperiences) {
+                    (new Update(PatientExperience.class))
+                            .set("checkedByDoctor = 0")
+                            .where("_id = ?", experience.getId())
+                            .execute();
+                }
                 Bundle data = new Bundle();
-                data.putString("EXPERIENCE_ID", experience.getExperienceId());
-                data.putString(PatientExperiencesActivity.PATIENT_ID, experience.getPatientId());
+                //data.putString("EXPERIENCE_ID", experience.getExperienceId());
+                //data.putString(PatientExperiencesActivity.PATIENT_ID, experience.getPatientId());
                 NotificationHelper.sendNotification(this, 3,
                         "Bad Patient Experience", "Experience of one or more Patients require your attention",
-                        PatientExperiencesActivity.class, true, "BAD_EXPERIENCE", data);
+                        PatientExperiencesActivity.class, true, PatientExperiencesActivity.ACTION_NEW_PATIENT_BAD_EXPERIENCE, null);
             }
             /*
             List<PatientExperience> newBadPatientExperiences = PatientExperience.checkBadExperiences();
@@ -696,7 +708,7 @@ public class MainActivity extends Activity implements ICardEventListener {
                     .setIcon(R.drawable.ic_logout)
                     .setMessage(getString(R.string.logout_question))
                     .setTitle(getString(R.string.title_activity_main))
-                    .setPositiveButton(R.string.alert_dialog_ok,
+                    .setPositiveButton(R.string.alert_dialog_yes,
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {
@@ -733,7 +745,7 @@ public class MainActivity extends Activity implements ICardEventListener {
                     .setIcon(R.drawable.ic_logout)
                     .setMessage(getString(R.string.exit_question))
                     .setTitle(getString(R.string.title_activity_main))
-                    .setPositiveButton(R.string.alert_dialog_ok,
+                    .setPositiveButton(R.string.alert_dialog_yes,
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {

@@ -42,6 +42,7 @@ public class PatientExperience extends Model implements IModelBuilder{
     final static PainLevel painLevelPrimaryToCheck = PainLevel.SEVERE;
     final static PainLevel painLevelSecondaryToCheck = PainLevel.MODERATE;
     final static FeedStatus feedStatusToCheck = FeedStatus.CANNOT_EAT;
+    private static List<PatientExperience> all;
 
     public PatientExperience(){}
 
@@ -58,7 +59,10 @@ public class PatientExperience extends Model implements IModelBuilder{
     @Column
     private int checkedByDoctor = 0;
     @Column
+    private int notifiedToDoctor = 0;
+    @Column
     private ExperienceType experienceType = ExperienceType.UNKNOWN;
+
 
     @Override
     public void buildInternalArray() {
@@ -120,6 +124,18 @@ public class PatientExperience extends Model implements IModelBuilder{
     public void setExperienceType(ExperienceType experienceType) {
         this.experienceType = experienceType;
     }
+    public static List<PatientExperience> getAll() {
+        return new Select()
+                .from(PatientExperience.class)
+                .orderBy("experienceDuration DESC")
+                .execute();
+    }
+
+    public static void setAllAsSeen(boolean setAsSeen) {
+        (new Update(PatientExperience.class))
+                .set("checkedByDoctor = ?", setAsSeen ? 1 : 0)
+                .execute();
+    }
 
     public static PatientExperience getByUniqueId(String experienceId) {
         return new Select()
@@ -134,7 +150,15 @@ public class PatientExperience extends Model implements IModelBuilder{
         return new Select()
                 .from(PatientExperience.class)
                 .where("checkedByDoctor = ?", 0)
-                .orderBy("experienceDuration DESC")
+                .orderBy("endExperienceTime DESC")
+                .execute();
+    }
+
+    public static List<PatientExperience> getAllNotNotified() {
+        return new Select()
+                .from(PatientExperience.class)
+                .where("notifiedToDoctor = ?", 0)
+                .orderBy("endExperienceTime DESC")
                 .execute();
     }
 
@@ -151,6 +175,8 @@ public class PatientExperience extends Model implements IModelBuilder{
     public String toString(){
         StringBuilder sb = new StringBuilder();
         sb
+                .append("Id: ").append(this.experienceId)
+                .append("\n-------------------------\n")
                 .append("PatientId: ").append(this.patientId)
                 .append("\n-------------------------\n")
                 .append("Type: ").append(this.experienceType)
@@ -239,108 +265,37 @@ public class PatientExperience extends Model implements IModelBuilder{
             }
         }
         List<PatientExperience> patientExperiences = Lists.newArrayList();
-        for(Patient patient : painLevelOnlySevereWarningCheck.keySet()){
-            final int sizeList = painLevelOnlySevereWarningCheck.get(patient).size();
+        //patientExperiences.addAll(checkNewBadExperience(painLevelOnlySevereWarningCheck, ExperienceType.SEVERE, 12));
+        patientExperiences.addAll(checkNewBadExperience(painLevelModerateOrSevereWarningCheck, ExperienceType.SEVERE_OR_MODERATE, 12));
+        patientExperiences.addAll(checkNewBadExperience(feedStatusWarningCheck, ExperienceType.CANNOT_EAT, 12));
+        final long countSaved = DAOManager.get().savePatientExperiences(patientExperiences);
+        return patientExperiences;
+    }
+    private static List<PatientExperience> checkNewBadExperience(HashMap<Patient, List<CheckIn>> tableOfWarningFound,
+                                              ExperienceType experienceType, int hourDiffThreshold) {
+        List<PatientExperience> patientExperiences = Lists.newArrayList();
+        for(Patient patient : tableOfWarningFound.keySet()){
+            final int sizeList = tableOfWarningFound.get(patient).size();
             if( sizeList > 1){
-                CheckIn newestCheckIn = painLevelOnlySevereWarningCheck.get(patient).get(0);
-                CheckIn oldestCheckIn = painLevelOnlySevereWarningCheck.get(patient).get(sizeList - 1);
+                CheckIn newestCheckIn = tableOfWarningFound.get(patient).get(0);
+                CheckIn oldestCheckIn = tableOfWarningFound.get(patient).get(sizeList - 1);
                 long diffTime = Long.valueOf(newestCheckIn.getIssueDateTime())
                         - Long.valueOf(oldestCheckIn.getIssueDateTime());
                 long hourDiff = diffTime / 3600 / 1000;
-                if(hourDiff >= 12){
-                    // Raise Alert!!!!
-                    PatientExperience experience = new PatientExperience();
-                    String uniqueId = patient.getMedicalRecordNumber()
-                            + "_" + newestCheckIn.getIssueDateTime()
-                            + "_" + ExperienceType.SEVERE.toString();
-                            //+ "_" + ExperienceSuperType.SEVERE_OR_MODERATE.toString();
-                    PatientExperience patientExperience = PatientExperience.getByUniqueId(uniqueId);
-                    if(patientExperience == null) { // first time this experience is computed
-                        experience.setCheckedByDoctor(0);
-                        experience.setEndExperienceTime(newestCheckIn.getIssueDateTime());
-                        experience.setStartExperienceTime(oldestCheckIn.getIssueDateTime());
-                        experience.setExperienceDuration((int) hourDiff);
-                        experience.setExperienceType(ExperienceType.SEVERE);
-                        experience.setPatientId(patient.getMedicalRecordNumber());
-                        experience.setExperienceId(uniqueId);
-                        patientExperiences.add(experience);
-                    } else { // experience already exists
-                        // update only end time if changed
-                        if(!patientExperience.endExperienceTime.equals(newestCheckIn.getIssueDateTime())) {
-                            (new Update(PatientExperience.class))
-                                    .set("endExperienceTime = " + newestCheckIn.getIssueDateTime()
-                                            + ","
-                                            + "checkedByDoctor = 0")
-                                    .where("_id = ?", patientExperience.getId())
-                                    .execute();
-                        }
-                        //PatientExperience.delete(PatientExperience.class,patientExperience.getId());
-                    }
-                }
-            }
-        }
-        for(Patient patient : painLevelModerateOrSevereWarningCheck.keySet()){
-            final int sizeList = painLevelModerateOrSevereWarningCheck.get(patient).size();
-            if( sizeList > 1){
-                CheckIn newestCheckIn = painLevelModerateOrSevereWarningCheck.get(patient).get(0);
-                CheckIn oldestCheckIn = painLevelModerateOrSevereWarningCheck.get(patient).get(sizeList - 1);
-                long diffTime = Long.valueOf(newestCheckIn.getIssueDateTime())
-                        - Long.valueOf(oldestCheckIn.getIssueDateTime());
-                long hourDiff = diffTime / 3600 / 1000;
-                if(hourDiff >= 16){
-                    // Raise Alert!!!!
-                    PatientExperience experience = new PatientExperience();
-                    String uniqueId = patient.getMedicalRecordNumber()
-                            + "_" + newestCheckIn.getIssueDateTime()
-                            + "_" + ExperienceType.SEVERE_OR_MODERATE.toString();
-                            //+ "_" + ExperienceSuperType.SEVERE_OR_MODERATE.toString();
-                    PatientExperience patientExperience = PatientExperience.getByUniqueId(uniqueId);
-                    if(patientExperience == null) { // first time this experience is computed
-                        experience.setCheckedByDoctor(0);
-                        experience.setEndExperienceTime(newestCheckIn.getIssueDateTime());
-                        experience.setStartExperienceTime(oldestCheckIn.getIssueDateTime());
-                        experience.setExperienceDuration((int) hourDiff);
-                        experience.setExperienceType(ExperienceType.SEVERE_OR_MODERATE);
-                        experience.setPatientId(patient.getMedicalRecordNumber());
-                        experience.setExperienceId(uniqueId);
-                        patientExperiences.add(experience);
-                    } else { // experience already exists
-                        // update only end time if changed
-                        if(!patientExperience.endExperienceTime.equals(newestCheckIn.getIssueDateTime())) {
-                            (new Update(PatientExperience.class))
-                                    .set("endExperienceTime = " + newestCheckIn.getIssueDateTime()
-                                            + ","
-                                            + "checkedByDoctor = 0")
-                                    .where("_id = ?", patientExperience.getId())
-                                    .execute();
-                        }
-                        //PatientExperience.delete(PatientExperience.class,patientExperience.getId());
-                    }
-                }
-            }
-        }
-        for(Patient patient : feedStatusWarningCheck.keySet()){
-            final int sizeList = feedStatusWarningCheck.get(patient).size();
-            if( sizeList > 1){
-                CheckIn newestCheckIn = feedStatusWarningCheck.get(patient).get(0);
-                CheckIn oldestCheckIn = feedStatusWarningCheck.get(patient).get(sizeList - 1);
-                long diffTime = Long.valueOf(newestCheckIn.getIssueDateTime())
-                        - Long.valueOf(oldestCheckIn.getIssueDateTime());
-                long hourDiff = diffTime / 3600 / 1000;
-                if(hourDiff >= 12){
+                if(hourDiff >= hourDiffThreshold){
                     // Raise Feed Alert!!!!
                     PatientExperience experience = new PatientExperience();
                     String uniqueId = patient.getMedicalRecordNumber()
                             + "_" + newestCheckIn.getIssueDateTime()
                             //+ "_" + oldestCheckIn.getIssueDateTime()
-                            + "_" + ExperienceType.CANNOT_EAT.toString();
+                            + "_" + experienceType;
                     PatientExperience patientExperience = PatientExperience.getByUniqueId(uniqueId);
-                    if(patientExperience == null) { // first time this experience is computed
+                    if(patientExperience == null) { // NEW EXPERIENCE
                         experience.setCheckedByDoctor(0);
                         experience.setEndExperienceTime(newestCheckIn.getIssueDateTime());
                         experience.setStartExperienceTime(oldestCheckIn.getIssueDateTime());
                         experience.setExperienceDuration((int) hourDiff);
-                        experience.setExperienceType(ExperienceType.CANNOT_EAT);
+                        experience.setExperienceType(experienceType);
                         experience.setPatientId(patient.getMedicalRecordNumber());
                         experience.setExperienceId(uniqueId);
                         patientExperiences.add(experience);
@@ -354,16 +309,18 @@ public class PatientExperience extends Model implements IModelBuilder{
                                     .where("_id = ?", patientExperience.getId())
                                     .execute();
                         }
-                        //PatientExperience.delete(PatientExperience.class,patientExperience.getId());
                     }
                 }
             }
         }
-        final long countSaved = DAOManager.get().savePatientExperiences(patientExperiences);
-//        for(PatientExperience patientExperience : patientExperiences){
-//            patientExperience.save();
-//        }
         return patientExperiences;
     }
 
+    public int getNotifiedToDoctor() {
+        return notifiedToDoctor;
+    }
+
+    public void setNotifiedToDoctor(int notifiedToDoctor) {
+        this.notifiedToDoctor = notifiedToDoctor;
+    }
 }

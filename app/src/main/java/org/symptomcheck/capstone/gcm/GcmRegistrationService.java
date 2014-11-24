@@ -26,21 +26,14 @@ import retrofit.RetrofitError;
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
  * <p/>
- * TODO: Customize class - update intent actions, extra parameters and static
  * helper methods.
  */
 public class GcmRegistrationService extends IntentService {
 
     private static final String TAG = "GcmRegistrationService";
 
-    // TODO: Rename actions, choose action names that describe tasks that this
-    // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_GCM_DEVICE_REGISTRATION = "org.symptomcheck.capstone.gcm.action.REGISTRATION";
     private static final String ACTION_GCM_DEVICE_UNREGISTRATION = "org.symptomcheck.capstone.gcm.action.UNREGISTRATION";
-
-    // TODO: Rename parameters
-    private static final String EXTRA_PARAM1 = "org.symptomcheck.capstone.gcm.extra.PARAM1";
-    private static final String EXTRA_PARAM2 = "org.symptomcheck.capstone.gcm.extra.PARAM2";
 
     GoogleCloudMessaging gcm;
     private String regid;
@@ -61,8 +54,6 @@ public class GcmRegistrationService extends IntentService {
     public static void startDeviceRegistration(Context context/*, String param1, String param2*/) {
         Intent intent = new Intent(context, GcmRegistrationService.class);
         intent.setAction(ACTION_GCM_DEVICE_REGISTRATION);
-        //intent.putExtra(EXTRA_PARAM1, param1);
-        //intent.putExtra(EXTRA_PARAM2, param2);
         context.startService(intent);
     }
 
@@ -75,18 +66,14 @@ public class GcmRegistrationService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_GCM_DEVICE_REGISTRATION.equals(action)) {
-                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-                handleDeviceRegistration(param1, param2);
+                handleDeviceRegistration();
             } else if (ACTION_GCM_DEVICE_UNREGISTRATION.equals(action)) {
-                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-                handleDeviceUnRegistration(param1, param2);
+                handleDeviceUnRegistration();
             }
         }
     }
 
-    private void handleDeviceUnRegistration(String param1, String param2) {
+    private void handleDeviceUnRegistration() {
         unregistration();
     }
 
@@ -94,13 +81,12 @@ public class GcmRegistrationService extends IntentService {
      * Handle action Gcm Device Registration in the provided background thread with the provided
      * parameters.
      */
-    private void handleDeviceRegistration(String param1, String param2) {
+    private void handleDeviceRegistration() {
         gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
         regid = getRegistrationId(getApplicationContext());
         final boolean hasUserGcmId = this.getRemoteGCMIds().contains(regid);
         if (regid.isEmpty()
                 || !hasUserGcmId) {
-                /*registerInBackground();*/
             registerInBackground();
         }
 
@@ -153,7 +139,7 @@ public class GcmRegistrationService extends IntentService {
             String regId = UserPreferencesManager.get().getGcmRegId(getApplicationContext());
             DownloadHelper.get().withRetrofitClient(getApplicationContext()).clearGCMRegistration(regId);
         }catch (RetrofitError error){
-            Log.e(TAG,"Gcm unregistration:" + error.getMessage());
+            Log.e(TAG,"Gcm de-registration:" + error.getMessage());
             res = false;
         }finally {
             if(res){

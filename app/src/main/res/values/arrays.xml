@@ -12,6 +12,7 @@
     <string-array
         name="doctor_fragments_array">
         <item>Patients</item>
+        <item>Patients Bad Experiences</item>
         <item>Settings</item>
         <item>Logout</item>
     </string-array>

@@ -324,6 +324,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
 
         @Override
         protected Card getCardFromCursor(Cursor cursor) {
+            final Doctor doctor = Doctor.getByDoctorNumber(cursor.getString(cursor.getColumnIndex(ActiveContract.DOCTORS_COLUMNS.DOCTOR_ID)));
             DoctorCursorCard card = new DoctorCursorCard(super.getContext());
             setCardFromCursor(card,cursor);
 
@@ -384,8 +385,12 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
             })*/
 
             //This provides a simple (and useless) expand area
-            CustomExpandCard expand = new CustomExpandCard(super.getContext(), mDetailedInfo);
-            expand.setTitle("Doctor Details");
+            String detailedInfo = "";
+            if(doctor != null) {
+                detailedInfo = Doctor.getDetailedInfo(doctor);
+            }
+            CustomExpandCard expand = new CustomExpandCard(super.getContext(), detailedInfo);
+            //expand.setTitle("Doctor Details");
             //Add Expand Area to Card
             card.addCardExpand(expand);
 

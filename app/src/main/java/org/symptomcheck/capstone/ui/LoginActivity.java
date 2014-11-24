@@ -232,12 +232,10 @@ public class LoginActivity extends Activity{
 
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() > 3;
     }
 
@@ -354,8 +352,6 @@ public class LoginActivity extends Activity{
                 errorLogin.error = e;
                 Log.e(TAG,String.format("Error on verifyUser:%s; User:%s Pw:%s Token:%s. ", e.getMessage(),mEmail,mPassword,token));
             }
-
-           // TODO: register the new account here.
             return errorLogin;
         }
 

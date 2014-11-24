@@ -65,6 +65,12 @@ public class Patient extends Model implements IModelBuilder{
 	private String birthDate;
 
     @Column
+    private String email;
+
+    @Column
+    private String phoneNumber;
+
+    @Column
     private String[] doctorsList = new String[]{};
     private boolean birthDateClear;
 
@@ -219,14 +225,18 @@ public class Patient extends Model implements IModelBuilder{
 
     public static String getDetailedInfo(Patient patient) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Name: ").append(patient.getFirstName());
-        sb.append("\n----------------------------\n");
-        sb.append("LastName: ").append(patient.getLastName());
-        sb.append("\n----------------------------\n");
-        sb.append("MedicalNumber: ").append(patient.getMedicalRecordNumber());
-        sb.append("\n----------------------------\n");
-        sb.append("BirthDate: ").append(DateTimeUtils.convertEpochToHumanTime(patient.getBirthDate(),"DD/MM/YYYY"));
-
+        sb.append("Name: ").append(patient.getFirstName())
+                .append("\n----------------------------\n")
+                .append("LastName: ").append(patient.getLastName())
+                .append("\n----------------------------\n")
+                .append("MedicalNumber: ").append(patient.getMedicalRecordNumber())
+                .append("\n----------------------------\n")
+                .append("BirthDate: ").append(DateTimeUtils.convertEpochToHumanTime(patient.getBirthDate(), "DD/MM/YYYY"))
+                .append("\n----------------------------\n")
+                .append("Email: ").append(patient.getEmail())
+                .append("\n----------------------------\n")
+                .append("PhoneNumber: ").append(patient.getPhoneNumber())
+                .append("\n----------------------------\n");
         return sb.toString();
     }
 
@@ -245,5 +255,19 @@ public class Patient extends Model implements IModelBuilder{
     }
 
 
+    public String getEmail() {
+        return email;
+    }
 
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 }

@@ -25,6 +25,8 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.google.common.collect.Lists;
 
+import org.symptomcheck.capstone.utils.DateTimeUtils;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,6 +49,12 @@ public class Doctor extends Model implements IModelBuilder {
 
     @Column
 	private String lastName;
+
+    @Column
+    private String email;
+
+    @Column
+    private String phoneNumber;
 
     //@Column
 	private List<String> gcmRegistrationIds = Lists.newArrayList();
@@ -135,5 +143,39 @@ public class Doctor extends Model implements IModelBuilder {
                         .where("doctorId = ?", uniqueDoctorId)
                         //.orderBy("Name ASC")
                 .executeSingle();
+    }
+
+    public static String getDetailedInfo(Doctor doctor) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Name: ").append(doctor.getFirstName())
+        .append("\n----------------------------\n")
+        .append("LastName: ").append(doctor.getLastName())
+        .append("\n----------------------------\n")
+        .append("UniqueDoctorID: ").append(doctor.getUniqueDoctorId())
+        .append("\n----------------------------\n")
+        .append("Email: ").append(doctor.getEmail())
+        .append("\n----------------------------\n")
+        .append("PhoneNumber: ").append(doctor.getPhoneNumber())
+        .append("\n----------------------------\n")
+
+        ;
+
+        return sb.toString();
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

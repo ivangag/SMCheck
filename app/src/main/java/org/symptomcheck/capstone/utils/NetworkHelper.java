@@ -24,12 +24,16 @@ import android.net.ConnectivityManager;
  * Created by Ivan on 11/11/2014.
  */
 public class NetworkHelper {
+
+    //region TODO#00001 Checks if Internet Connection is present
     public static boolean isOnline(Context context) {
         ConnectivityManager cm =
                 (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
         android.net.NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
+    //endregion
+
     public static boolean isOnlineOverWifi(Context context){
         ConnectivityManager cm =((ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE));
         return (isOnline(context) &&

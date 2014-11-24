@@ -159,7 +159,7 @@ public  abstract class BaseFragment extends Fragment {
                 iconId = R.drawable.ic_check_in;
                 break;
             case FRAGMENT_TYPE_EXPERIENCES:
-                iconId = R.drawable.ic_medicine;
+                iconId = R.drawable.ic_experience_2;
                 break;
 
             default:
@@ -175,19 +175,6 @@ public  abstract class BaseFragment extends Fragment {
 
 
     private String buildQuerySelection(){
-        //***START rebuild selection ****/
-//        long id;
-//        if(DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)){
-//            id = Patient.getByMedicalNumber(DAOManager.get().getUser().getUserIdentification()).getId();
-//        }else{
-//            id = cursor.getInt(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PATIENT));
-//        }
-//        if(!mPatientOwner.getId().equals(id)){
-//            // rebuild query selection based on base sqlite _id, it could be changed due to a full database rebuilding
-//            mSelectionQuery =  ActiveContract.CHECKIN_COLUMNS.PATIENT + " = "  + id;
-//        }
-        //***END rebuild selection ****/
-
         final String uniqueId = getIdentityOwnerId();
         String selection = Costants.STRINGS.EMPTY;
         switch (getFragmentType()){
@@ -196,13 +183,16 @@ public  abstract class BaseFragment extends Fragment {
             case FRAGMENT_TYPE_DOCTORS:
                 break;
             case FRAGMENT_TYPE_CHECKIN:
-                selection = ActiveContract.CHECKIN_COLUMNS.PATIENT + " = " + Patient.getByMedicalNumber(uniqueId).getId();
+                if(!uniqueId.isEmpty())
+                    selection = ActiveContract.CHECKIN_COLUMNS.PATIENT + " = " + Patient.getByMedicalNumber(uniqueId).getId();
                 break;
             case FRAGMENT_TYPE_MEDICINES:
-                selection =  ActiveContract.MEDICINES_COLUMNS.PATIENT + " = '" + uniqueId + "'";
+                if(!uniqueId.isEmpty())
+                    selection =  ActiveContract.MEDICINES_COLUMNS.PATIENT + " = '" + uniqueId + "'";
                 break;
             case FRAGMENT_TYPE_EXPERIENCES:
-                selection =  ActiveContract.EXPERIENCES_COLUMNS.PATIENT + " = '" + uniqueId + "'";
+                if(!uniqueId.isEmpty())
+                    selection =  ActiveContract.EXPERIENCES_COLUMNS.PATIENT + " = '" + uniqueId + "'";
                 break;
             default:
                 break;
