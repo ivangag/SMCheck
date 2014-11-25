@@ -34,6 +34,7 @@ import retrofit.http.GET;
 import retrofit.http.POST;
 import retrofit.http.PUT;
 import retrofit.http.Path;
+import retrofit.http.Query;
 
 public interface SymptomManagerSvcApi {
     public static final String PATIENT_ID_1 = "patient001";
@@ -104,6 +105,13 @@ public interface SymptomManagerSvcApi {
 
 
     //----------------- DOCTOR methods ----------------- //
+    @GET(DOCTOR_SVC_PATH + "/{uniqueDoctorID}/patients/checkins/searchByPatientName")
+
+    public Collection<CheckIn> findCheckInsByPatientName(
+            @Path("uniqueDoctorID") String uniqueDoctorID,
+            @Query("firstName") String patientFirstName,
+            @Query("lastName") String patientLastName);
+
     @GET(DOCTOR_SVC_PATH + "/{uniqueDoctorID}")
     public Doctor findDoctorByUniqueDoctorID(@Path("uniqueDoctorID") String uniqueDoctorID);
 

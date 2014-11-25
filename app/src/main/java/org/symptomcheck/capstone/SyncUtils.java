@@ -39,6 +39,9 @@ public class SyncUtils {
 
     public static final String SYNC_LOCAL_ACTION_PARTIAL = "sync_local_partial";
     public static final String SYNC_CLOUD_ACTION_PARTIAL = "sync_cloud_partial";
+    public static final String SYNC_ONLINE_SEARCH_ACTION = "sync_online_search";
+
+    public static final String ONLINE_QUERY_TEXT = "online_query_text";
 
     /**
      * Create an entry for this application in the system account list, if it isn't already there.
@@ -100,7 +103,7 @@ public class SyncUtils {
     }
 
     /**
-     * Trigger partial sync by download
+     * Trigger partial sync by downloading fresh data from the Server and saving them locally
      * @param repoToUpdate constant defines the table / db source to sync
      * @see org.symptomcheck.capstone.provider.ActiveContract
      */
@@ -114,7 +117,7 @@ public class SyncUtils {
     }
 
     /**
-     * Trigger partial sync
+     * Trigger partial sync in order to upload local pending data to remote Server
      * @param repoToUpdate constant defines the table / db source to sync
      * @see org.symptomcheck.capstone.provider.ActiveContract
      */
@@ -126,4 +129,20 @@ public class SyncUtils {
                 ActiveContract.CONTENT_AUTHORITY, // Content authority
                 b);
     }
+
+    /**
+     * Trigger online search by populating corresponding local repository used by UI to fetch result
+     * @param repoWhereSearch constant defines the table / db source to sync
+     * @see org.symptomcheck.capstone.provider.ActiveContract
+     */
+    public static void TriggerOnlineSearch(String repoWhereSearch,  String querySearch){
+        Bundle b = new Bundle();
+        b.putString(SYNC_ONLINE_SEARCH_ACTION,repoWhereSearch);
+        b.putString(ONLINE_QUERY_TEXT,querySearch);
+        ContentResolver.requestSync(
+                GenericAccountService.GetAccount(),      // Sync account
+                ActiveContract.CONTENT_AUTHORITY, // Content authority
+                b);
+    }
+
 }

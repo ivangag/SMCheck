@@ -48,6 +48,7 @@ public  abstract class BaseFragment extends Fragment {
     public final static int FRAGMENT_TYPE_CHECKIN = 2;
     public final static int FRAGMENT_TYPE_MEDICINES = 3;
     public final static int FRAGMENT_TYPE_EXPERIENCES = 4;
+    public final static int FRAGMENT_TYPE_ONLINE_CHECKIN = 5;
 
     public static final String TITLE_NONE = "";
 
@@ -160,6 +161,12 @@ public  abstract class BaseFragment extends Fragment {
                 break;
             case FRAGMENT_TYPE_EXPERIENCES:
                 iconId = R.drawable.ic_experience_2;
+                break;
+            case FRAGMENT_TYPE_MEDICINES:
+                iconId = R.drawable.ic_medicine;
+                break;
+            case FRAGMENT_TYPE_ONLINE_CHECKIN:
+                iconId = R.drawable.ic_action_web_site;
                 break;
 
             default:

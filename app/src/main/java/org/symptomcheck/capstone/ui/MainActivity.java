@@ -59,11 +59,17 @@ import org.symptomcheck.capstone.fragments.ICardEventListener;
 import org.symptomcheck.capstone.fragments.IFragmentListener;
 import org.symptomcheck.capstone.fragments.MedicinesFragment;
 import org.symptomcheck.capstone.fragments.PatientsFragment;
+import org.symptomcheck.capstone.fragments.ServerHostedCheckInFragment;
+import org.symptomcheck.capstone.model.CheckIn;
+import org.symptomcheck.capstone.model.CheckInOnlineWrapper;
 import org.symptomcheck.capstone.model.Doctor;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.PatientExperience;
+import org.symptomcheck.capstone.model.QuestionOnlineWrapper;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
+import org.symptomcheck.capstone.network.DownloadHelper;
+import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
 import org.symptomcheck.capstone.preference.UserPreferencesManager;
 import org.symptomcheck.capstone.utils.Costants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
@@ -101,6 +107,7 @@ public class MainActivity extends Activity implements ICardEventListener {
         DOCTOR_PATIENTS_EXPERIENCES,
         SETTINGS,
         PATIENT_CHECKINS,
+        PATIENT_ONLINE_CHECKINS,
         PATIENT_DOCTORS,
         PATIENT_MEDICINES,
         LOGOUT,
@@ -108,8 +115,9 @@ public class MainActivity extends Activity implements ICardEventListener {
 
     private static final int CASE_SHOW_DOCTOR_PATIENTS = 0;
     private static final int CASE_SHOW_DOCTOR_PATIENTS_EXPERIENCES = 1;
-    private static final int CASE_SHOW_DOCTOR_SETTINGS = 2;
-    private static final int CASE_SHOW_DOCTOR_LOGOUT = 3;
+    private static final int CASE_SHOW_DOCTOR_PATIENTS_ONLINE_CHECKINS = 2;
+    private static final int CASE_SHOW_DOCTOR_SETTINGS = 3;
+    private static final int CASE_SHOW_DOCTOR_LOGOUT = 4;
     private static final int CASE_SHOW_PATIENT_CHECKINS = 0;
     private static final int CASE_SHOW_PATIENT_DOCTORS = 1;
     private static final int CASE_SHOW_PATIENT_MEDICINES = 2;
@@ -223,6 +231,7 @@ public class MainActivity extends Activity implements ICardEventListener {
                     mDrawerImagesResources = new int[]{
                             R.drawable.ic_patient,
                             R.drawable.ic_experience_2,
+                            R.drawable.ic_action_web_site,
                             R.drawable.ic_action_settings,
                             R.drawable.ic_logout};
                     Picasso.with(this).load(R.drawable.ic_doctor)
@@ -288,6 +297,9 @@ public class MainActivity extends Activity implements ICardEventListener {
             case PATIENT_CHECKINS:
                 fragment = CheckInFragment.newInstance(ownerId);
                 break;
+            case PATIENT_ONLINE_CHECKINS:
+                fragment = ServerHostedCheckInFragment.newInstance(Costants.STRINGS.EMPTY);
+                break;
             case PATIENT_DOCTORS:
                 fragment = new DoctorFragment();
                 break;
@@ -323,6 +335,10 @@ public class MainActivity extends Activity implements ICardEventListener {
                         //fragment = new PatientsFragment();
                         fragment = selectFragment(ShowFragmentType.DOCTOR_PATIENTS_EXPERIENCES, user.getUserIdentification());
                         break;
+                    case CASE_SHOW_DOCTOR_PATIENTS_ONLINE_CHECKINS:
+                        //fragment = new PatientsFragment();
+                        fragment = selectFragment(ShowFragmentType.PATIENT_ONLINE_CHECKINS, user.getUserIdentification());
+                        break;
                     case CASE_SHOW_DOCTOR_SETTINGS:
                         openSettings();
                         break;
@@ -352,6 +368,10 @@ public class MainActivity extends Activity implements ICardEventListener {
                         fragment = AlertLogoutFragment.newInstance();
                         break;
                 }
+                break;
+            case ADMIN:
+                break;
+            case UNKNOWN:
                 break;
             default:
                 break;
@@ -544,6 +564,12 @@ public class MainActivity extends Activity implements ICardEventListener {
         int id = item.getItemId();
 
         if (id == R.id.action_test) {
+
+            List<CheckIn> checkIns = CheckIn.getAll();
+            DAOManager.get().saveCheckInsOnline(checkIns, Costants.STRINGS.EMPTY,user.getUserIdentification());
+            List<CheckInOnlineWrapper> checkInOnlineWrappers = CheckInOnlineWrapper.getAll();
+            List<QuestionOnlineWrapper> questionOnlineWrappers = QuestionOnlineWrapper.getAll();
+
             Intent intent = new Intent(this, CheckInFlowActivity.class);
             startActivity(intent);
             List<PatientExperience> newBadPatientExperiences = PatientExperience.checkBadExperiences();
@@ -564,28 +590,6 @@ public class MainActivity extends Activity implements ICardEventListener {
                         "Bad Patient Experience", "Experience of one or more Patients require your attention",
                         PatientExperiencesActivity.class, true, PatientExperiencesActivity.ACTION_NEW_PATIENT_BAD_EXPERIENCE, null);
             }
-            /*
-            List<PatientExperience> newBadPatientExperiences = PatientExperience.checkBadExperiences();
-            for (PatientExperience experience : newBadPatientExperiences){
-                Log.d(TAG,"NewBadExperiences: " + experience.toString());
-            }
-            newBadPatientExperiences = PatientExperience.getAllNotSeen();
-            for (PatientExperience experience : newBadPatientExperiences){
-                Log.d(TAG,String.format("NotSeenExperiences: " + experience.toString()));
-            }
-            if(newBadPatientExperiences.size() > 0){
-                PatientExperience experience = newBadPatientExperiences.get(0);
-                (new Update(PatientExperience.class))
-                        .set("checkedByDoctor = 1")
-                        .where("_id = ?", experience.getId())
-                        .execute();
-                Bundle data = new Bundle();
-                data.putString("EXPERIENCE_ID",experience.getExperienceId());
-                data.putString(PatientExperiencesActivity.PATIENT_ID,experience.getPatientId());
-                NotificationHelper.sendNotification(this, 3,
-                        "Bad Patient Experience", "Experience of one or more Patients require your attention",
-                        PatientExperiencesActivity.class, true, "BAD_EXPERIENCE",data);
-            }*/
             /*
             try {
                 if(DAOManager.get().getUser().getUserType().equals(UserType.DOCTOR)) {

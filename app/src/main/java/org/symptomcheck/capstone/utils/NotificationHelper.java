@@ -81,6 +81,7 @@ public class NotificationHelper {
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.drawable.ic_doctor)
                         .setContentTitle(titleMsg)
+                        //.setTicker("Alert from Patient!")
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(msg))
                         .setAutoCancel(true)

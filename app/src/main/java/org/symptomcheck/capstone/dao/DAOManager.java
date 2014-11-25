@@ -23,12 +23,14 @@ import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 
 import org.symptomcheck.capstone.model.CheckIn;
+import org.symptomcheck.capstone.model.CheckInOnlineWrapper;
 import org.symptomcheck.capstone.model.Doctor;
 import org.symptomcheck.capstone.model.IModelBuilder;
 import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.PatientExperience;
 import org.symptomcheck.capstone.model.Question;
+import org.symptomcheck.capstone.model.QuestionOnlineWrapper;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.provider.ActiveContract;
 
@@ -103,55 +105,16 @@ public class DAOManager {
         (new ActiveHandler<CheckIn>()).deleteItems(CheckIn.class);
     }
 
-/*
-
-    public synchronized boolean saveCheckIns(List<CheckIn> checkIns, String medicalRecordNumber,
-                                          String userIdentification, boolean needSync) {
-
-        boolean result = false;
-
-        Patient patient = null;
-        //retrieve Patient for foreign key relation
-        List<Patient> patients = new Select().
-                from(Patient.class)
-                .where(ActiveContract.PATIENT_COLUMNS.PATIENT + " = ?", medicalRecordNumber)
-                .execute();
-
-
-        if (patients.size() > 0) {
-            patient = patients.get(0);
-            if (patient != null) {
-                List<Question> questions = new ArrayList<Question>(checkIns.size());
-                for (CheckIn checkIn : checkIns) {
-                    checkIn.patient = patient;
-                    checkIn.setNeedSync(needSync ? 1 : 0);
-                    for (Question question : checkIn.getQuestions()) {
-                        question.checkIn = checkIn;
-                        questions.add(question);
-                    }
-                }
-                final long countCheckIns =  (new ActiveHandler<CheckIn>().saveItems(checkIns));
-                final long countQuestions = (new ActiveHandler<Question>().saveItems(questions));
-                result = needSync ? (countCheckIns > 0) : ((countCheckIns > 0) && (countQuestions > 0));
-            }
-        }
-        return result;
-    }
-*/
-
     public synchronized boolean saveCheckIns(List<CheckIn> checkIns, String medicalRecordNumber,
                                           String userIdentification) {
 
         boolean result = false;
-
         Patient patient = null;
         //retrieve Patient for foreign key relation
         List<Patient> patients = new Select().
                 from(Patient.class)
                 .where(ActiveContract.PATIENT_COLUMNS.PATIENT_ID + " = ?", medicalRecordNumber)
                 .execute();
-
-
         if (patients.size() > 0) {
             patient = patients.get(0);
             if (patient != null) {
@@ -172,6 +135,35 @@ public class DAOManager {
         }
         return result;
     }
+   public synchronized boolean saveCheckInsOnline(List<CheckIn> checkIns, String medicalRecordNumber,
+                                          String userIdentification) {
+
+       boolean result = false;
+
+       List<CheckInOnlineWrapper> checkInOnlineWrappers = new ArrayList<CheckInOnlineWrapper>();
+       List<QuestionOnlineWrapper> questions = new ArrayList<QuestionOnlineWrapper>(checkIns.size());
+
+       for (CheckIn checkIn : checkIns) {
+           CheckInOnlineWrapper checkInOnlineWrapper = new CheckInOnlineWrapper();
+           checkInOnlineWrapper.setIssuePainLevel(checkIn.getIssuePainLevel());
+           checkInOnlineWrapper.setIssueDateTime(checkIn.getIssueDateTime());
+           checkInOnlineWrapper.setIssueFeedStatus(checkIn.getIssueFeedStatus());
+           checkInOnlineWrapper.setPatientMedicalNumber(checkIn.getPatientMedicalNumber());
+           checkInOnlineWrapper.setUnitId(checkIn.getUnitId());
+           checkInOnlineWrappers.add(checkInOnlineWrapper);
+           for (Question question : checkIn.getQuestions()) {
+               QuestionOnlineWrapper questionOnline = new QuestionOnlineWrapper();
+               questionOnline.checkIn = checkInOnlineWrapper;
+               questionOnline.setQuestion(question.getQuestion());
+               questionOnline.setResponse(question.getResponse());
+               questions.add(questionOnline);
+           }
+       }
+       final long countCheckIns = (new ActiveHandler<CheckInOnlineWrapper>().saveItems(checkInOnlineWrappers));
+       final long countQuestions = (new ActiveHandler<QuestionOnlineWrapper>().saveItems(questions));
+       result = countCheckIns > 0;
+       return result;
+   }
 
 
 
