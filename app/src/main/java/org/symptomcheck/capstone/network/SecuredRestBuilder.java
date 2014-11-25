@@ -104,7 +104,7 @@ public class SecuredRestBuilder extends RestAdapter.Builder {
             ExecutorService executor = Executors.newSingleThreadExecutor();
             final Context ctx = mContext.get();
             if(ctx != null) {
-                loggedIn = UserPreferencesManager.get().IsLogged(ctx);
+                loggedIn = UserPreferencesManager.get().isLogged(ctx);
             }
 			if (!loggedIn && (accessToken == null || accessToken.isEmpty())) {
                 final Future<?> future  = executor.submit(new Runnable() {

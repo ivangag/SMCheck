@@ -136,5 +136,8 @@
     <string name="title_bad_experience_notification">Bad Patient Experience</string>
     <string name="text_bad_experience_details">[2014–10–11 08:30 AM]\\nThe Patient John Smith had a bad experience claiming 12 hours of sever pain</string>
     <string name="text_ok_go_to_all_experiences">Go To All Experiences Reports</string>
+    <string name="checkins_online_header">Checkin Remote Search</string>
+    <string name="txt_search_online_running">Searching on the Remote Server…</string>
+    <string name="txt_cards_online_empty_list">No Items - Enter Patient Name for starting a new search</string>
 
 </resources>

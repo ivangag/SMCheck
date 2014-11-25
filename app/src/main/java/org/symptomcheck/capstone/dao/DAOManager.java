@@ -139,6 +139,7 @@ public class DAOManager {
                                           String userIdentification) {
 
        boolean result = false;
+       this.deleteCheckInsOnline();
 
        List<CheckInOnlineWrapper> checkInOnlineWrappers = new ArrayList<CheckInOnlineWrapper>();
        List<QuestionOnlineWrapper> questions = new ArrayList<QuestionOnlineWrapper>(checkIns.size());
@@ -165,6 +166,11 @@ public class DAOManager {
        return result;
    }
 
+    private synchronized void deleteCheckInsOnline() {
+        //delete the foreign key objects also
+        (new ActiveHandler<QuestionOnlineWrapper>()).deleteItems(QuestionOnlineWrapper.class);
+        (new ActiveHandler<CheckInOnlineWrapper>()).deleteItems(CheckInOnlineWrapper.class);
+    }
 
 
     public UserInfo getUser() {

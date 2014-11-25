@@ -234,10 +234,17 @@ public class SettingsActivity extends Activity {
 
         // Trigger the listener immediately with the preference's
         // current value.
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getString(preference.getKey(), ""));
+        Object value;
+        if(preference.getKey().equals(UserPreferencesManager.KEY_SYNC_ONLY_WIFI)){
+            value = PreferenceManager
+                    .getDefaultSharedPreferences(preference.getContext())
+                    .getBoolean(preference.getKey(), false);
+        }else {
+            value = PreferenceManager
+                    .getDefaultSharedPreferences(preference.getContext())
+                    .getString(preference.getKey(), "");
+        }
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,value);
     }
 
 
@@ -279,7 +286,7 @@ public class SettingsActivity extends Activity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference(UserPreferencesManager.KEY_SYNC_FREQ));
-            //bindPreferenceSummaryToValue(findPreference(KEY_SYNC_ONLY_WIFI));
+            bindPreferenceSummaryToValue(findPreference(UserPreferencesManager.KEY_SYNC_ONLY_WIFI));
         }
     }
 

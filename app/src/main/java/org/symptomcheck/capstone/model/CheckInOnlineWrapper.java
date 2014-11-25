@@ -24,7 +24,7 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 
-import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -134,7 +134,7 @@ public class CheckInOnlineWrapper extends Model implements IModelBuilder {
                                         Map<PainMedication,String> Medications) {
 
         //final Calendar calendar = Calendar.getInstance();
-        Long timestamp = DateTime.now(TimeZone.getTimeZone(Costants.TIME.GMT00)).getMilliseconds(TimeZone.getTimeZone(Costants.TIME.GMT00));
+        Long timestamp = DateTime.now(TimeZone.getTimeZone(Constants.TIME.GMT00)).getMilliseconds(TimeZone.getTimeZone(Constants.TIME.GMT00));
         //Long timestamp = calendar.getTimeInMillis();
         CheckInOnlineWrapper checkIn = new CheckInOnlineWrapper(timestamp.toString(), painLevel, feedStatus);
         checkIn.setUnitId(UUID.randomUUID().toString());
@@ -161,7 +161,7 @@ public class CheckInOnlineWrapper extends Model implements IModelBuilder {
         for (QuestionOnlineWrapper question : questions) {
             final String time = question.getMedicationTime();
             sb.append(time)
-                    .append(time.equals(Costants.STRINGS.EMPTY) ? Costants.STRINGS.EMPTY : "\n")
+                    .append(time.equals(Constants.STRINGS.EMPTY) ? Constants.STRINGS.EMPTY : "\n")
                     .append(question.getQuestion()).append(" ").append(question.getResponse())
                     .append("\n----------------------------\n");
 
@@ -206,7 +206,7 @@ public class CheckInOnlineWrapper extends Model implements IModelBuilder {
                     TimeZone.getDefault()).format("YYYY-MM-DD hh:mm");
         }
         else{
-            medicationTime = Costants.STRINGS.EMPTY;
+            medicationTime = Constants.STRINGS.EMPTY;
         }
         return medicationTime;
     }

@@ -32,10 +32,10 @@ public class DateTimeUtils {
         if(savedTime != null &&
                 !savedTime.isEmpty()){
             humanTime = DateTime.forInstant(Long.valueOf(savedTime),
-                    TimeZone.getDefault()).format(format.equals(Costants.TIME.DEFAULT_FORMAT) ? "YYYY-MM-DD hh:mm" : format);
+                    TimeZone.getDefault()).format(format.equals(Constants.TIME.DEFAULT_FORMAT) ? "YYYY-MM-DD hh:mm" : format);
         }
         else{
-            humanTime = Costants.STRINGS.EMPTY;
+            humanTime = Constants.STRINGS.EMPTY;
         }
         return humanTime;
     }

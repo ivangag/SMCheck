@@ -53,13 +53,13 @@ import org.symptomcheck.capstone.alarms.SymptomAlarmRequest;
 import org.symptomcheck.capstone.bus.DownloadEvent;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.fragments.CheckInFragment;
+import org.symptomcheck.capstone.fragments.CheckInOnlineFragment;
 import org.symptomcheck.capstone.fragments.DoctorFragment;
 import org.symptomcheck.capstone.fragments.ExperiencesFragment;
 import org.symptomcheck.capstone.fragments.ICardEventListener;
 import org.symptomcheck.capstone.fragments.IFragmentListener;
 import org.symptomcheck.capstone.fragments.MedicinesFragment;
 import org.symptomcheck.capstone.fragments.PatientsFragment;
-import org.symptomcheck.capstone.fragments.ServerHostedCheckInFragment;
 import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.CheckInOnlineWrapper;
 import org.symptomcheck.capstone.model.Doctor;
@@ -68,10 +68,8 @@ import org.symptomcheck.capstone.model.PatientExperience;
 import org.symptomcheck.capstone.model.QuestionOnlineWrapper;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
-import org.symptomcheck.capstone.network.DownloadHelper;
-import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
 import org.symptomcheck.capstone.preference.UserPreferencesManager;
-import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
 import org.symptomcheck.capstone.utils.NotificationHelper;
 
@@ -298,7 +296,7 @@ public class MainActivity extends Activity implements ICardEventListener {
                 fragment = CheckInFragment.newInstance(ownerId);
                 break;
             case PATIENT_ONLINE_CHECKINS:
-                fragment = ServerHostedCheckInFragment.newInstance(Costants.STRINGS.EMPTY);
+                fragment = CheckInOnlineFragment.newInstance(Constants.STRINGS.EMPTY);
                 break;
             case PATIENT_DOCTORS:
                 fragment = new DoctorFragment();
@@ -307,7 +305,7 @@ public class MainActivity extends Activity implements ICardEventListener {
                 fragment = MedicinesFragment.newInstance(ownerId);
                 break;
             case DOCTOR_PATIENTS_EXPERIENCES:
-                fragment = ExperiencesFragment.newInstance(Costants.STRINGS.EMPTY); // we want ALL the Experiences of all patients
+                fragment = ExperiencesFragment.newInstance(Constants.STRINGS.EMPTY); // we want ALL the Experiences of all patients
                 break;
             case SETTINGS:
                 openSettings();
@@ -381,6 +379,7 @@ public class MainActivity extends Activity implements ICardEventListener {
 
 
     private void openSettings() {
+        UserPreferencesManager.get().printAll(this);
         //SettingsActivity.startSettingActivity(getApplicationContext());
         Intent intent = new Intent(this, SettingsActivity.class);
         //startActivity(intent);
@@ -390,6 +389,7 @@ public class MainActivity extends Activity implements ICardEventListener {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Check which request we're responding to
+        UserPreferencesManager.get().printAll(this);
         if (requestCode == SettingsActivity.MODIFY_USER_SETTINGS) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
@@ -514,8 +514,10 @@ public class MainActivity extends Activity implements ICardEventListener {
                 //Toast.makeText(getActivity().getApplicationContext(), "onQueryTextSubmit:" + query, Toast.LENGTH_SHORT).show();
                 //mNetAdapter.update(query.toUpperCase());
                 IFragmentListener notifier = getCurrentDisplayedFragment();
-                if (notifier != null)
-                    notifier.OnFilterData(query);
+                if (notifier != null) {
+                    //notifier.OnFilterData(query);
+                    notifier.OnSearchOnLine(query);
+                }
                 return true;
             }
 
@@ -566,7 +568,7 @@ public class MainActivity extends Activity implements ICardEventListener {
         if (id == R.id.action_test) {
 
             List<CheckIn> checkIns = CheckIn.getAll();
-            DAOManager.get().saveCheckInsOnline(checkIns, Costants.STRINGS.EMPTY,user.getUserIdentification());
+            DAOManager.get().saveCheckInsOnline(checkIns, Constants.STRINGS.EMPTY,user.getUserIdentification());
             List<CheckInOnlineWrapper> checkInOnlineWrappers = CheckInOnlineWrapper.getAll();
             List<QuestionOnlineWrapper> questionOnlineWrappers = QuestionOnlineWrapper.getAll();
 

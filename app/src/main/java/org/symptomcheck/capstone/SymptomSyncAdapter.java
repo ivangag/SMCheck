@@ -47,7 +47,7 @@ import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
 import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.ui.PatientExperiencesActivity;
-import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.NetworkHelper;
 import org.symptomcheck.capstone.preference.UserPreferencesManager;
 import org.symptomcheck.capstone.utils.NotificationHelper;
@@ -119,10 +119,10 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         if(!accessToken.isEmpty()) {
             mSymptomClient = DownloadHelper.get().setAccessToken(accessToken).withRetrofitClient(getContext());
 
-            String online_to_search_query = Costants.STRINGS.EMPTY;
+            String online_to_search_query = Constants.STRINGS.EMPTY;
+            String[] online_to_search_query_list = new String[]{};
             String active_repo_local_to_sync;
             String active_repo_cloud_to_sync;
-            String active_repo_online_to_search = ActiveContract.SYNC_NONE;
 
             boolean forceSync = ((extras.containsKey(ContentResolver.SYNC_EXTRAS_MANUAL)
                                     && extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED)));
@@ -139,8 +139,9 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
             }else {
                 active_repo_local_to_sync = extras.getString(SyncUtils.SYNC_LOCAL_ACTION_PARTIAL, ActiveContract.SYNC_NONE);
                 active_repo_cloud_to_sync = extras.getString(SyncUtils.SYNC_CLOUD_ACTION_PARTIAL, ActiveContract.SYNC_NONE);
-                active_repo_online_to_search = extras.getString(SyncUtils.SYNC_ONLINE_SEARCH_ACTION, ActiveContract.SYNC_NONE);
-                online_to_search_query = extras.getString(SyncUtils.ONLINE_QUERY_TEXT, Costants.STRINGS.EMPTY);
+                //active_repo_online_to_search = extras.getString(SyncUtils.SYNC_ONLINE_SEARCH_ACTION, ActiveContract.SYNC_NONE);
+                //online_to_search_query = extras.getString(SyncUtils.ONLINE_QUERY_TEXT, Constants.STRINGS.EMPTY);
+                //online_to_search_query_list = extras.getStringArray(SyncUtils.ONLINE_QUERY_TEXT);
             }
 
             final UserInfo user = DAOManager.get().getUser();
@@ -151,7 +152,6 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
                     updateCloudData(active_repo_cloud_to_sync, user);
                     updateLocalData(active_repo_local_to_sync, user);
                     handleOtherUserSpecificTasks(user.getUserType());
-                    onlineSearch(user,active_repo_online_to_search,online_to_search_query);
 
                 }
             }
@@ -162,38 +162,6 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.i(TAG, "Network synchronization completed");
     }
 
-
-
-    private void onlineSearch(UserInfo user, String onlineSearch, String online_to_search_query){
-        switch (user.getUserType()){
-            case PATIENT:
-                break;
-            case DOCTOR:
-                String[] names = online_to_search_query.split(" ");
-                if(names.length > 1) {
-                    final String firstName = names[0];
-                    StringBuilder lastName = new StringBuilder();
-                    //e.g. La Rosa => length = 3
-                    for(int i = 1; i<names.length; i++){
-                        lastName.append(names[i]);
-                        if(i < names.length - 1){
-                            lastName.append(" ");
-                        }
-                    }
-                    if (onlineSearch.equals(ActiveContract.SYNC_CHECK_IN)) {
-                       List<CheckIn> checkIns = (List<CheckIn>) mSymptomClient.
-                               findCheckInsByPatientName(user.getUserIdentification(),firstName,lastName.toString());
-                        if(!checkIns.isEmpty()){
-                            DAOManager.get().saveCheckInsOnline(checkIns, Costants.STRINGS.EMPTY,user.getUserIdentification());
-                        }
-                    }
-                }
-                break;
-            case ADMIN:
-                break;
-        }
-
-    }
     private void handleOtherUserSpecificTasks(UserType userType){
         switch (userType){
             case PATIENT:

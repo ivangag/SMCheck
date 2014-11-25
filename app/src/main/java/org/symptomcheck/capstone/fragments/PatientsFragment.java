@@ -40,7 +40,6 @@ import android.view.ViewGroup;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.activeandroid.content.ContentProvider;
 
@@ -50,12 +49,11 @@ import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.Doctor;
-import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
-import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.Constants;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
@@ -159,7 +157,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
 
     @Override
     public String getIdentityOwnerId() {
-        return Costants.STRINGS.EMPTY;
+        return Constants.STRINGS.EMPTY;
     }
 
 
@@ -182,7 +180,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
                 refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
                 displayList(false);
-                OnFilterData(Costants.STRINGS.EMPTY);
+                OnFilterData(Constants.STRINGS.EMPTY);
                 refreshItem.setActionView(null);
             }
         }
@@ -233,7 +231,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         mAdapter.swapCursor(data);
 
         displayList(data.getCount() <= 0);
-        OnFilterData(Costants.STRINGS.EMPTY);
+        OnFilterData(Constants.STRINGS.EMPTY);
     }
     /**
      * Crfate a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
@@ -311,6 +309,11 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
     public void OnFilterData(String textToSearch) {
         if(mAdapter != null)
             mAdapter.getFilter().filter(textToSearch);
+    }
+
+    @Override
+    public void OnSearchOnLine(String textToSearch) {
+
     }
 
     public static final int ID_COLUMN = 0;

@@ -30,7 +30,6 @@ import android.content.SyncStatusObserver;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,7 +39,6 @@ import android.view.ViewGroup;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.activeandroid.content.ContentProvider;
 
@@ -48,14 +46,10 @@ import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
-import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.CheckIn;
-import org.symptomcheck.capstone.model.FeedStatus;
-import org.symptomcheck.capstone.model.PainLevel;
 import org.symptomcheck.capstone.model.Patient;
-import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
-import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -160,7 +154,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
     @Override
     public String getIdentityOwnerId() {
-        return getArguments().getString(ARG_PATIENT_ID, Costants.STRINGS.EMPTY);
+        return getArguments().getString(ARG_PATIENT_ID, Constants.STRINGS.EMPTY);
     }
 
 
@@ -183,7 +177,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
                 refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
                 displayList(false);
-                OnFilterData(Costants.STRINGS.EMPTY);
+                OnFilterData(Constants.STRINGS.EMPTY);
                 refreshItem.setActionView(null);
             }
         }
@@ -193,12 +187,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
     Patient mPatientOwner = null;
     private void init() {
 
-        final String patientMedicalNumber = getArguments().getString(ARG_PATIENT_ID, Costants.STRINGS.EMPTY);
-//        if((patientId > 0)){
-//            mPatientOwner = Patient.getById(patientId);
-//        }else if (DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)){
-//            mPatientOwner = Patient.getByMedicalNumber(DAOManager.get().getUser().getUserIdentification());
-//        }
+        final String patientMedicalNumber = getArguments().getString(ARG_PATIENT_ID, Constants.STRINGS.EMPTY);
         if(!patientMedicalNumber.isEmpty()) {
             mPatientOwner = Patient.getByMedicalNumber(patientMedicalNumber);
         }
@@ -241,7 +230,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
         displayList(data.getCount() <= 0);
 
-        OnFilterData(Costants.STRINGS.EMPTY);
+        OnFilterData(Constants.STRINGS.EMPTY);
     }
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
@@ -322,6 +311,11 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             mAdapter.getFilter().filter(textToSearch);
     }
 
+    @Override
+    public void OnSearchOnLine(String textToSearch) {
+
+    }
+
     //-------------------------------------------------------------------------------------------------------------
     // Adapter
     //-------------------------------------------------------------------------------------------------------------
@@ -338,7 +332,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             final CheckIn checkIn = CheckIn.getByUnitId(cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.UNIT_ID)));
 
             CheckinCursorCard card = new CheckinCursorCard(super.getContext());
-            setCardFromCursor(card,cursor);
+            setCardFromCursor(card,cursor,checkIn);
 
             //Create a CardHeader
             CardHeader header = new CardHeader(getActivity());
@@ -364,7 +358,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
             String mDetailedCheckInInfo = "";
             if(checkIn != null) {
-                card.secondaryTitle = DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Costants.TIME.DEFAULT_FORMAT);
+                card.secondaryTitle = DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT);
                 mDetailedCheckInInfo = CheckIn.getDetailedInfo(checkIn,true);
             }
             // Add expand card
@@ -374,13 +368,14 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             return card;
         }
 
-        private void setCardFromCursor(CheckinCursorCard card, Cursor cursor) {
+        private void setCardFromCursor(CheckinCursorCard card, Cursor cursor, CheckIn checkIn) {
             final int checkInId = cursor.getInt(ID_COLUMN);
             card.setId(""+ checkInId);
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL))
                         + " - " + cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS))
                             ;
-            card.mainHeader = getString(R.string.checkin_header);
+            final Patient patient = Patient.getByMedicalNumber(checkIn.getPatientMedicalNumber());
+            card.mainHeader = patient.getFirstName() + " "  + patient.getLastName() + " " +  getString(R.string.checkin_header);
             card.resourceIdThumb=R.drawable.ic_check_in;
 
             //retrieve image

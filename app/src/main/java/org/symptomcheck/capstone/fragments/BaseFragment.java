@@ -31,12 +31,13 @@ import com.activeandroid.content.ContentProvider;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.model.CheckIn;
+import org.symptomcheck.capstone.model.CheckInOnlineWrapper;
 import org.symptomcheck.capstone.model.Doctor;
 import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.PatientExperience;
 import org.symptomcheck.capstone.provider.ActiveContract;
-import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.Constants;
 
 /**
  * Created by Ivan on 08/11/2014.
@@ -85,6 +86,10 @@ public  abstract class BaseFragment extends Fragment {
             case FRAGMENT_TYPE_EXPERIENCES:
                 mListContainer = root.findViewById(R.id.card_experiences_listContainer);
                 break;
+            case FRAGMENT_TYPE_ONLINE_CHECKIN:
+                mListContainer = root.findViewById(R.id.card_checkins_online_listContainer);
+                break;
+
             default:
                 break;
         }
@@ -108,6 +113,7 @@ public  abstract class BaseFragment extends Fragment {
      * @param isEmpty
      */
     protected void setListShown(boolean shown, boolean animate, boolean isEmpty) {
+        //Log.d("BaseFragment",String.format("FragmentType:%d. setListShown:%b. animate:%b. isEmpty:%b.",getFragmentType(),shown,animate,isEmpty));
         if (mListShown == shown) {
             return;
         }
@@ -116,8 +122,13 @@ public  abstract class BaseFragment extends Fragment {
             if (animate) {
                 mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
                         getActivity(), android.R.anim.fade_out));
-                mListContainer.startAnimation(AnimationUtils.loadAnimation(
-                        getActivity(), android.R.anim.fade_in));
+                if(!isEmpty) {
+                    mListContainer.startAnimation(AnimationUtils.loadAnimation(
+                            getActivity(), android.R.anim.fade_in));
+                }else {
+                    mEmptyListContainer.startAnimation(AnimationUtils.loadAnimation(
+                            getActivity(), android.R.anim.fade_in));
+                }
             }
             mProgressContainer.setVisibility(View.GONE);
             mListContainer.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
@@ -130,8 +141,8 @@ public  abstract class BaseFragment extends Fragment {
                         getActivity(), android.R.anim.fade_out));
             }
             mProgressContainer.setVisibility(View.VISIBLE);
-            mListContainer.setVisibility(View.INVISIBLE);
-            mEmptyListContainer.setVisibility(View.INVISIBLE);
+            mListContainer.setVisibility(View.GONE);
+            mEmptyListContainer.setVisibility(View.GONE);
         }
     }
     protected void hideList(boolean animate){
@@ -183,11 +194,13 @@ public  abstract class BaseFragment extends Fragment {
 
     private String buildQuerySelection(){
         final String uniqueId = getIdentityOwnerId();
-        String selection = Costants.STRINGS.EMPTY;
+        String selection = Constants.STRINGS.EMPTY;
         switch (getFragmentType()){
             case FRAGMENT_TYPE_PATIENT:
                 break;
             case FRAGMENT_TYPE_DOCTORS:
+                break;
+            case FRAGMENT_TYPE_ONLINE_CHECKIN:
                 break;
             case FRAGMENT_TYPE_CHECKIN:
                 if(!uniqueId.isEmpty())
@@ -204,7 +217,7 @@ public  abstract class BaseFragment extends Fragment {
             default:
                 break;
         }
-        Log.d("BaseFragment::buildQuerySelection", selection);
+        //Log.d("buildQuerySelection", selection);
         return selection;
     }
 
@@ -225,7 +238,6 @@ public  abstract class BaseFragment extends Fragment {
 
                 case FRAGMENT_TYPE_PATIENT:
                     uriContentProvider = ContentProvider.createUri(Patient.class, null);
-                    //final String filterPattern = charSequence.toString();
                         cursor = getActivity().getContentResolver()
                                 .query(uriContentProvider,
                                         ActiveContract.PATIENT_TABLE_PROJECTION,
@@ -278,6 +290,16 @@ public  abstract class BaseFragment extends Fragment {
                                     new String[]{"%" + filterPattern + "%", "%" + filterPattern + "%","%" + filterPattern + "%"}
                                     , ActiveContract.EXPERIENCES_COLUMNS.END_EXPERIENCE_TIME + " desc");
                     break;
+               case FRAGMENT_TYPE_ONLINE_CHECKIN:
+                   cursor = getActivity().getContentResolver()
+                           .query(uriContentProvider,
+                                   ActiveContract.CHECK_ONLINE_IN_TABLE_PROJECTION,
+                                   selection + "( " + ActiveContract.CHECKIN_COLUMNS.FEED_STATUS + " LIKE ? OR " +
+                                           ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL + " LIKE ? )",
+                                   new String[]{"%" + filterPattern + "%", "%" + filterPattern + "%"}
+                                   , ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME + " desc");
+                    break;
+
                 default:
                     break;
             }
@@ -286,6 +308,7 @@ public  abstract class BaseFragment extends Fragment {
     }
 
     private Uri getDefaultUriProvider(){
+
         Uri uriContentProvider = Uri.EMPTY;// = ContentProvider.createUri(Patient.class, null);
         switch (getFragmentType()){
             case FRAGMENT_TYPE_PATIENT:
@@ -303,6 +326,10 @@ public  abstract class BaseFragment extends Fragment {
             case FRAGMENT_TYPE_EXPERIENCES:
                 uriContentProvider = ContentProvider.createUri(PatientExperience.class, null);
                 break;
+            case FRAGMENT_TYPE_ONLINE_CHECKIN:
+                uriContentProvider = ContentProvider.createUri(CheckInOnlineWrapper.class, null);
+                break;
+
             default:
                 break;
         }
@@ -341,7 +368,12 @@ public  abstract class BaseFragment extends Fragment {
                                     ActiveContract.EXPERIENCES_TABLE_PROJECTION, selection, null,
                                     ActiveContract.EXPERIENCES_COLUMNS.END_EXPERIENCE_TIME + " desc");
                     break;
-
+                case FRAGMENT_TYPE_ONLINE_CHECKIN:
+                    cursor = getActivity().getContentResolver()
+                            .query(uriContentProvider,
+                                    ActiveContract.CHECK_ONLINE_IN_TABLE_PROJECTION, selection, null,
+                                    ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME + " desc");
+                    break;
                 default:
                     break;
             }

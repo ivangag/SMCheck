@@ -2,14 +2,17 @@ package org.symptomcheck.capstone.preference;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import org.symptomcheck.capstone.SyncUtils;
-import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.Constants;
 
 /**
  * Created by igaglioti on 06/11/2014.
  */
 public class UserPreferencesManager {
+
+    private static final String TAG = "UserPreferencesManager";
 
     private static final String REMEMBER_LOGIN = "remember_login";
     private static final String USERNAME_LOGIN = "user_login";
@@ -45,7 +48,7 @@ public class UserPreferencesManager {
                 .getString(PROPERTY_BEARER_TOKEN, "");
     }
 
-    public boolean IsLogged(Context context){
+    public boolean isLogged(Context context){
        return PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean(PROPERTY_IS_LOGGED, false);
     }
@@ -54,10 +57,21 @@ public class UserPreferencesManager {
        return PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean(REMEMBER_LOGIN, false);
     }
+
+    public boolean isSyncActiveOnlyViaWifi(Context context){
+       return PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(KEY_SYNC_ONLY_WIFI, false);
+    }
+
+    private String getStartHourMinutes(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(KEY_CHECK_IN_START, Constants.STRINGS.EMPTY);
+    }
+
     public int getStartCheckInHour(Context context){
        int hour = 8;
        String hourStr = PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(KEY_CHECK_IN_START, Costants.STRINGS.EMPTY);
+                .getString(KEY_CHECK_IN_START, Constants.STRINGS.EMPTY);
         if(!hourStr.isEmpty()
             && hourStr.contains(":")){
             try {
@@ -70,7 +84,7 @@ public class UserPreferencesManager {
     public int getStartCheckInMinute(Context context){
         int minute = 0;
         String minuteStr = PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(KEY_CHECK_IN_START, Costants.STRINGS.EMPTY);
+                .getString(KEY_CHECK_IN_START, Constants.STRINGS.EMPTY);
         if(!minuteStr.isEmpty()
                 && minuteStr.contains(":")){
             try {
@@ -89,7 +103,7 @@ public class UserPreferencesManager {
     public int getCheckInTimes(Context context){
         int times = DEFAULT_CHECK_IN_TIMES;
         String str = PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(KEY_CHECK_IN_FREQ, Costants.STRINGS.EMPTY);
+                .getString(KEY_CHECK_IN_FREQ, Constants.STRINGS.EMPTY);
         if(!str.isEmpty()){
             times = Integer.valueOf(str);
         }
@@ -104,7 +118,7 @@ public class UserPreferencesManager {
     public long getSyncFrequency(Context context){
         long minutes = SyncUtils.SYNC_FREQUENCY;
         String minuteStr = PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(KEY_SYNC_FREQ, Costants.STRINGS.EMPTY);
+                .getString(KEY_SYNC_FREQ, Constants.STRINGS.EMPTY);
         if(!minuteStr.isEmpty()){
             try {
                 minutes = Integer.valueOf(minuteStr) * 60;
@@ -135,6 +149,12 @@ public class UserPreferencesManager {
                 .putString(PASSWORD_LOGIN, password).commit();
     }
     */
+
+    public void setActiveSyncOnlyViaWifi(Context context, boolean active){
+        PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putBoolean(KEY_SYNC_ONLY_WIFI, active).commit();
+    }
+
 
     public void setLogged(Context context, boolean logged){
         PreferenceManager.getDefaultSharedPreferences(context).edit()
@@ -177,7 +197,20 @@ public class UserPreferencesManager {
 
     public String getNextScheduledCheckin(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(KEY_NEXT_SCHEDULED_CHECKIN, Costants.STRINGS.EMPTY);
+                .getString(KEY_NEXT_SCHEDULED_CHECKIN, Constants.STRINGS.EMPTY);
     }
 
+    public void printAll(Context context){
+        StringBuilder sb = new StringBuilder();
+        sb
+                .append(REMEMBER_LOGIN).append(":").append(this.getLoginRememberMe(context)).append(" - ")
+                .append(PROPERTY_REG_ID).append(":").append(this.getGcmRegId(context)).append(" - ")
+                .append(PROPERTY_BEARER_TOKEN).append(":").append(this.getBearerToken(context)).append(" - ")
+                .append(PROPERTY_IS_LOGGED).append(":").append(this.isLogged(context)).append(" - ")
+                .append(KEY_CHECK_IN_FREQ).append(":").append(this.getSyncFrequency(context)).append(" - ")
+                .append(KEY_SYNC_ONLY_WIFI).append(":").append(this.isSyncActiveOnlyViaWifi(context)).append(" - ")
+                .append(KEY_CHECK_IN_START).append(":").append(this.getStartHourMinutes(context)).append(" - ")
+                .append(KEY_NEXT_SCHEDULED_CHECKIN).append(":").append(this.getNextScheduledCheckin(context));
+        Log.i(TAG,sb.toString());
+    }
 }

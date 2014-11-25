@@ -19,7 +19,6 @@ package org.symptomcheck.capstone.model;
 
 import android.provider.BaseColumns;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,8 +32,7 @@ import com.activeandroid.query.Select;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
-import org.symptomcheck.capstone.dao.DAOManager;
-import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
 
 import hirondelle.date4j.DateTime;
@@ -249,7 +247,7 @@ public class Patient extends Model implements IModelBuilder{
                     TimeZone.getDefault()).format("YYYY-MM-DD hh:mm");
         }
         else{
-            birthDateTime = Costants.STRINGS.EMPTY;
+            birthDateTime = Constants.STRINGS.EMPTY;
         }
         return birthDateTime;
     }

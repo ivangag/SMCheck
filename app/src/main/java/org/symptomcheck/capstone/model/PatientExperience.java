@@ -27,7 +27,7 @@ import com.activeandroid.query.Update;
 import com.google.common.collect.Lists;
 
 import org.symptomcheck.capstone.dao.DAOManager;
-import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
 
 import java.util.HashMap;
@@ -183,9 +183,9 @@ public class PatientExperience extends Model implements IModelBuilder{
                 .append("\n-------------------------\n")
                 .append("Duration: ").append(this.experienceDuration).append(" hours")
                 .append("\n-------------------------\n")
-                .append("Start: ").append(DateTimeUtils.convertEpochToHumanTime(startExperienceTime, Costants.TIME.DEFAULT_FORMAT))
+                .append("Start: ").append(DateTimeUtils.convertEpochToHumanTime(startExperienceTime, Constants.TIME.DEFAULT_FORMAT))
                 .append("\n-------------------------\n")
-                .append("End: ").append(DateTimeUtils.convertEpochToHumanTime(endExperienceTime,Costants.TIME.DEFAULT_FORMAT))
+                .append("End: ").append(DateTimeUtils.convertEpochToHumanTime(endExperienceTime, Constants.TIME.DEFAULT_FORMAT))
                 .append("\n-------------------------\n")
                 .append("seenByDoctor? ").append(this.checkedByDoctor == 0 ? "NO" : "YES")
                 .append("\n-------------------------\n");

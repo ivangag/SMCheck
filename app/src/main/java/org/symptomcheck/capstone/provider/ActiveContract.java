@@ -84,6 +84,14 @@ public class ActiveContract {
                             + EXPERIENCES_COLUMNS.EXPERIENCE_TYPE
             };
 
+    public static String[] CHECK_ONLINE_IN_TABLE_PROJECTION = new String[]{
+            BaseColumns._ID + ","
+                    + CHECKIN_COLUMNS.UNIT_ID + ","
+                    + CHECKIN_COLUMNS.PAIN_LEVEL + ","
+                    + CHECKIN_COLUMNS.FEED_STATUS + ","
+                    + CHECKIN_COLUMNS.ISSUE_TIME
+    };
+
     public static class PATIENT_COLUMNS{
         public static final String PATIENT_ID = "patientId";
         public static final String FIRST_NAME = "firstName";

@@ -5,11 +5,6 @@
         android:key="pref_key_general_data_sync">
 
 
-<!--    <it.actia.app.settingstest.TimePreference
-        android:key="start_time"
-        android:title="@string/pref_title_start_sync_time"
-        android:defaultValue="08:00"
-        />-->
     <CheckBoxPreference
         android:key="sync_only_wifi"
         android:title="@string/pref_title_sync_only_wifi"

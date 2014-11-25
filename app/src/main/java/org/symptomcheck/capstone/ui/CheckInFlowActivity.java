@@ -65,7 +65,7 @@ import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
-import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.NotificationHelper;
 
 import hirondelle.date4j.DateTime;
@@ -133,8 +133,8 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
 
             mMedicines = PainMedication.getAll(mUser.getUserIdentification());
             for(PainMedication medication : mMedicines){
-                mReportMedicationsResponse.put(medication.getMedicationName(), Costants.STRINGS.EMPTY);
-                mReportMedicationsTakingTime.put(medication.getMedicationName(), Costants.STRINGS.EMPTY);
+                mReportMedicationsResponse.put(medication.getMedicationName(), Constants.STRINGS.EMPTY);
+                mReportMedicationsTakingTime.put(medication.getMedicationName(), Constants.STRINGS.EMPTY);
             }
             // Set up the action bar.
             final ActionBar actionBar = getActionBar();
@@ -279,7 +279,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
     }
 
     private void handleCheckInSubmissionRequest() {
-        String msgError = Costants.STRINGS.EMPTY;
+        String msgError = Constants.STRINGS.EMPTY;
         //verify check-in data consistence
         boolean check = false;
         boolean checkMedicines = true;
@@ -289,12 +289,12 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         } else {
             for (int idx = 0; idx < mMedicines.size(); idx++) {
                 final String medication = mMedicines.get(idx).getMedicationName();
-                if (mReportMedicationsResponse.get(medication).equals(Costants.STRINGS.EMPTY)) {
+                if (mReportMedicationsResponse.get(medication).equals(Constants.STRINGS.EMPTY)) {
                     msgError = String.format("Pain Medication %s not reported", medication);
                     checkMedicines = false;
                     mViewPager.setCurrentItem(1 + idx);
                 } else if (mReportMedicationsResponse.get(medication).equals(YES)
-                        && mReportMedicationsTakingTime.get(medication).equals(Costants.STRINGS.EMPTY)) {
+                        && mReportMedicationsTakingTime.get(medication).equals(Constants.STRINGS.EMPTY)) {
                     msgError = String.format("Pain Medication %s reported without Date & Time", medication);
                     checkMedicines = false;
                     mViewPager.setCurrentItem(1 + idx);
@@ -591,7 +591,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                 String timeTaken = ((CheckInFlowActivity) getActivity()).mReportMedicationsTakingTime.get(mMedicineName);
                 final boolean YES = ((RadioButton)medicinesQuestionsView.findViewById(R.id.radioBtnMedicineYES)).isChecked();
                 txtMedicineTakingTime.setVisibility(YES ? View.VISIBLE : View.GONE);
-                if(!timeTaken.equals(Costants.STRINGS.EMPTY)) {
+                if(!timeTaken.equals(Constants.STRINGS.EMPTY)) {
                     timeTaken =  DateTime.forInstant(Long.valueOf(timeTaken),TimeZone.getTimeZone("GMT+00")).format("YYYY-MM-DD hh:mm");
                 }
                 txtMedicineTakingTime.setText(timeTaken);

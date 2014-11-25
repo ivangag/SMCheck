@@ -30,9 +30,9 @@ import android.content.SyncStatusObserver;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,15 +43,18 @@ import android.widget.TextView;
 import com.activeandroid.content.ContentProvider;
 
 import org.symptomcheck.capstone.R;
-import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
+import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.CheckInOnlineWrapper;
 import org.symptomcheck.capstone.model.Patient;
+import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.provider.ActiveContract;
-import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
+
+import java.util.Collection;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
@@ -60,13 +63,18 @@ import it.gmariotti.cardslib.library.internal.CardThumbnail;
 import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
 import it.gmariotti.cardslib.library.internal.base.BaseCard;
 import it.gmariotti.cardslib.library.view.CardListView;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 /**
  * List with Cursor Example
  *
  * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
  */
-public class ServerHostedCheckInFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>, IFragmentListener {
+public class CheckInOnlineFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>, IFragmentListener {
+
+    private static final String TAG = "CheckInOnlineFragment";
 
     CheckinCursorCardAdapter mAdapter;
     CardListView mListView;
@@ -87,8 +95,8 @@ public class ServerHostedCheckInFragment extends BaseFragment implements LoaderM
      * number.
      * @param patientId
      */
-    public static ServerHostedCheckInFragment newInstance(String patientId) {
-        ServerHostedCheckInFragment fragment = new ServerHostedCheckInFragment();
+    public static CheckInOnlineFragment newInstance(String patientId) {
+        CheckInOnlineFragment fragment = new CheckInOnlineFragment();
         Bundle args = new Bundle();
         //if (patientId != -1) {
             //args.putLong(ARG_PATIENT_ID, patientId);
@@ -104,7 +112,7 @@ public class ServerHostedCheckInFragment extends BaseFragment implements LoaderM
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root= inflater.inflate(R.layout.fragment_card_checkins_list_cursor, container, false);
+        View root= inflater.inflate(R.layout.fragment_card_checkins_online_list_cursor, container, false);
         setupListFragment(root);
         setHasOptionsMenu(true);
         return root;
@@ -130,24 +138,27 @@ public class ServerHostedCheckInFragment extends BaseFragment implements LoaderM
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        init();
         super.onActivityCreated(savedInstanceState);
+        init();
+        Log.d(TAG,"onActivityCreated");
         hideList(false);
+        displayList(true);
     }
 
     @Override
     public String getTitleText() {
+        /*
         String title = TITLE_NONE;
         if(mPatientOwner != null){
             title = //mPatientOwner.getFirstName() + " " +
-                    mPatientOwner.getLastName() + "'s " + getString(R.string.checkins_header);
-        }
-        return title;
+                    mPatientOwner.getLastName() + "'s " + getString(R.string.checkins_online_header);
+        }*/
+        return getString(R.string.checkins_online_header);
     }
 
     @Override
     public String getIdentityOwnerId() {
-        return getArguments().getString(ARG_PATIENT_ID, Costants.STRINGS.EMPTY);
+        return getArguments().getString(ARG_PATIENT_ID, Constants.STRINGS.EMPTY);
     }
 
 
@@ -170,7 +181,7 @@ public class ServerHostedCheckInFragment extends BaseFragment implements LoaderM
                 refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
                 displayList(false);
-                OnFilterData(Costants.STRINGS.EMPTY);
+                OnFilterData(Constants.STRINGS.EMPTY);
                 refreshItem.setActionView(null);
             }
         }
@@ -180,7 +191,7 @@ public class ServerHostedCheckInFragment extends BaseFragment implements LoaderM
     Patient mPatientOwner = null;
     private void init() {
 
-        final String patientMedicalNumber = getArguments().getString(ARG_PATIENT_ID, Costants.STRINGS.EMPTY);
+        final String patientMedicalNumber = getArguments().getString(ARG_PATIENT_ID, Constants.STRINGS.EMPTY);
 
         if(!patientMedicalNumber.isEmpty()) {
             mPatientOwner = Patient.getByMedicalNumber(patientMedicalNumber);
@@ -210,7 +221,7 @@ public class ServerHostedCheckInFragment extends BaseFragment implements LoaderM
 
         return new CursorLoader(getActivity(),
                 ContentProvider.createUri(CheckInOnlineWrapper.class, null),
-                ActiveContract.CHECK_IN_TABLE_PROJECTION, mSelectionQuery, null,
+                ActiveContract.CHECK_ONLINE_IN_TABLE_PROJECTION, mSelectionQuery, null,
                 ActiveContract.CHECKIN_COLUMNS.ISSUE_TIME + " desc"
         );
     }
@@ -220,11 +231,10 @@ public class ServerHostedCheckInFragment extends BaseFragment implements LoaderM
         if (getActivity() == null) {
             return;
         }
+        Log.d(TAG,"onLoadFinished. Count: " + data.getCount());
         mAdapter.swapCursor(data);
-
         displayList(data.getCount() <= 0);
-
-        OnFilterData(Costants.STRINGS.EMPTY);
+        OnFilterData(Constants.STRINGS.EMPTY);
     }
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
@@ -275,12 +285,14 @@ public class ServerHostedCheckInFragment extends BaseFragment implements LoaderM
     public void onResume() {
         super.onResume();
 
+        /*
         mSyncStatusObserver.onStatusChanged(0);
 
         // Watch for sync state changes
         final int mask = ContentResolver.SYNC_OBSERVER_TYPE_PENDING |
                 ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE;
         mSyncObserverHandle = ContentResolver.addStatusChangeListener(mask, mSyncStatusObserver);
+        */
 
     }
 
@@ -298,20 +310,65 @@ public class ServerHostedCheckInFragment extends BaseFragment implements LoaderM
 
     @Override
     public int getFragmentType() {
-        return BaseFragment.FRAGMENT_TYPE_CHECKIN;
+        return BaseFragment.FRAGMENT_TYPE_ONLINE_CHECKIN;
     }
 
     @Override
     public void OnFilterData(String textToSearch) {
         if(mAdapter != null) {
+            mAdapter.getFilter().filter(textToSearch);
+        }
+    }
+
+    @Override
+    public void OnSearchOnLine(String textToSearch) {
+        // here we have to trigger background sync service by stimulating a Server Hosted search
+        if(mAdapter != null) {
             if(!textToSearch.isEmpty()){
-                SyncUtils.TriggerOnlineSearch(ActiveContract.SYNC_CHECK_IN,textToSearch);
+                String[] names = textToSearch.split(" ");
+
+                StringBuilder lastName = new StringBuilder();
+                if(names.length > 1) {
+                    final String firstName = names[0];
+                    //e.g. La Rosa => length = 3
+                    for (int i = 1; i < names.length; i++) {
+                        lastName.append(names[i]);
+                        if (i < names.length - 1) {
+                            lastName.append(" ");
+                        }
+                    }
+                    //SyncUtils.TriggerOnlineSearch(ActiveContract.SYNC_CHECK_IN,firstName,lastName.toString());
+                    Log.d(TAG,"StartSearching");
+                    hideList(true);
+                    startSearchOnline(firstName,lastName.toString());
+                }
             }else {
                 mAdapter.getFilter().filter(textToSearch);
             }
-            // here we have to trigger background sync service by stimulating a Server Hosted search
         }
     }
+
+    private void startSearchOnline(String FirstName, String LastName){
+        DownloadHelper.get()
+                .withRetrofitClient(getActivity())
+                .findCheckInsByPatientName(DAOManager.get().getUser().getUserIdentification(),FirstName,LastName, new Callback<Collection<CheckIn>>() {
+                    @Override
+                    public void success(Collection<CheckIn> checkIns, Response response) {
+                        Log.d(TAG, "success. CheckinsFound:" + checkIns.size());
+                        DAOManager.get().saveCheckInsOnline((java.util.List<CheckIn>) checkIns, Constants.STRINGS.EMPTY, Constants.STRINGS.EMPTY);
+
+                        Log.d(TAG,"EndSearching");
+                        displayList(checkIns.isEmpty());
+                        OnFilterData(Constants.STRINGS.EMPTY);
+                    }
+
+                    @Override
+                    public void failure(RetrofitError error) {
+                        Log.d(TAG, error.getCause().getMessage());
+                    }
+                });
+    }
+
 
     //-------------------------------------------------------------------------------------------------------------
     // Adapter
@@ -330,7 +387,7 @@ public class ServerHostedCheckInFragment extends BaseFragment implements LoaderM
                     cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.UNIT_ID)));
 
             CheckinCursorCard card = new CheckinCursorCard(super.getContext());
-            setCardFromCursor(card,cursor);
+            setCardFromCursor(card,cursor,checkIn);
 
             //Create a CardHeader
             CardHeader header = new CardHeader(getActivity());
@@ -356,7 +413,7 @@ public class ServerHostedCheckInFragment extends BaseFragment implements LoaderM
 
             String mDetailedCheckInInfo = "";
             if(checkIn != null) {
-                card.secondaryTitle = DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Costants.TIME.DEFAULT_FORMAT);
+                card.secondaryTitle = DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT);
                 mDetailedCheckInInfo = CheckInOnlineWrapper.getDetailedInfo(checkIn);
             }
             // Add expand card
@@ -366,23 +423,15 @@ public class ServerHostedCheckInFragment extends BaseFragment implements LoaderM
             return card;
         }
 
-        private void setCardFromCursor(CheckinCursorCard card, Cursor cursor) {
+        private void setCardFromCursor(CheckinCursorCard card, Cursor cursor, CheckInOnlineWrapper checkIn) {
             final int checkInId = cursor.getInt(ID_COLUMN);
             card.setId(""+ checkInId);
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL))
                         + " - " + cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS))
                             ;
-            card.mainHeader = getString(R.string.checkin_header);
+            final Patient patient = Patient.getByMedicalNumber(checkIn.getPatientMedicalNumber());
+            card.mainHeader = patient.getFirstName() + " "  + patient.getLastName() + " " +  getString(R.string.checkin_header);
             card.resourceIdThumb=R.drawable.ic_check_in;
-
-            //retrieve image
-            //byte[] byteArray = Base64.decode("",Base64.DEFAULT);
-            //Bitmap bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-            //ImageView image = (ImageView) getActivity().findViewById(R.id.imageChartApi);
-            //image.setImageBitmap(bmp);
-            //Picasso.with(getActivity()).load(R.id.imageChartApi).resize(150,150).get();
-            //build detailed info to be shown in expand area
-            // retrieve questions from checkin
 
         }
     }

@@ -39,7 +39,6 @@ import android.view.ViewGroup;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.activeandroid.content.ContentProvider;
 
@@ -53,14 +52,13 @@ import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
-import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.Constants;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.CardThumbnail;
 import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
-import it.gmariotti.cardslib.library.internal.base.BaseCard;
 import it.gmariotti.cardslib.library.view.CardListView;
 
 /**
@@ -155,7 +153,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
 
     @Override
     public String getIdentityOwnerId() {
-        return Costants.STRINGS.EMPTY;
+        return Constants.STRINGS.EMPTY;
     }
 
 
@@ -178,7 +176,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
                 refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
                 displayList(false);
-                OnFilterData(Costants.STRINGS.EMPTY);
+                OnFilterData(Constants.STRINGS.EMPTY);
                 refreshItem.setActionView(null);
             }
         }
@@ -230,7 +228,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
         mAdapter.swapCursor(data);
 
         displayList(data.getCount() <= 0);
-        OnFilterData(Costants.STRINGS.EMPTY);
+        OnFilterData(Constants.STRINGS.EMPTY);
 
     }
     /**
@@ -309,6 +307,11 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
     public void OnFilterData(String textToSearch) {
         if(mAdapter != null)
             mAdapter.getFilter().filter(textToSearch);
+    }
+
+    @Override
+    public void OnSearchOnLine(String textToSearch) {
+
     }
 
     //-------------------------------------------------------------------------------------------------------------

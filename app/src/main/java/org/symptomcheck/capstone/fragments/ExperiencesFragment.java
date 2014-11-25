@@ -41,16 +41,14 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.activeandroid.content.ContentProvider;
-import com.activeandroid.query.Update;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
-import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.PatientExperience;
 import org.symptomcheck.capstone.provider.ActiveContract;
-import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -155,7 +153,7 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
 
     @Override
     public String getIdentityOwnerId() {
-        return getArguments().getString(ARG_PATIENT_ID, Costants.STRINGS.EMPTY);
+        return getArguments().getString(ARG_PATIENT_ID, Constants.STRINGS.EMPTY);
     }
 
 
@@ -178,18 +176,18 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
                 refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
                 displayList(false);
-                OnFilterData(Costants.STRINGS.EMPTY);
+                OnFilterData(Constants.STRINGS.EMPTY);
                 refreshItem.setActionView(null);
             }
         }
     }
 
-    String mSelection = Costants.STRINGS.EMPTY;
+    String mSelection = Constants.STRINGS.EMPTY;
     private void init() {
 
         PatientExperience.setAllAsSeen(true);
 
-        final String patientMedicalNumber = getArguments().getString(ARG_PATIENT_ID, Costants.STRINGS.EMPTY);
+        final String patientMedicalNumber = getArguments().getString(ARG_PATIENT_ID, Constants.STRINGS.EMPTY);
         if(!patientMedicalNumber.isEmpty()) {
             mPatientOwner = Patient.getByMedicalNumber(patientMedicalNumber);
         }
@@ -235,7 +233,7 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
         mAdapter.swapCursor(data);
 
         displayList(data.getCount() <= 0);
-        OnFilterData(Costants.STRINGS.EMPTY);
+        OnFilterData(Constants.STRINGS.EMPTY);
     }
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
@@ -316,6 +314,11 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
             mAdapter.getFilter().filter(textToSearch);
     }
 
+    @Override
+    public void OnSearchOnLine(String textToSearch) {
+
+    }
+
 
     //-------------------------------------------------------------------------------------------------------------
     // Adapter
@@ -394,9 +397,9 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
 
             card.mainHeader =  patient.getFirstName() + " " + patient.getLastName() + " " +  getString(R.string.experience_header);
             final String start = DateTimeUtils.convertEpochToHumanTime(
-                    cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.START_EXPERIENCE_TIME)), Costants.TIME.DEFAULT_FORMAT);
+                    cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.START_EXPERIENCE_TIME)), Constants.TIME.DEFAULT_FORMAT);
             final String end = DateTimeUtils.convertEpochToHumanTime(
-                    cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.END_EXPERIENCE_TIME)), Costants.TIME.DEFAULT_FORMAT);
+                    cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.END_EXPERIENCE_TIME)), Constants.TIME.DEFAULT_FORMAT);
             card.secondaryTitle =
                     "Duration "
                     + cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.EXPERIENCE_DURATION))

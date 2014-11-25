@@ -32,7 +32,7 @@ import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.fragments.ExperiencesFragment;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.PatientExperience;
-import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
 
 import java.util.List;
@@ -57,7 +57,7 @@ public class PatientExperiencesActivity extends Activity {
                 viewIntroNewExperienceInfo.setVisibility(View.VISIBLE);
                 List<PatientExperience> patientExperiences = PatientExperience.getAllNotSeen();
                 if(!patientExperiences.isEmpty()){
-                    textViewDetails.setText(Costants.STRINGS.EMPTY);
+                    textViewDetails.setText(Constants.STRINGS.EMPTY);
                     Patient patient;
                     for (PatientExperience patientExperience : patientExperiences){
                         patient = Patient.getByMedicalNumber(patientExperience.getPatientId());
@@ -97,7 +97,7 @@ public class PatientExperiencesActivity extends Activity {
         viewIntroNewExperienceInfo.setVisibility(View.GONE);
         btnGoToAllExperiences.setVisibility(View.GONE);
         getFragmentManager().beginTransaction()
-                .add(R.id.container, ExperiencesFragment.newInstance(Costants.STRINGS.EMPTY))
+                .add(R.id.container, ExperiencesFragment.newInstance(Constants.STRINGS.EMPTY))
                 .commit();
     }
 

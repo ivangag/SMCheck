@@ -160,7 +160,7 @@ public class LoginActivity extends Activity{
         final String password;
         boolean skipCheckField = false;
         if(UserPreferencesManager.get().getLoginRememberMe(this)
-                && UserPreferencesManager.get().IsLogged(this)
+                && UserPreferencesManager.get().isLogged(this)
                 //&& (DAOManager.get().getUser() !=  null)
                 //&& (DAOManager.get().getUser().getLogged())
                         )
@@ -226,7 +226,7 @@ public class LoginActivity extends Activity{
                             handleAfterLoginAttempt(false,email,password);
                         }
                     });
-                    */
+*/
         }
     }
 

@@ -67,11 +67,14 @@ import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
-import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.Constants;
+import org.symptomcheck.capstone.utils.DateTimeUtils;
 
 import java.util.List;
+import java.util.TimeZone;
 import java.util.UUID;
 
+import hirondelle.date4j.DateTime;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 import it.gmariotti.cardslib.library.internal.CardHeader;
@@ -191,7 +194,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
     @Override
     public String getIdentityOwnerId() {
-        return getArguments().getString(ARG_PATIENT_ID, Costants.STRINGS.EMPTY);
+        return getArguments().getString(ARG_PATIENT_ID, Constants.STRINGS.EMPTY);
     }
 
 
@@ -214,7 +217,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                 refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
                 displayList(false);
-                OnFilterData(Costants.STRINGS.EMPTY);
+                OnFilterData(Constants.STRINGS.EMPTY);
                 refreshItem.setActionView(null);
             }
         }
@@ -237,7 +240,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
     private void init() {
 
 
-        final String patientMedicalNumber = getArguments().getString(ARG_PATIENT_ID, Costants.STRINGS.EMPTY);
+        final String patientMedicalNumber = getArguments().getString(ARG_PATIENT_ID, Constants.STRINGS.EMPTY);
 //        if((patientId > 0)){
 //            mPatientOwner = Patient.getById(patientId);
 //        }else if (DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)){
@@ -288,7 +291,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
         mAdapter.swapCursor(data);
 
         displayList(data.getCount() <= 0);
-        OnFilterData(Costants.STRINGS.EMPTY);
+        OnFilterData(Constants.STRINGS.EMPTY);
     }
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
@@ -369,6 +372,10 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             mAdapter.getFilter().filter(textToSearch);
     }
 
+    @Override
+    public void OnSearchOnLine(String textToSearch) {
+
+    }
 
 
     private void showInsertNewMedicationDialog(final Patient patient) {
@@ -440,10 +447,10 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                     //Toast.makeText(getActivity(), "New Medication inserted successfully: " + medicationName.toUpperCase(), Toast.LENGTH_SHORT).show();
                     PainMedication.Builder builder = (new PainMedication.Builder());
                     executePainMedicationsUpdate(getActivity(), builder.setMedicationName(medicationName)
-                            .setLastTakingDateTime("")
-                            .setPatientMedicalNumber(mPatientOwner.getMedicalRecordNumber())
-                            .setProductId(UUID.randomUUID().toString())
-                            .Build()
+                                    .setLastTakingDateTime(String.valueOf(DateTime.now(TimeZone.getTimeZone(Constants.TIME.GMT00)).getMilliseconds(TimeZone.getTimeZone(Constants.TIME.GMT00))))
+                                    .setPatientMedicalNumber(mPatientOwner.getMedicalRecordNumber())
+                                    .setProductId(UUID.randomUUID().toString())
+                                    .Build()
                             //new PainMedication(medicationName,"",mPatientOwner.getMedicalRecordNumber())
                     );
                     dialog.dismiss();
@@ -525,7 +532,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                             if(painMedicationRes) {
                                 Toast.makeText(getActivity(), "Medication added correctly", Toast.LENGTH_LONG).show();
                                 Log.i("AddNewMedication", "Medication " + medication.getMedicationName() + " Patient: " + medication.getPatientMedicalNumber());
-                                MedicinesFragment.this.OnFilterData(Costants.STRINGS.EMPTY);
+                                MedicinesFragment.this.OnFilterData(Constants.STRINGS.EMPTY);
                             }else {
                                 Toast.makeText(getActivity(), "Error", Toast.LENGTH_LONG).show();
                             }
@@ -573,7 +580,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             final PainMedication painMedication = PainMedication.getByProductId(cursor.getString(cursor.getColumnIndex(ActiveContract.MEDICINES_COLUMNS.PRODUCT_ID)));
 
             MedicineCursorCard card = new MedicineCursorCard(super.getContext());
-            setCardFromCursor(card,cursor);
+            setCardFromCursor(card,cursor,painMedication);
 
 
             //Create a CardHeader
@@ -647,13 +654,14 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             return card;
         }
 
-        private void setCardFromCursor(MedicineCursorCard card,Cursor cursor) {
+        private void setCardFromCursor(MedicineCursorCard card, Cursor cursor, PainMedication painMedication) {
             final int medicineId = cursor.getInt(ID_COLUMN);
             card.setId(""+ medicineId);
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.MEDICINES_COLUMNS.NAME));
 
-            card.mainHeader = getString(R.string.medicine_header);
-            card.secondaryTitle = mPatientOwner.getFirstName() + " " + mPatientOwner.getLastName();
+            card.mainHeader = /* mPatientOwner.getFirstName() + " " + mPatientOwner.getLastName() + " "  +*/ getString(R.string.medicine_header);
+            card.secondaryTitle = "Added the " + (painMedication.getLastTakingDateTime().equals(Constants.STRINGS.EMPTY)
+                                        ? "NA" : DateTimeUtils.convertEpochToHumanTime(painMedication.getLastTakingDateTime(),"YYYY-MM-DD hh:mm"));
             card.resourceIdThumb=R.drawable.ic_medicine;
 
         }

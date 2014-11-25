@@ -25,15 +25,19 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
+import com.google.common.collect.Lists;
+
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.provider.ActiveContract;
+
+import java.util.List;
 
 
 /**
  * Static helper methods for working with the sync framework.
  */
 public class SyncUtils {
-    public static final long SYNC_FREQUENCY = 60 * 1;  // 1 hour (in seconds)
+    public static final long SYNC_FREQUENCY = 60 * 15;  // 1 hour (in seconds)
     private static final String CONTENT_AUTHORITY = ActiveContract.CONTENT_AUTHORITY;
     private static final String PREF_SETUP_COMPLETE = "setup_complete";
 
@@ -135,10 +139,14 @@ public class SyncUtils {
      * @param repoWhereSearch constant defines the table / db source to sync
      * @see org.symptomcheck.capstone.provider.ActiveContract
      */
-    public static void TriggerOnlineSearch(String repoWhereSearch,  String querySearch){
+    public static void TriggerOnlineSearch(String repoWhereSearch, String... querySearch){
         Bundle b = new Bundle();
         b.putString(SYNC_ONLINE_SEARCH_ACTION,repoWhereSearch);
-        b.putString(ONLINE_QUERY_TEXT,querySearch);
+        List<String> queryParam = Lists.newArrayList();
+        for (String query: querySearch){
+
+        }
+        //b.putStringArray(ONLINE_QUERY_TEXT,data);
         ContentResolver.requestSync(
                 GenericAccountService.GetAccount(),      // Sync account
                 ActiveContract.CONTENT_AUTHORITY, // Content authority

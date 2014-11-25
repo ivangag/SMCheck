@@ -20,7 +20,7 @@ package org.symptomcheck.capstone.utils;
 /**
  * Created by igaglioti on 17/11/2014.
  */
-public class Costants {
+public class Constants {
 
     public final static class STRINGS{
         public static final String EMPTY = "";

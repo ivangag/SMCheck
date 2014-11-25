@@ -23,4 +23,5 @@ package org.symptomcheck.capstone.fragments;
 public interface IFragmentListener {
 
     void OnFilterData(String textToSearch);
+    void OnSearchOnLine(String textToSearch);
 }

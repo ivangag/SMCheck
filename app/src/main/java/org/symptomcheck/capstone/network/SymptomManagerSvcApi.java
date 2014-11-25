@@ -106,11 +106,16 @@ public interface SymptomManagerSvcApi {
 
     //----------------- DOCTOR methods ----------------- //
     @GET(DOCTOR_SVC_PATH + "/{uniqueDoctorID}/patients/checkins/searchByPatientName")
-
     public Collection<CheckIn> findCheckInsByPatientName(
             @Path("uniqueDoctorID") String uniqueDoctorID,
             @Query("firstName") String patientFirstName,
             @Query("lastName") String patientLastName);
+
+    @GET(DOCTOR_SVC_PATH + "/{uniqueDoctorID}/patients/checkins/searchByPatientName")
+    public void findCheckInsByPatientName(
+            @Path("uniqueDoctorID") String uniqueDoctorID,
+            @Query("firstName") String patientFirstName,
+            @Query("lastName") String patientLastName, Callback<Collection<CheckIn>> result);
 
     @GET(DOCTOR_SVC_PATH + "/{uniqueDoctorID}")
     public Doctor findDoctorByUniqueDoctorID(@Path("uniqueDoctorID") String uniqueDoctorID);

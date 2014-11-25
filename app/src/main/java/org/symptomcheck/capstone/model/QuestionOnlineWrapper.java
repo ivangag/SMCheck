@@ -24,7 +24,7 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 
-import org.symptomcheck.capstone.utils.Costants;
+import org.symptomcheck.capstone.utils.Constants;
 
 import java.util.List;
 import java.util.TimeZone;
@@ -122,10 +122,10 @@ public class QuestionOnlineWrapper extends Model implements IModelBuilder{
         String medicationTime;
         if(savedTime != null &&
                 !savedTime.isEmpty()){
-            medicationTime = DateTime.forInstant(Long.valueOf(savedTime), TimeZone.getTimeZone(Costants.TIME.GMT00)).format("YYYY-MM-DD hh:mm");
+            medicationTime = DateTime.forInstant(Long.valueOf(savedTime), TimeZone.getTimeZone(Constants.TIME.GMT00)).format("YYYY-MM-DD hh:mm");
         }
         else{
-            medicationTime = Costants.STRINGS.EMPTY;
+            medicationTime = Constants.STRINGS.EMPTY;
         }
         return medicationTime;
     }
