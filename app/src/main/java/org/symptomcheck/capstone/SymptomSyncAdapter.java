@@ -189,12 +189,9 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
             for(PatientExperience patientExperience : patientExperiences) {
                 (new Update(PatientExperience.class))
                         .set("notifiedToDoctor = 1")
-                        .where("_id = ?", experience.getId())
+                        .where("_id = ?", patientExperience.getId())
                         .execute();
             }
-            Bundle data = new Bundle();
-            //data.putString("EXPERIENCE_ID", experience.getExperienceId());
-            //data.putString(PatientExperiencesActivity.PATIENT_ID, patientId);
             final Context context = getContext();
             NotificationHelper.sendNotification(context, 3,
                     context.getResources().getString(R.string.title_bad_experience_notification),

@@ -44,6 +44,7 @@ import android.widget.TextView;
 
 import com.activeandroid.content.ContentProvider;
 
+import org.symptomcheck.capstone.App;
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
@@ -343,9 +344,9 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
                         }
                     }
                     Log.d(TAG,"StartSearching");
-                    hideList(true);
-                    performOnlineSearch(firstName, lastName.toString());
-                    //executeCheckInSaving(firstName,lastName.toString());
+                    //hideList(true);
+                    //performOnlineSearch(firstName, lastName.toString());
+                    performOnlineSearchWithProgress(firstName,lastName.toString());
                 }
             }else {
                 mAdapter.getFilter().filter(textToSearch);
@@ -374,8 +375,8 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
                 });
     }
 
-    private void executeCheckInSaving(final String FirstName, final String LastName) {
-        final ProgressDialog ringProgressDialog = ProgressDialog.show(getActivity(), "Patient " + FirstName + " "  + LastName + "Checkin-Data",
+    private void performOnlineSearchWithProgress(final String FirstName, final String LastName) {
+        final ProgressDialog ringProgressDialog = ProgressDialog.show(getActivity(), FirstName + " " + LastName + " Checkin-Data",
                 getActivity().getResources().getString(R.string.txt_search_online_running), true);
         ringProgressDialog.setCancelable(true);
         new Thread(new Runnable() {
@@ -391,6 +392,7 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
                         @Override
                         public void run() {
                             if (checkinRes) {
+                                hideList(true);
                                 DAOManager.get().saveCheckInsOnline(checkIns, Constants.STRINGS.EMPTY, Constants.STRINGS.EMPTY);
                                 displayList(checkIns.isEmpty());
                                 OnFilterData(Constants.STRINGS.EMPTY);

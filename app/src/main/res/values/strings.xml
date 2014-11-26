@@ -142,4 +142,11 @@
     <string name="medical_number">Medical Number</string>
     <string name="unique_doctor_id">Doctor ID</string>
 
+
+    <string name="severe">Severe Pain</string>
+    <string name="severe_or_moderate">Severe or Moderate Pain</string>
+    <string name="cannot_eat">Cannot Eat Feed</string>
+
+
+
 </resources>

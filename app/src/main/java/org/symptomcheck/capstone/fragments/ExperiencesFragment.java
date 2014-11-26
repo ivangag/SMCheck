@@ -42,9 +42,12 @@ import android.widget.TextView;
 
 import com.activeandroid.content.ContentProvider;
 
+import org.symptomcheck.capstone.App;
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
+import org.symptomcheck.capstone.dao.DAOManager;
+import org.symptomcheck.capstone.model.ExperienceType;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.PatientExperience;
 import org.symptomcheck.capstone.provider.ActiveContract;
@@ -147,6 +150,8 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
         if(mPatientOwner != null){
             title = //mPatientOwner.getFirstName() + " " +
                     mPatientOwner.getLastName() + "'s " + getString(R.string.experiences_header);
+        }else{
+            title = "Patients " + getString(R.string.experiences_header);
         }
         return title;
     }
@@ -391,7 +396,7 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
         private void setCardFromCursor(ExperienceCursorCard card, Cursor cursor, PatientExperience patientExperience) {
             final int experienceId = cursor.getInt(ID_COLUMN);
             card.setId(""+ experienceId);
-            card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.EXPERIENCE_TYPE));
+            card.mainTitle = App.getPatientExperienceTranslation(ExperienceType.valueOf(cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.EXPERIENCE_TYPE))));
 
             final Patient patient = Patient.getByMedicalNumber(cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.PATIENT)));
 
@@ -404,11 +409,6 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
                     "Duration "
                     + cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.EXPERIENCE_DURATION))
                     + " hours"
-              // + " (Last Experience Report " + end + ")";
-                    /* DateTimeUtils.convertEpochToHumanTime(startExperienceTime, Costants.TIME.DEFAULT_FORMAT)
-                    "Since " + cursor.getString(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.START_EXPERIENCE_TIME))
-                    + "( " + cursor.getInt(cursor.getColumnIndex(ActiveContract.EXPERIENCES_COLUMNS.EXPERIENCE_DURATION))
-                            + " hours of bad experience )";*/
 
             ;
             card.resourceIdBackground = R.drawable.card_background;

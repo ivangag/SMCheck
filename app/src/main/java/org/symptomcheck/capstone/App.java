@@ -3,16 +3,19 @@ package org.symptomcheck.capstone;
 import android.app.Activity;
 import android.app.Application;
 import android.app.job.JobScheduler;
+import android.content.Context;
 import android.view.inputmethod.InputMethodManager;
 
 import com.activeandroid.ActiveAndroid;
+
+import org.symptomcheck.capstone.model.ExperienceType;
 
 /**
  * Created by Ivan on 22/10/2014.
  */
 public class App extends Application {
 
-
+    private static Context mContext;
     @Override
     public void onTerminate() {
         super.onTerminate();
@@ -24,6 +27,7 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        mContext = getApplicationContext();
         //DownloadManager.get().startRDService(this);
         //VolleyRequestController.get(this).getRequestQueue().start();
         //DownloadRDSManager.get().bindRDService(this);
@@ -37,5 +41,24 @@ public class App extends Application {
         if(activity.getCurrentFocus() != null) {
             inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
         }
+    }
+
+
+    public static String getPatientExperienceTranslation(ExperienceType experienceType){
+        String result = "NA";
+        switch (experienceType){
+            case SEVERE:
+                result = mContext.getResources().getString(R.string.severe);
+                break;
+            case SEVERE_OR_MODERATE:
+                result = mContext.getResources().getString(R.string.severe_or_moderate);
+                break;
+            case CANNOT_EAT:
+                result = mContext.getResources().getString(R.string.cannot_eat);
+                break;
+            case UNKNOWN:
+                break;
+        }
+        return result;
     }
 }

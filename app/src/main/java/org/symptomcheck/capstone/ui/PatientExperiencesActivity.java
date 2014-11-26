@@ -20,6 +20,7 @@ package org.symptomcheck.capstone.ui;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +29,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.symptomcheck.capstone.App;
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.fragments.ExperiencesFragment;
 import org.symptomcheck.capstone.model.Patient;
@@ -40,6 +42,7 @@ import java.util.List;
 public class PatientExperiencesActivity extends Activity {
 
     public final static String PATIENT_ID = "patient_id";
+    public final static String TAG = "PatientExperiencesActivity";
     public final static String ACTION_NEW_PATIENT_BAD_EXPERIENCE = "new_bad_experience_patient";
     View viewIntroNewExperienceInfo;
     TextView textViewDetails;
@@ -51,12 +54,15 @@ public class PatientExperiencesActivity extends Activity {
         viewIntroNewExperienceInfo = findViewById(R.id.viewIntroExperience);
         textViewDetails = (TextView) findViewById(R.id.txt_view_bad_experience_test);
         btnGoToAllExperiences = (Button) findViewById(R.id.btn_go_to_all_experiences);
+        Log.d(TAG, "Enter PatientExperienceActivity");
         if (savedInstanceState == null) {
             if((getIntent().getAction() != null)
                     &&  getIntent().getAction().equals(ACTION_NEW_PATIENT_BAD_EXPERIENCE)) {
+                Log.d(TAG,"PatientExperienceActivity ACTION_NEW_PATIENT_BAD_EXPERIENCE");
                 viewIntroNewExperienceInfo.setVisibility(View.VISIBLE);
                 List<PatientExperience> patientExperiences = PatientExperience.getAllNotSeen();
                 if(!patientExperiences.isEmpty()){
+                    Log.d(TAG,"PatientExperienceActivity experiences not seen: " + patientExperiences.size());
                     textViewDetails.setText(Constants.STRINGS.EMPTY);
                     Patient patient;
                     for (PatientExperience patientExperience : patientExperiences){
@@ -64,7 +70,8 @@ public class PatientExperiencesActivity extends Activity {
                         String headStartTime = "[" + DateTimeUtils.convertEpochToHumanTime(patientExperience.getEndExperienceTime(),"YYYY-MM-DD hh:mm") + "]";
                         headStartTime += "\n";
                         String patientInfo = String.format(String.format("The Patient %s reported a bad experience claiming %d hours of %s",
-                                patient.getFirstName() + " " + patient.getLastName(), patientExperience.getExperienceDuration(), patientExperience.getExperienceType()));
+                                patient.getFirstName() + " " + patient.getLastName(), patientExperience.getExperienceDuration(),
+                                App.getPatientExperienceTranslation(patientExperience.getExperienceType())));
                         headStartTime += patientInfo + "\n";
                         textViewDetails.append(headStartTime);
                         textViewDetails.append("------------------------------\n");

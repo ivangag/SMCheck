@@ -26,6 +26,7 @@ import com.activeandroid.query.Select;
 import com.activeandroid.query.Update;
 import com.google.common.collect.Lists;
 
+import org.symptomcheck.capstone.App;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
@@ -175,11 +176,11 @@ public class PatientExperience extends Model implements IModelBuilder{
     public String toString(){
         StringBuilder sb = new StringBuilder();
         sb
-                .append("Id: ").append(this.experienceId)
+                //.append("Id: ").append(this.experienceId)
+                //.append("\n-------------------------\n")
+                .append("").append(App.getPatientExperienceTranslation(this.experienceType).toUpperCase())
                 .append("\n-------------------------\n")
-                .append("PatientId: ").append(this.patientId)
-                .append("\n-------------------------\n")
-                .append("Type: ").append(this.experienceType)
+                .append("Patient Medical Number: ").append(this.patientId)
                 .append("\n-------------------------\n")
                 .append("Duration: ").append(this.experienceDuration).append(" hours")
                 .append("\n-------------------------\n")
