@@ -288,7 +288,7 @@ public  abstract class BaseFragment extends Fragment {
                                     ActiveContract.EXPERIENCES_COLUMNS.START_EXPERIENCE_TIME + " LIKE ? OR " +
                                             ActiveContract.EXPERIENCES_COLUMNS.END_EXPERIENCE_TIME + " LIKE ? )",
                                     new String[]{"%" + filterPattern + "%", "%" + filterPattern + "%","%" + filterPattern + "%"}
-                                    , ActiveContract.EXPERIENCES_COLUMNS.END_EXPERIENCE_TIME + " desc");
+                                    , ActiveContract.EXPERIENCES_COLUMNS.EXPERIENCE_DURATION + " desc");
                     break;
                case FRAGMENT_TYPE_ONLINE_CHECKIN:
                    cursor = getActivity().getContentResolver()
@@ -366,7 +366,7 @@ public  abstract class BaseFragment extends Fragment {
                     cursor = getActivity().getContentResolver()
                             .query(uriContentProvider,
                                     ActiveContract.EXPERIENCES_TABLE_PROJECTION, selection, null,
-                                    ActiveContract.EXPERIENCES_COLUMNS.END_EXPERIENCE_TIME + " desc");
+                                    ActiveContract.EXPERIENCES_COLUMNS.EXPERIENCE_DURATION + " desc");
                     break;
                 case FRAGMENT_TYPE_ONLINE_CHECKIN:
                     cursor = getActivity().getContentResolver()

@@ -326,7 +326,6 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
         if(mAdapter != null) {
             if(!textToSearch.isEmpty()){
                 String[] names = textToSearch.split(" ");
-
                 StringBuilder lastName = new StringBuilder();
                 if(names.length > 1) {
                     final String firstName = names[0];
@@ -337,7 +336,6 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
                             lastName.append(" ");
                         }
                     }
-                    //SyncUtils.TriggerOnlineSearch(ActiveContract.SYNC_CHECK_IN,firstName,lastName.toString());
                     Log.d(TAG,"StartSearching");
                     hideList(true);
                     startSearchOnline(firstName,lastName.toString());
@@ -411,13 +409,13 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
             thumb.setDrawableResource(card.resourceIdThumb);
             card.addCardThumbnail(thumb);
 
-            String mDetailedCheckInInfo = "";
+            String detailedCheckInInfo = Constants.STRINGS.EMPTY;
             if(checkIn != null) {
                 card.secondaryTitle = DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT);
-                mDetailedCheckInInfo = CheckInOnlineWrapper.getDetailedInfo(checkIn);
+                detailedCheckInInfo = CheckInOnlineWrapper.getDetailedInfo(checkIn);
             }
             // Add expand card
-            CustomExpandCard expand = new CustomExpandCard(super.getContext(),mDetailedCheckInInfo);
+            CustomExpandCard expand = new CustomExpandCard(super.getContext(),detailedCheckInInfo);
             card.addCardExpand(expand);
 
             return card;

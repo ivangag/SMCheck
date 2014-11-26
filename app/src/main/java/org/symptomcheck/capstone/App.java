@@ -1,7 +1,9 @@
 package org.symptomcheck.capstone;
 
+import android.app.Activity;
 import android.app.Application;
 import android.app.job.JobScheduler;
+import android.view.inputmethod.InputMethodManager;
 
 import com.activeandroid.ActiveAndroid;
 
@@ -28,5 +30,12 @@ public class App extends Application {
         //CacheDataManager.get().setContext(this);
         ActiveAndroid.initialize(this);
         SyncUtils.CreateSyncAccount(getApplicationContext());
+    }
+
+    public static void hideSoftKeyboard(Activity activity) {
+        InputMethodManager inputMethodManager = (InputMethodManager)  activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        if(activity.getCurrentFocus() != null) {
+            inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+        }
     }
 }

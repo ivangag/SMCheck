@@ -46,6 +46,7 @@ import android.widget.Toast;
 import com.activeandroid.query.Update;
 import com.squareup.picasso.Picasso;
 
+import org.symptomcheck.capstone.App;
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.adapters.DrawerItem;
 import org.symptomcheck.capstone.adapters.DrawerItemAdapter;
@@ -516,6 +517,7 @@ public class MainActivity extends Activity implements ICardEventListener {
                 IFragmentListener notifier = getCurrentDisplayedFragment();
                 if (notifier != null) {
                     //notifier.OnFilterData(query);
+                    App.hideSoftKeyboard(MainActivity.this);
                     notifier.OnSearchOnLine(query);
                 }
                 return true;

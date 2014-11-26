@@ -49,6 +49,7 @@ import org.symptomcheck.capstone.alarms.SymptomAlarmRequest;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.gcm.GcmRegistrationService;
 import org.symptomcheck.capstone.model.UserInfo;
+import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
 import org.symptomcheck.capstone.utils.NetworkHelper;
@@ -69,7 +70,7 @@ import retrofit.client.Response;
  * https://developers.google.com/+/mobile/android/getting-started#step_1_enable_the_google_api
  * and follow the steps in "Step 1" to create an OAuth 2.0 client for your package.
  */
-public class LoginActivity extends Activity{
+public class LoginActivity extends Activity {
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -133,12 +134,11 @@ public class LoginActivity extends Activity{
         mProgressView = findViewById(R.id.layout_login_progress);
         mErrorFormView = findViewById(R.id.layout_login_error);
 
-        if(UserPreferencesManager.get().getLoginRememberMe(this)
-                && (DAOManager.get().getUser() !=  null)
+        if (UserPreferencesManager.get().getLoginRememberMe(this)
+                && (DAOManager.get().getUser() != null)
                 && (DAOManager.get().getUser().getLogged()))
             attemptLogin();
     }
-
 
 
     /**
@@ -159,18 +159,17 @@ public class LoginActivity extends Activity{
         final String email;
         final String password;
         boolean skipCheckField = false;
-        if(UserPreferencesManager.get().getLoginRememberMe(this)
+        if (UserPreferencesManager.get().getLoginRememberMe(this)
                 && UserPreferencesManager.get().isLogged(this)
-                //&& (DAOManager.get().getUser() !=  null)
-                //&& (DAOManager.get().getUser().getLogged())
-                        )
-                    {
+            //&& (DAOManager.get().getUser() !=  null)
+            //&& (DAOManager.get().getUser().getLogged())
+                ) {
             email = "";
             password = "";
             skipCheckField = true;
             //email = UserPreferencesManager.get().getLoginUsername(this);
             //password = UserPreferencesManager.get().getLoginPassword(this);
-        }else{
+        } else {
             email = mEmailView.getText().toString();
             password = mPasswordView.getText().toString();
         }
@@ -206,7 +205,7 @@ public class LoginActivity extends Activity{
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            showProgress(true,false);
+            showProgress(true, false);
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);
 /*
@@ -315,26 +314,26 @@ public class LoginActivity extends Activity{
             // Attempt authentication against a network service.
             errorLogin.onSuccess = true;
             boolean useToken = mEmail.isEmpty()
-                                    || mPassword.isEmpty();
+                    || mPassword.isEmpty();
             final String token = UserPreferencesManager.get().getBearerToken(getApplicationContext());
             try {
                 // Check network access.
                 SymptomManagerSvcApi client;
-                if(useToken){
+                if (useToken) {
                     client = DownloadHelper.get()
                             .setAccessToken(token)
                             .withRetrofitClient(getApplicationContext());
-                }else{
+                } else {
                     client = DownloadHelper.get().
                             setUserName(mEmail).
                             setPassword(mPassword).
                             withRetrofitClient(getApplicationContext());
                 }
 
-                if(!NetworkHelper.isOnline(getApplicationContext())
-                        && useToken){
+                if (!NetworkHelper.isOnline(getApplicationContext())
+                        && useToken) {
                     errorLogin.onSuccess = true;
-                }else {
+                } else {
                     userInfo = client.verifyUser();
                     userInfo.setLogged(true);
 
@@ -350,7 +349,7 @@ public class LoginActivity extends Activity{
             } catch (Exception e) {
                 errorLogin.onSuccess = false;
                 errorLogin.error = e;
-                Log.e(TAG,String.format("Error on verifyUser:%s; User:%s Pw:%s Token:%s. ", e.getMessage(),mEmail,mPassword,token));
+                Log.e(TAG, String.format("Error on verifyUser:%s; User:%s Pw:%s Token:%s. ", e.getMessage(), mEmail, mPassword, token));
             }
             return errorLogin;
         }
@@ -359,8 +358,8 @@ public class LoginActivity extends Activity{
         protected void onPostExecute(final ErrorLogin login) {
             mAuthTask = null;
 
-            if(login.onSuccess) {
-                handleGCMRegistrationRequest(getApplicationContext());
+            if (login.onSuccess) {
+                handleGCMRegistrationRequest();
             }
             handleAfterLoginAttempt(login);
         }
@@ -369,47 +368,35 @@ public class LoginActivity extends Activity{
         @Override
         protected void onCancelled() {
             mAuthTask = null;
-            showProgress(false,false);
+            showProgress(false, false);
         }
     }
 
 
-
-    public void handleGCMRegistrationRequest(Context context) {
+    public void handleGCMRegistrationRequest() {
         // Check device for Play Services APK. If check succeeds, proceed with GCM registration.
-        if (checkPlayServices(context)) {
-            GcmRegistrationService.startDeviceRegistration(context);
+        if (checkPlayServices(this)) {
+            GcmRegistrationService.startDeviceRegistration(getApplicationContext());
         } else {
             Log.i(TAG, "No valid Google Play Services APK found.");
         }
     }
 
 
-
     /**
      * Check the device to make sure it has the Google Play Services APK. If
      * it doesn't, display a dialog that allows users to download the APK from
      * the Google Play Store or enable it in the device's system settings.
-     * @param context
+     *
      */
     private boolean checkPlayServices(final Context context) {
         final int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
         if (resultCode != ConnectionResult.SUCCESS) {
-
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                if(context instanceof Activity){
-                    ((Activity)context).runOnUiThread(
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    GooglePlayServicesUtil.getErrorDialog(resultCode,  ((Activity)context),
-                                            PLAY_SERVICES_RESOLUTION_REQUEST).show();
-                                }
-                            }
-                    );
-                }else{
-                    Log.e(TAG, "checkPlayServices: " + GooglePlayServicesUtil.getErrorString(resultCode));
-                }
+                GooglePlayServicesUtil.getErrorDialog(resultCode, ((Activity) context),
+                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+                Log.e(TAG, "checkPlayServices: " + GooglePlayServicesUtil.getErrorString(resultCode));
+
             } else {
                 Log.i(TAG, "This device is not supported.");
                 //finish();
@@ -426,7 +413,11 @@ public class LoginActivity extends Activity{
         String errorMsg = "";
         if (result.onSuccess) {
             //SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_ALL);
-            SymptomAlarmRequest.get().setAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
+            if(DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)) {
+                SymptomAlarmRequest.get().setAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
+            }else {
+                SymptomAlarmRequest.get().cancelAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
+            }
             UserPreferencesManager.get().setLoginRememberMe(context,mCheckInRememberMe.isChecked());
             //UserPreferencesManager.get().setLoginUsername(context,username);
             //UserPreferencesManager.get().setLoginPassword(context,password);

@@ -221,7 +221,7 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
         return new CursorLoader(getActivity(),
                 ContentProvider.createUri(PatientExperience.class, null),
                 ActiveContract.EXPERIENCES_TABLE_PROJECTION, mSelection, null,
-                ActiveContract.EXPERIENCES_COLUMNS.END_EXPERIENCE_TIME + " desc"
+                ActiveContract.EXPERIENCES_COLUMNS.EXPERIENCE_DURATION + " desc"
         );
     }
 

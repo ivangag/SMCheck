@@ -266,13 +266,18 @@ public class PatientExperience extends Model implements IModelBuilder{
         }
         List<PatientExperience> patientExperiences = Lists.newArrayList();
         //patientExperiences.addAll(checkNewBadExperience(painLevelOnlySevereWarningCheck, ExperienceType.SEVERE, 12));
-        patientExperiences.addAll(checkNewBadExperience(painLevelModerateOrSevereWarningCheck, ExperienceType.SEVERE_OR_MODERATE, 12));
-        patientExperiences.addAll(checkNewBadExperience(feedStatusWarningCheck, ExperienceType.CANNOT_EAT, 12));
+        patientExperiences.addAll(checkNewBadExperience(painLevelModerateOrSevereWarningCheck,
+                ExperienceType.SEVERE, 12,ExperienceType.SEVERE_OR_MODERATE,16));
+        patientExperiences.addAll(checkNewBadExperience(feedStatusWarningCheck,
+                ExperienceType.CANNOT_EAT, 12,ExperienceType.CANNOT_EAT, 12));
         final long countSaved = DAOManager.get().savePatientExperiences(patientExperiences);
         return patientExperiences;
     }
     private static List<PatientExperience> checkNewBadExperience(HashMap<Patient, List<CheckIn>> tableOfWarningFound,
-                                              ExperienceType experienceType, int hourDiffThreshold) {
+                                                                 ExperienceType experienceTypeFirstLevel,
+                                                                 int hourDiffFirstLevelThreshold,
+                                                                 ExperienceType experienceTypeSecondLevel,
+                                                                 int hourDiffSecondLevelThreshold) {
         List<PatientExperience> patientExperiences = Lists.newArrayList();
         for(Patient patient : tableOfWarningFound.keySet()){
             final int sizeList = tableOfWarningFound.get(patient).size();
@@ -282,7 +287,11 @@ public class PatientExperience extends Model implements IModelBuilder{
                 long diffTime = Long.valueOf(newestCheckIn.getIssueDateTime())
                         - Long.valueOf(oldestCheckIn.getIssueDateTime());
                 long hourDiff = diffTime / 3600 / 1000;
-                if(hourDiff >= hourDiffThreshold){
+                if(hourDiff >= hourDiffFirstLevelThreshold){
+                    ExperienceType experienceType = experienceTypeFirstLevel;
+                    if(hourDiff >= hourDiffSecondLevelThreshold)
+                        experienceType = experienceTypeSecondLevel;
+
                     // Raise Feed Alert!!!!
                     PatientExperience experience = new PatientExperience();
                     String uniqueId = patient.getMedicalRecordNumber()

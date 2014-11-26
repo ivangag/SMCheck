@@ -358,7 +358,6 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
             String mDetailedCheckInInfo = "";
             if(checkIn != null) {
-                card.secondaryTitle = DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT);
                 mDetailedCheckInInfo = CheckIn.getDetailedInfo(checkIn,true);
             }
             // Add expand card
@@ -374,8 +373,11 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL))
                         + " - " + cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS))
                             ;
-            final Patient patient = Patient.getByMedicalNumber(checkIn.getPatientMedicalNumber());
-            card.mainHeader = patient.getFirstName() + " "  + patient.getLastName() + " " +  getString(R.string.checkin_header);
+            if(checkIn != null) {
+                card.secondaryTitle = DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT);
+                final Patient patient = Patient.getByMedicalNumber(checkIn.getPatientMedicalNumber());
+                card.mainHeader = patient.getFirstName() + " " + patient.getLastName() + " " + getString(R.string.checkin_header);
+            }
             card.resourceIdThumb=R.drawable.ic_check_in;
 
             //retrieve image

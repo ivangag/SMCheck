@@ -13,7 +13,7 @@
         name="doctor_fragments_array">
         <item>Patients</item>
         <item>Patients Bad Experiences</item>
-        <item>Search Server Patient Check-In</item>
+        <item>Search Patient Check-In Data</item>
         <item>Settings</item>
         <item>Logout</item>
     </string-array>

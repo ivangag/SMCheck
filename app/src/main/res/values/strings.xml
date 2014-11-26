@@ -139,5 +139,7 @@
     <string name="checkins_online_header">Checkin Remote Search</string>
     <string name="txt_search_online_running">Searching on the Remote Server…</string>
     <string name="txt_cards_online_empty_list">No Items - Enter Patient Name for starting a new search</string>
+    <string name="medical_number">Medical Number</string>
+    <string name="unique_doctor_id">Doctor ID</string>
 
 </resources>

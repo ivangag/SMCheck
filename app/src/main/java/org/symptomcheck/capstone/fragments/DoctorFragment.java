@@ -406,7 +406,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
             card.setId("" + cursor.getInt(ID_COLUMN));
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.DOCTORS_COLUMNS.FIRST_NAME))
                     + " " + cursor.getString(cursor.getColumnIndex(ActiveContract.DOCTORS_COLUMNS.LAST_NAME));
-            card.secondaryTitle =
+            card.secondaryTitle = getString(R.string.unique_doctor_id) + ": " +
                     cursor.getString(cursor.getColumnIndex(ActiveContract.DOCTORS_COLUMNS.DOCTOR_ID))
                             /*+ " " + cursor.getString(cursor.getColumnIndex(ActiveContract.PATIENT_COLUMNS.BIRTH_DATE))*/
             ;
