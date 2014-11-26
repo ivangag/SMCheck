@@ -31,4 +31,16 @@
         android:gravity="center_vertical"
         />
 
+<!--    <TextView
+        style="@style/ActionBar.Solid.Capstone"
+        android:id="@+id/carddemo_expand_text_link"
+        android:linksClickable="true"
+        android:autoLink="web"
+        android:text="www.google.com"
+        android:textColorLink="@android:color/holo_blue_bright"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent" />-->
+
 </LinearLayout>

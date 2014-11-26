@@ -146,7 +146,7 @@
     <string name="severe">Severe Pain</string>
     <string name="severe_or_moderate">Severe or Moderate Pain</string>
     <string name="cannot_eat">Cannot Eat Feed</string>
-
+    <string name="txt_card_info_button">click for more info</string>
 
 
 </resources>
