@@ -56,6 +56,8 @@ public class DAOManager {
         this.deleteDoctors();
         this.deletePatients();
         this.deleteMedicines();
+        this.deleteCheckInsOnline();
+        this.deletePatientExperiences();
     }
 
     private synchronized void deleteUser() {
@@ -105,8 +107,7 @@ public class DAOManager {
         (new ActiveHandler<CheckIn>()).deleteItems(CheckIn.class);
     }
 
-    public synchronized boolean saveCheckIns(List<CheckIn> checkIns, String medicalRecordNumber,
-                                          String userIdentification) {
+    public synchronized boolean saveCheckIns(List<CheckIn> checkIns, String medicalRecordNumber) {
 
         boolean result = false;
         Patient patient = null;

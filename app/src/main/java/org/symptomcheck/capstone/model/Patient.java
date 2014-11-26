@@ -223,9 +223,7 @@ public class Patient extends Model implements IModelBuilder{
 
     public static String getDetailedInfo(Patient patient) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Name: ").append(patient.getFirstName())
-                .append("\n----------------------------\n")
-                .append("LastName: ").append(patient.getLastName())
+        sb.append("Name: ").append(patient.getFirstName()).append(" ").append(patient.getLastName())
                 .append("\n----------------------------\n")
                 .append("MedicalNumber: ").append(patient.getMedicalRecordNumber())
                 .append("\n----------------------------\n")

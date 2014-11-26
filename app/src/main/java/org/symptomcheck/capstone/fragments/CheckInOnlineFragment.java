@@ -22,6 +22,7 @@ import android.accounts.Account;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.CursorLoader;
@@ -30,6 +31,7 @@ import android.content.SyncStatusObserver;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -55,13 +57,13 @@ import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
 
 import java.util.Collection;
+import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.CardThumbnail;
 import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
-import it.gmariotti.cardslib.library.internal.base.BaseCard;
 import it.gmariotti.cardslib.library.view.CardListView;
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -74,8 +76,11 @@ import retrofit.client.Response;
  */
 public class CheckInOnlineFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>, IFragmentListener {
 
+
     private static final String TAG = "CheckInOnlineFragment";
 
+
+    private Handler progressBarHandler = new Handler();
     CheckinCursorCardAdapter mAdapter;
     CardListView mListView;
     /**
@@ -143,6 +148,7 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
         Log.d(TAG,"onActivityCreated");
         hideList(false);
         displayList(true);
+
     }
 
     @Override
@@ -325,8 +331,8 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
         // here we have to trigger background sync service by stimulating a Server Hosted search
         if(mAdapter != null) {
             if(!textToSearch.isEmpty()){
-                String[] names = textToSearch.split(" ");
-                StringBuilder lastName = new StringBuilder();
+                final String[] names = textToSearch.split(" ");
+                final StringBuilder lastName = new StringBuilder();
                 if(names.length > 1) {
                     final String firstName = names[0];
                     //e.g. La Rosa => length = 3
@@ -338,7 +344,8 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
                     }
                     Log.d(TAG,"StartSearching");
                     hideList(true);
-                    startSearchOnline(firstName,lastName.toString());
+                    performOnlineSearch(firstName, lastName.toString());
+                    //executeCheckInSaving(firstName,lastName.toString());
                 }
             }else {
                 mAdapter.getFilter().filter(textToSearch);
@@ -346,15 +353,15 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
         }
     }
 
-    private void startSearchOnline(String FirstName, String LastName){
+    private void performOnlineSearch(String FirstName, String LastName){
         DownloadHelper.get()
                 .withRetrofitClient(getActivity())
                 .findCheckInsByPatientName(DAOManager.get().getUser().getUserIdentification(),FirstName,LastName, new Callback<Collection<CheckIn>>() {
                     @Override
                     public void success(Collection<CheckIn> checkIns, Response response) {
                         Log.d(TAG, "success. CheckinsFound:" + checkIns.size());
-                        DAOManager.get().saveCheckInsOnline((java.util.List<CheckIn>) checkIns, Constants.STRINGS.EMPTY, Constants.STRINGS.EMPTY);
-
+                        DAOManager.get().saveCheckInsOnline((List<CheckIn>) checkIns, Constants.STRINGS.EMPTY, Constants.STRINGS.EMPTY);
+                        Log.d(TAG, "CheckinsOnlineSaved:" + CheckInOnlineWrapper.getAll().size());
                         Log.d(TAG,"EndSearching");
                         displayList(checkIns.isEmpty());
                         OnFilterData(Constants.STRINGS.EMPTY);
@@ -367,6 +374,39 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
                 });
     }
 
+    private void executeCheckInSaving(final String FirstName, final String LastName) {
+        final ProgressDialog ringProgressDialog = ProgressDialog.show(getActivity(), "Patient " + FirstName + " "  + LastName + "Checkin-Data",
+                getActivity().getResources().getString(R.string.txt_search_online_running), true);
+        ringProgressDialog.setCancelable(true);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final List<CheckIn> checkIns = (List<CheckIn>) DownloadHelper.get().withRetrofitClient(getActivity())
+                            .findCheckInsByPatientName(DAOManager.get().getUser().getUserIdentification(), FirstName, LastName);
+                    final boolean checkinRes = checkIns.size() > 0;
+                    Log.d(TAG, "CheckinsFound:" + checkIns.size());
+                    Thread.sleep(1000);
+                    progressBarHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (checkinRes) {
+                                DAOManager.get().saveCheckInsOnline(checkIns, Constants.STRINGS.EMPTY, Constants.STRINGS.EMPTY);
+                                displayList(checkIns.isEmpty());
+                                OnFilterData(Constants.STRINGS.EMPTY);
+                                Log.d(TAG,"EndSearching");
+                            } else {
+                                Log.d(TAG, "ErrorOnFindCheckInsByPatientName");
+                            }
+                        }
+                    });
+                } catch (Exception error) {
+                    Log.d(TAG, "FindCheckInsByPatientName Error: " + error.getCause().getMessage());
+                }
+                ringProgressDialog.dismiss();
+            }
+        }).start();
+    }
 
     //-------------------------------------------------------------------------------------------------------------
     // Adapter
@@ -395,11 +435,11 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
 
             //Set the header title
             header.setTitle(card.mainHeader);
-            header.setPopupMenu(R.menu.popup_checkin, new CardHeader.OnClickCardHeaderPopupMenuListener() {
+            /*header.setPopupMenu(R.menu.popup_checkin, new CardHeader.OnClickCardHeaderPopupMenuListener() {
                 @Override
                 public void onMenuItemClick(BaseCard card, MenuItem item) {
                 }
-            });
+            });*/
             //Add Header to card
             card.addCardHeader(header);
 
@@ -411,7 +451,7 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
 
             String detailedCheckInInfo = Constants.STRINGS.EMPTY;
             if(checkIn != null) {
-                card.secondaryTitle = DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT);
+                card.secondaryTitle = "Submitted on " + DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT);
                 detailedCheckInInfo = CheckInOnlineWrapper.getDetailedInfo(checkIn);
             }
             // Add expand card

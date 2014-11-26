@@ -31,6 +31,8 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <uses-permission android:name="org.symptomcheck.capstone.RECEIVE_CHECKIN_DISMISSION"/>
+
     <!--
  Creates a custom permission so only this app can receive its messages.
 
@@ -171,11 +173,11 @@
 
         <activity
             android:name="org.symptomcheck.capstone.ui.CheckInFlowActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="true"
             android:label="@string/title_check_in_flow"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:uiOptions="none"
-            android:parentActivityName="org.symptomcheck.capstone.ui.MainActivity">
+            android:parentActivityName="org.symptomcheck.capstone.ui.MainActivity"
+            android:uiOptions="none" >
             <meta-data
                 android:name="android.support.UI_OPTIONS"
                 android:value="none" />
@@ -185,8 +187,8 @@
         </activity>
         <activity
             android:name="org.symptomcheck.capstone.ui.SettingsActivity"
-            android:label="@string/title_activity_settings"
             android:configChanges="orientation|screenSize|keyboardHidden"
+            android:label="@string/title_activity_settings"
             android:parentActivityName="org.symptomcheck.capstone.ui.MainActivity" >
 
             <!-- Parent activity meta-data to support 4.0 and lower -->
@@ -196,15 +198,24 @@
         </activity>
         <activity
             android:name="org.symptomcheck.capstone.ui.PatientExperiencesActivity"
-            android:exported="true"
             android:configChanges="orientation|screenSize|keyboardHidden"
+            android:exported="true"
             android:label="@string/title_activity_patient_experiences"
             android:parentActivityName="org.symptomcheck.capstone.ui.MainActivity" >
+
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.symptomcheck.capstone.ui.MainActivity" />
         </activity>
+
+        <receiver
+            android:name=".alarms.CheckinDismissingReceiver"
+            android:enabled="true"
+            android:permission="org.symptomcheck.capstone.RECEIVE_CHECKIN_DISMISSION"
+            android:exported="true" >
+
+        </receiver>
     </application>
 
 </manifest>

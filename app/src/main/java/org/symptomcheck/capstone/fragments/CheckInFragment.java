@@ -342,11 +342,11 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
             //Set the header title
             header.setTitle(card.mainHeader);
-            header.setPopupMenu(R.menu.popup_checkin, new CardHeader.OnClickCardHeaderPopupMenuListener() {
+            /*header.setPopupMenu(R.menu.popup_checkin, new CardHeader.OnClickCardHeaderPopupMenuListener() {
                 @Override
                 public void onMenuItemClick(BaseCard card, MenuItem item) {
                 }
-            });
+            });*/
             //Add Header to card
             card.addCardHeader(header);
 
@@ -374,7 +374,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
                         + " - " + cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS))
                             ;
             if(checkIn != null) {
-                card.secondaryTitle = DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT);
+                card.secondaryTitle = "Submitted on " + DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT);
                 final Patient patient = Patient.getByMedicalNumber(checkIn.getPatientMedicalNumber());
                 card.mainHeader = patient.getFirstName() + " " + patient.getLastName() + " " + getString(R.string.checkin_header);
             }

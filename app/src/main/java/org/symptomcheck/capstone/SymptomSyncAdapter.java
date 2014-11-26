@@ -425,8 +425,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
                     checkIns.addAll(checkInsToSync);
                     if((checkIns.size() > 0))
                         DAOManager.get().saveCheckIns(checkIns,
-                                patient.getMedicalRecordNumber(),
-                                user.getUserIdentification());
+                                patient.getMedicalRecordNumber());
                 }
             }else {
                 Log.e(TAG, "syncPatientsCheckIns=> sync not possible: patients = null!");

@@ -143,7 +143,7 @@ public class MainActivity extends Activity implements ICardEventListener {
 
         user = DAOManager.get().getUser();
 
-
+        App.hideSoftKeyboard(MainActivity.this);
         if (user != null) {
             initUserResource();
             getFragmentManager().

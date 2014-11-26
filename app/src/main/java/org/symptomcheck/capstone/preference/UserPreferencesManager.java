@@ -28,6 +28,7 @@ public class UserPreferencesManager {
     public static final String KEY_SYNC_ONLY_WIFI = "sync_only_wifi";
     public static final String KEY_NEW_NOTIFICATIONS_ALERT = "notifications_new_message";
     public static final String KEY_NEXT_SCHEDULED_CHECKIN = "next_schedule_checkin";
+    public static final String KEY_LAST_SUBMITTED_CHECKIN_TIME = "latest_checkin_time";
     private static UserPreferencesManager ourInstance = new UserPreferencesManager();
     private static Context mContext;
 
@@ -63,6 +64,10 @@ public class UserPreferencesManager {
                 .getBoolean(KEY_SYNC_ONLY_WIFI, false);
     }
 
+    public String getLatestCheckinSubmission(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(KEY_LAST_SUBMITTED_CHECKIN_TIME, Constants.STRINGS.EMPTY);
+    }
     private String getStartHourMinutes(Context context){
         return PreferenceManager.getDefaultSharedPreferences(context)
                 .getString(KEY_CHECK_IN_START, Constants.STRINGS.EMPTY);
@@ -149,6 +154,11 @@ public class UserPreferencesManager {
                 .putString(PASSWORD_LOGIN, password).commit();
     }
     */
+
+    public void setLatestCheckinSubmission(Context context, String time){
+        PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putString(KEY_LAST_SUBMITTED_CHECKIN_TIME,time);
+    }
 
     public void setActiveSyncOnlyViaWifi(Context context, boolean active){
         PreferenceManager.getDefaultSharedPreferences(context).edit()

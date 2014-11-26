@@ -81,8 +81,8 @@ public class ReminderSchedulingService extends IntentService {
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
                 new Intent(this, CheckInFlowActivity.class),0);
 
-        PendingIntent deleteIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, LoginActivity.class),0);
+        PendingIntent deleteIntent = PendingIntent.getBroadcast(this, 0,
+                new Intent(this, CheckinDismissingReceiver.class),0);
 
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder mBuilder =

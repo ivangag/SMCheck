@@ -101,12 +101,9 @@ public class PainMedication extends Model implements IModelBuilder {
 
         sb.append("Medicine Name: ").append(painMedication.getMedicationName());
         sb.append("\n----------------------------\n");
-        sb.append("Patient details")
+        sb.append("Patient Details")
                 .append("\n")
                 .append(patient != null ? Patient.getDetailedInfo(patient) : "NA");
-
-        sb.append("\n----------------------------\n");
-
         return sb.toString();
     }
 

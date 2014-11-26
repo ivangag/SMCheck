@@ -156,6 +156,8 @@ public class SettingsActivity extends Activity {
         this.setResult(mIsSettingsModified ? RESULT_OK : RESULT_OK);
         super.onBackPressed();
     }
+
+
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
@@ -166,6 +168,7 @@ public class SettingsActivity extends Activity {
             String stringValue = value.toString();
 
             if (preference instanceof ListPreference) {
+                mIsSettingsModified = true;
                 // For list preferences, look up the correct display value in
                 // the preference's 'entries' list.
                 ListPreference listPreference = (ListPreference) preference;
@@ -201,7 +204,7 @@ public class SettingsActivity extends Activity {
 
             } else if (preference instanceof TimePreference) {
                 mIsSettingsModified = true;
-                SymptomAlarmRequest.get().setAlarm(preference.getContext(), SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
+
                 // For all other preferences, set the summary to the value's
                 // simple string representation.
                 preference.setSummary(stringValue);
@@ -209,6 +212,9 @@ public class SettingsActivity extends Activity {
                 // For all other preferences, set the summary to the value's
                 // simple string representation.
                 preference.setSummary(stringValue);
+            }
+            if(mIsSettingsModified){
+                SymptomAlarmRequest.get().setAlarm(preference.getContext(), SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
             }
             final Preference nextScheduleCheckInPreference = preference.getPreferenceManager().findPreference(UserPreferencesManager.KEY_NEXT_SCHEDULED_CHECKIN);
             if (nextScheduleCheckInPreference != null) {

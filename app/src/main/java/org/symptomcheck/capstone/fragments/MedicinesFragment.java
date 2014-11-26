@@ -538,17 +538,6 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                             }
                         }
                     });
-
-                    /*
-                    Message message = Message.obtain();
-                    message.what = 80;
-                    Bundle data = new Bundle();
-                    data.putString("MEDICATION_NAME",medication.getMedicationName() + " Patient: " + medication.getPatientMedicalNumber());
-                    data.putBoolean("RESULT",painMedicationRes);
-                    message.setData(data);
-                    progressBarHandler.sendMessage(message);
-                    */
-
                 } catch (Exception exception) {
                     Toast.makeText(getActivity(), "Error: " + exception.getCause().getMessage(), Toast.LENGTH_LONG).show();
                 }
@@ -660,27 +649,12 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.MEDICINES_COLUMNS.NAME));
 
             card.mainHeader = /* mPatientOwner.getFirstName() + " " + mPatientOwner.getLastName() + " "  +*/ getString(R.string.medicine_header);
-            card.secondaryTitle = "Added the " + (painMedication.getLastTakingDateTime().equals(Constants.STRINGS.EMPTY)
+            card.secondaryTitle = "Added on " + (painMedication.getLastTakingDateTime().equals(Constants.STRINGS.EMPTY)
                                         ? "NA" : DateTimeUtils.convertEpochToHumanTime(painMedication.getLastTakingDateTime(),"YYYY-MM-DD hh:mm"));
             card.resourceIdThumb=R.drawable.ic_medicine;
 
         }
     }
-
-    private void removeCard(Card card) {
-
-        //Use this code to delete getItemsQuestion on DB
-        /*
-        ContentResolver resolver = getActivity().getContentResolver();
-        long noDeleted = resolver.delete
-                (CardCursorContract.CardCursor.CONTENT_URI,
-                        CardCursorContract.CardCursor.KeyColumns.KEY_ID + " = ? ",
-        new String[]{card.getId()});
-
-        //mAdapter.notifyDataSetChanged();*/
-
-    }
-
     //-------------------------------------------------------------------------------------------------------------
     // Cards
     //-------------------------------------------------------------------------------------------------------------

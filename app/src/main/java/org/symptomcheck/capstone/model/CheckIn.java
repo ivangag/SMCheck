@@ -145,10 +145,7 @@ public class CheckIn extends Model implements IModelBuilder {
     public static CheckIn createCheckIn(PainLevel painLevel,
                                         FeedStatus feedStatus,
                                         Map<PainMedication,String> Medications) {
-
-        //final Calendar calendar = Calendar.getInstance();
         Long timestamp = DateTime.now(TimeZone.getTimeZone(Constants.TIME.GMT00)).getMilliseconds(TimeZone.getTimeZone(Constants.TIME.GMT00));
-        //Long timestamp = calendar.getTimeInMillis();
         CheckIn checkIn = new CheckIn(timestamp.toString(), painLevel, feedStatus);
         checkIn.setUnitId(UUID.randomUUID().toString());
         for (PainMedication medication : Medications.keySet()) {
@@ -237,6 +234,14 @@ public class CheckIn extends Model implements IModelBuilder {
                 .from(CheckIn.class)
                 .where("issueDateTime >= ?", time)
                 .execute().size();
+    }
+    public static CheckIn getLatestOne(){
+        return new Select()
+                .from(CheckIn.class)
+                //.where("patientMedicalNumber = ?", patientMedicalNumber)
+                .orderBy("issueDateTime DESC")
+                .limit(1)
+                .executeSingle();
     }
 
     public static int getCountInThisDay(){

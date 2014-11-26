@@ -311,12 +311,12 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
             mViewPager.setCurrentItem(mSectionsPagerAdapter.getCount() - 1);
         }
 
-        if (!check) {
-            Toast.makeText(this, msgError, Toast.LENGTH_LONG).show();
-        } else {
+        if (check) {
             // Save Check-In and trigger local => cloud sync
             mCheckInFromUserChoices = makeCheckInFromUserChoices();
             showDialog();
+        } else {
+            //Toast.makeText(this, msgError, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -334,28 +334,23 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
             @Override
             public void run() {
                 try {
-                    // Here you should write your time consuming task...
-                    // Let the progress ring for 10 seconds...
-                    //Thread.sleep(10000);
                     final boolean checkinRes = saveCheckIn(checkIn);
-                    if (checkinRes) {
-                        SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_CHECK_IN);
-                        Thread.sleep(2000);
-                    }
+                    Thread.sleep(3000);
                     progressBarHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            if(checkinRes) {
-                                // re-set the alarm to as this could be the last Check-In of the day
+                            if (checkinRes) {
+                                //re-schedule the next check-in
                                 SymptomAlarmRequest.get().setAlarm(getApplicationContext(), SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
+                                SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_CHECK_IN);
                                 finish();
                                 Toast.makeText(getApplicationContext(), "Check-In Submitted Correctly", Toast.LENGTH_LONG).show();
-                            }else {
+                            } else {
                                 Toast.makeText(getApplicationContext(), "Check-In Submission ERROR!!!", Toast.LENGTH_LONG).show();
                             }
                         }
                     });
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
                 ringProgressDialog.dismiss();
             }
@@ -375,8 +370,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
 
     private boolean saveCheckIn(CheckIn checkIn){
         checkIn.setNeedSync(1);
-        return DAOManager.get().saveCheckIns(Lists.newArrayList(checkIn),
-                mUser.getUserIdentification(),mUser.getUserIdentification());
+        return DAOManager.get().saveCheckIns(Lists.newArrayList(checkIn),mUser.getUserIdentification());
     }
 
     @Override
@@ -660,7 +654,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                     ((CheckInFlowActivity)getActivity()).mReportMedicationsTakingTime.put(CheckInQuestionFragment.this.mMedicineName, String.valueOf(milliFrom1970GMT));
 
                     Log.i("CheckInFlow", "milliFrom1970GMT= " + milliFrom1970GMT);
-                    Toast.makeText(getActivity(), "Date: " + date + " Time: " + time, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getActivity(), "Date: " + date + " Time: " + time, Toast.LENGTH_SHORT).show();
 
                     dialog.dismiss();
                 }
