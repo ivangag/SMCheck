@@ -39,7 +39,6 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -245,7 +244,7 @@ public class MainActivity extends Activity implements ICardEventListener {
                             //.centerCrop()
                             .into(mImageView);
                     detailUser += "\nID " + Doctor.getByDoctorNumber(user.getUserIdentification()).getUniqueDoctorId();
-                } else if (userType.equals(UserType.PATIENT)) {
+                } else if (userType.equals(UserType.PATIENT)) { //TODO#FDAR_1 show details of Patient on the a view in front of the main activity
                     mFragmentTitles = getResources().getStringArray(R.array.patient_fragments_array);
                     mDrawerImagesResources = new int[]{
                             R.drawable.ic_check_in,
@@ -498,33 +497,16 @@ public class MainActivity extends Activity implements ICardEventListener {
 
     private void setupMenuActions(Menu menu) {
         MenuItem searchItem = menu.findItem(R.id.action_search);
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        MenuItem shareItem = menu.findItem(R.id.action_share);
-        ShareActionProvider mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
-        mShareActionProvider.setShareHistoryFileName(ShareActionProvider.DEFAULT_SHARE_HISTORY_FILE_NAME);
-
-        /*
-        mShareActionProvider.setShareIntent(getDefaultIntent());
-        if(mIsShareIntentPending)
-            updateShareIntentWithText();
-            */
-        mShareActionProvider.setOnShareTargetSelectedListener(new ShareActionProvider.OnShareTargetSelectedListener() {
-            @Override
-            public boolean onShareTargetSelected(ShareActionProvider source, Intent intent) {
-                return false;
-            }
-        });
-
+        final SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                //Toast.makeText(getActivity().getApplicationContext(), "onQueryTextSubmit:" + query, Toast.LENGTH_SHORT).show();
-                //mNetAdapter.update(query.toUpperCase());
                 IFragmentListener notifier = getCurrentDisplayedFragment();
                 if (notifier != null) {
                     //notifier.OnFilterData(query);
                     App.hideSoftKeyboard(MainActivity.this);
                     notifier.OnSearchOnLine(query);
+                    searchView.clearFocus();
                 }
                 return true;
             }
@@ -547,7 +529,6 @@ public class MainActivity extends Activity implements ICardEventListener {
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-                //mNetAdapter.getFilter().filter(getResources().getString(R.string.filterALL));
                 return true;
             }
         });
@@ -581,7 +562,7 @@ public class MainActivity extends Activity implements ICardEventListener {
 
             Intent intent = new Intent(this, CheckInFlowActivity.class);
             startActivity(intent);
-            List<PatientExperience> newBadPatientExperiences = PatientExperience.checkBadExperiences();
+            List<PatientExperience> newBadPatientExperiences = PatientExperience.computeBadExperiences();
             //List<PatientExperience> patientExperiences = PatientExperience.getByPatient("patient001");
             List<PatientExperience> patientExperiences = PatientExperience.getAll();
             if (patientExperiences.size() > 0) {

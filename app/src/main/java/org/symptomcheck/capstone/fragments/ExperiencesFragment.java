@@ -251,7 +251,7 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
         /** Callback invoked with the sync adapter status changes. */
         @Override
         public void onStatusChanged(int which) {
-            getActivity().runOnUiThread(new Runnable() {
+            getActivity().runOnUiThread(new Runnable() { //TODO#BPR_8
                 /**
                  * The SyncAdapter runs on a background thread. To update the UI, onStatusChanged()
                  * runs on the UI thread.

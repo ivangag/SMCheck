@@ -55,8 +55,8 @@ public class ReminderSchedulingService extends IntentService {
     }
 
     /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
+     * Send notification
+     *
      */
     private void handleActionCheckInSubmission() {
         sendNotification(getString(R.string.checkin_reminder_text));
@@ -64,7 +64,7 @@ public class ReminderSchedulingService extends IntentService {
 
     /**
      * Post a notification
-     * @param msg
+     * @param msg message to send with the notification
      */
     private void sendNotification(String msg) {
         Log.i(TAG,"sendNotification");
@@ -87,6 +87,7 @@ public class ReminderSchedulingService extends IntentService {
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(msg))
                         .setAutoCancel(true)
+                        .setTicker(getString(R.string.txt_checkin_reminder_ticker))
                         .setSound(alarmSound)
                         .setDeleteIntent(deleteIntent)
                         .setContentText(msg);

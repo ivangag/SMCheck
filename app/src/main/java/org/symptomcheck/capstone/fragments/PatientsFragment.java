@@ -247,7 +247,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
                  * runs on the UI thread.
                  */
                 @Override
-                public void run() {
+                public void run() { //TODO#BPR_8
                     // Create a handle to the account that was created by
                     // SyncService.CreateSyncAccount(). This will be used to query the system to
                     // see how the sync status has changed.

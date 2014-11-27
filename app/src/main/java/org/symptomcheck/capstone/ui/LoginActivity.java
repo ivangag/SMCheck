@@ -52,6 +52,7 @@ import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.network.DownloadHelper;
 import org.symptomcheck.capstone.network.SymptomManagerSvcApi;
+import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.NetworkHelper;
 import org.symptomcheck.capstone.utils.NotificationHelper;
 import org.symptomcheck.capstone.preference.UserPreferencesManager;
@@ -141,7 +142,7 @@ public class LoginActivity extends Activity { //TODO#BPR_3
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
-    public void attemptLogin() {
+    public void attemptLogin() {//TODO#FDAR_1 get the user credentials and try to login in a background thread via AsyncTask
         if (mAuthTask != null) {
             return;
         }
@@ -154,10 +155,9 @@ public class LoginActivity extends Activity { //TODO#BPR_3
         final String password;
         boolean skipCheckField = false;
         if (UserPreferencesManager.get().getLoginRememberMe(this)
-                && UserPreferencesManager.get().isLogged(this)
-                ) {
-            email = "";
-            password = "";
+                && UserPreferencesManager.get().isLogged(this)) {
+            email = password = Constants.STRINGS.EMPTY;
+            //password = "" ;
             skipCheckField = true;
         } else {
             email = mEmailView.getText().toString();
@@ -193,7 +193,7 @@ public class LoginActivity extends Activity { //TODO#BPR_3
             // perform the user login attempt.
             showProgress(true, false);
             mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            mAuthTask.execute((Void) null); //TODO#FDAR_1
         }
     }
 
@@ -212,6 +212,8 @@ public class LoginActivity extends Activity { //TODO#BPR_3
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
+            //region TODO#BPR_7
+            //
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
             mLoginFormView.animate().setDuration(shortAnimTime).alpha(
                     show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
@@ -237,6 +239,7 @@ public class LoginActivity extends Activity { //TODO#BPR_3
                     mErrorFormView.setVisibility(errorOnLogin ? View.VISIBLE : View.GONE);
                 }
             });
+            //endregion
         } else {
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
@@ -274,6 +277,8 @@ public class LoginActivity extends Activity { //TODO#BPR_3
 
         @Override
         protected ErrorLogin doInBackground(Void... params) {
+            // TODO#FDAR_1
+            // TODO#BPR_8 Perform (potentially long) login calling Api REST Service in a background thread
             // Attempt authentication against a network service.
             errorLogin.onSuccess = true;
             boolean useToken = mEmail.isEmpty()
@@ -305,7 +310,7 @@ public class LoginActivity extends Activity { //TODO#BPR_3
                     DAOManager.get().saveUser(userInfo);
 
                     if (!useToken) {
-                        //probably is the first access after wiping data
+                        //probably is the first access after a data wiping, then we force a total data synchronization
                         SyncUtils.ForceRefresh();
                         Thread.sleep(2000);
                     }

@@ -72,19 +72,7 @@ import hirondelle.date4j.DateTime;
 //TODO#BPR_3 Check-In Submission Activity
 public class CheckInFlowActivity extends Activity implements ActionBar.TabListener {
 
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
     SectionsPagerAdapter mSectionsPagerAdapter;
-
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
     ViewPager mViewPager;
     UserInfo mUser;
     private boolean checkInPermitted = true;
@@ -118,16 +106,17 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         setContentView(R.layout.activity_check_in_flow);
 
         // enable ActionBar app icon to behave as action to toggle nav drawer
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        if(getActionBar() != null) {
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setHomeButtonEnabled(true);
+        }
 
-        progressBarHandler = new Handler();
         mUser = DAOManager.get().getUser();
-
         // TODO#BPR_2 allow check-in only if user is a Patient and is logged
         if((mUser != null)
             && (mUser.getUserType().equals(UserType.PATIENT))){
 
+            progressBarHandler = new Handler();
             mBtnGoToPreviousTab = (ImageButton) findViewById(R.id.btn_check_in_goto_previous);
             mBtnGoToNextTab = (ImageButton) findViewById(R.id.btn_check_in_goto_next);
             mBtnSubmit = (ImageButton) findViewById(R.id.btn_check_in_confirm_submission);
@@ -156,6 +145,8 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
             mViewPager = (ViewPager) findViewById(R.id.pager);
             mViewPager.setAdapter(mSectionsPagerAdapter);
 
+
+            //TODO#BPR_7 here we handle through the swiping the visibility of buttons
             // When swiping between different sections, select the corresponding
             // tab. We can also use ActionBar.Tab#select() to do this if we have
             // a reference to the Tab.
@@ -331,7 +322,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         final ProgressDialog ringProgressDialog = ProgressDialog.show(this, "Please wait ...",
                 "Check-In submission in progress ...", true);
         ringProgressDialog.setCancelable(true);
-        new Thread(new Runnable() {
+        new Thread(new Runnable() { //TODO#BPR_8 Check-In saving in background
             @Override
             public void run() {
                 try {

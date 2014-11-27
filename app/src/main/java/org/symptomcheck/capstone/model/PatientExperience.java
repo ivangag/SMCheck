@@ -212,7 +212,7 @@ public class PatientExperience extends Model implements IModelBuilder{
      * Scan all Patients' CheckIns and update local database with Bad Patient Experience
      * @return New Bad Experience(s) not handled yet by Doctor
      */
-    public static List<PatientExperience> checkBadExperiences() {
+    public static List<PatientExperience> computeBadExperiences() {
         //HashMap<Patient, List<CheckIn>> painLevelOnlySevereWarningCheck = new HashMap<Patient, List<CheckIn>>();
         HashMap<Patient, List<CheckIn>> painLevelModerateOrSevereWarningCheck = new HashMap<Patient, List<CheckIn>>();
         HashMap<Patient, List<CheckIn>> feedStatusWarningCheck = new HashMap<Patient, List<CheckIn>>();

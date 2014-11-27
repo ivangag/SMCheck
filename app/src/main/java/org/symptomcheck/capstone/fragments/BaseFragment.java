@@ -108,18 +108,17 @@ public  abstract class BaseFragment extends Fragment {
     }
 
     /**
-     * @param shown
-     * @param animate
-     * @param isEmpty
+     * @param shown if true show the main listview
+     * @param animate activate the animation fade of the view
+     * @param isEmpty used to hide or shown empty List
      */
     protected void setListShown(boolean shown, boolean animate, boolean isEmpty) {
-        //Log.d("BaseFragment",String.format("FragmentType:%d. setListShown:%b. animate:%b. isEmpty:%b.",getFragmentType(),shown,animate,isEmpty));
         if (mListShown == shown) {
             return;
         }
         mListShown = shown;
         if (shown) {
-            if (animate) {
+            if (animate) { //TODO#BPR_7
                 mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
                         getActivity(), android.R.anim.fade_out));
                 if(!isEmpty) {
@@ -134,7 +133,7 @@ public  abstract class BaseFragment extends Fragment {
             mListContainer.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
             mEmptyListContainer.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
         } else {
-            if (animate) {
+            if (animate) {//TODO#BPR_7
                 mProgressContainer.startAnimation(AnimationUtils.loadAnimation(
                         getActivity(), android.R.anim.fade_in));
                 mListContainer.startAnimation(AnimationUtils.loadAnimation(

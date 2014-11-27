@@ -44,9 +44,9 @@ import hirondelle.date4j.DateTime;
  * - (for PATIENTS_ROLE) store only the current patient Data
  * - (for DOCTORS_ROLE) store all the doctor's patients Data
  */
+//TODO#FDAR_1 Patient is identified by FirstName, LastName, unique Medical Card Number, Birthdate, PhoneNumber, E-mail
 @Table(name = "Patients", id = BaseColumns._ID)
 public class Patient extends Model implements IModelBuilder{
-
 
     @Column(name = "patientId", unique = true)
 	private String medicalRecordNumber;

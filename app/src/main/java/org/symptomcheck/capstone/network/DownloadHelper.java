@@ -135,7 +135,6 @@ public class DownloadHelper {
             .setEndpoint(GAE_HTTPS_URL_TRUSTED)
             .setLogLevel(RestAdapter.LogLevel.FULL);
 
-    Executor executor = Executors.newSingleThreadExecutor();
     //JacksonConverter converter = new JacksonConverter(new ObjectMapper());
 
     private static final Gson GSON = new GsonBuilder().addSerializationExclusionStrategy(new ExclusionStrategy() {

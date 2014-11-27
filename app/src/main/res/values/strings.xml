@@ -138,7 +138,7 @@
     <string name="text_ok_go_to_all_experiences">Go To All Experiences Reports</string>
     <string name="checkins_online_header">Checkin Remote Search</string>
     <string name="txt_search_online_running">Searching on the Remote Server…</string>
-    <string name="txt_cards_online_empty_list">Enter Patient Name for starting Online search</string>
+    <string name="txt_cards_online_empty_list">To start Online Search enter Patient FirstName &amp; LastName</string>
     <string name="medical_number">Medical Number</string>
     <string name="unique_doctor_id">Doctor ID</string>
 
@@ -149,6 +149,7 @@
     <string name="txt_card_info_button">click for more info</string>
     <string name="call_other_user_header">Call</string>
     <string name="send_email_other_user_header">Contact via E-mail</string>
+    <string name="txt_checkin_reminder_ticker">It\'s time to submit your periodically Check-In</string>
 
 
 </resources>

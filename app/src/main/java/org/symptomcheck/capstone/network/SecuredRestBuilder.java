@@ -110,7 +110,8 @@ public class SecuredRestBuilder extends RestAdapter.Builder {
                 final Future<?> future  = executor.submit(new Runnable() {
                       @Override
                       public void run() {
-
+                        //TODO#BPR_8 normally this method would be performed in the calling thread even if we use async callback retrofit method
+                        //TODO#BPR_8 then we execute every time the intercept in a background thread in order to avoid network security android exception
                           try {
                               // This code below programmatically builds an OAuth 2.0 password
                               // grant request and sends it to the server.

@@ -259,7 +259,7 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
         final ProgressDialog ringProgressDialog = ProgressDialog.show(getActivity(), FirstName + " " + LastName + " Checkin-Data",
                 getActivity().getResources().getString(R.string.txt_search_online_running), true);
         ringProgressDialog.setCancelable(true);
-        new Thread(new Runnable() {
+        new Thread(new Runnable() { //TODO#BPR_8 here we perform online search in background
             @Override
             public void run() {
                 try {

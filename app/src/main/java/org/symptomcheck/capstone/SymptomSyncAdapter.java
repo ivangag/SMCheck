@@ -66,12 +66,11 @@ import retrofit.RetrofitError;
  * <p>The system calls onPerformSync() via an RPC call through the IBinder object supplied by
  * SyncService.
  */
+//TODO#BPR_8 Sync Adapter implementation spawns a thread to invoke a (potentially long) sync operation.
 class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
     public final String TAG = SymptomSyncAdapter.this.getClass().getSimpleName();
 
     private SymptomManagerSvcApi mSymptomClient;
-
-
     /**
      * Constructor. Obtains handle to content resolver for later use.
      */
@@ -175,15 +174,16 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void checkPatientsBadExperience(){
         String method = new Object(){}.getClass().getEnclosingMethod().getName();
-        Log.i(TAG, method + " Checking...");
-        List<PatientExperience> patientExperiences = PatientExperience.checkBadExperiences();
+        Log.i(TAG, method + "Verify the presence of Bad Experiences...");
+        List<PatientExperience> patientExperiences = PatientExperience.computeBadExperiences();
+        Log.i(TAG, "BadExperienceFound:" + patientExperiences.size());
         patientExperiences = PatientExperience.getAllNotNotified();
         final int count = patientExperiences.size();
-        Log.i(TAG, "BadExperienceFound:" + count);
+        Log.i(TAG, "BadExperienceNotNotifiedYetFound:" + count);
         if(count > 0){
-            final PatientExperience experience = patientExperiences.get(0);
-            final String patientId = experience.getPatientId();
-            Log.i(TAG, "BadExperiencePatient:" + patientId);
+            //final PatientExperience experience = patientExperiences.get(0);
+            //final String patientId = experience.getPatientId();
+            //Log.i(TAG, "BadExperiencePatient:" + patientId);
             for(PatientExperience patientExperience : patientExperiences) {
                 (new Update(PatientExperience.class))
                         .set("notifiedToDoctor = 1")
