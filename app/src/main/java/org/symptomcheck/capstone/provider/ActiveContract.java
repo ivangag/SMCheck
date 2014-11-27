@@ -32,13 +32,11 @@ public class ActiveContract {
     // CLOUD suffix means update cloud data by uploading the "fresh" from the local DB to remote DB (Upload)
     public static final String SYNC_NONE = "SYNC_NONE";
     public static final String SYNC_ALL = "SYNC_ALL";
-    //public static final String SYNC_CLOUD_CHECK_IN = "SYNC_CLOUD_CHECK_IN";
     public static final String SYNC_CHECK_IN = "SYNC_CHECK_IN";
     public static final String SYNC_PATIENTS = "SYNC_PATIENTS";
-    //public static final String SYNC_CLOUD_PATIENTS = "SYNC_REMOTE_PATIENTS";
     public static final String SYNC_DOCTORS = "SYNC_DOCTORS";
-    //public static final String SYNC_CLOUD_DOCTORS = "SYNC_REMOTE_DOCTORS";
     public static final String SYNC_MEDICINES = "SYNC_MEDICINES";
+    public static final String SYNC_DELETE_MEDICINES = "SYNC_DELETE_MEDICINES";
 
     //public static final String SYNC_CLOUD_MEDICINES = "SYNC_REMOTE_MEDICINES";
 

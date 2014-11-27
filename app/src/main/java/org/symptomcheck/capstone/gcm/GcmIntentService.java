@@ -90,12 +90,12 @@ public class GcmIntentService extends IntentService {
     private void handleTriggerSync(String action, UserType userTypeSender) {
         switch (userTypeSender){
             case PATIENT:
-                if(action.equals(GcmConstants.GCM_ACTION_CHECKIN_RX)) {
+                if(action.equals(GcmConstants.GCM_ACTION_CHECKIN_UPDATE)) {
                     SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_CHECK_IN);
                 }
                 break;
             case DOCTOR:
-                if(action.equals(GcmConstants.GCM_ACTION_MEDICATION_RX)){
+                if(action.equals(GcmConstants.GCM_ACTION_MEDICATION_UPDATE)){
                     SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_MEDICINES);
                 }
                 break;

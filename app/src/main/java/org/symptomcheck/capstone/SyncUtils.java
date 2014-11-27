@@ -46,6 +46,8 @@ public class SyncUtils {
     public static final String SYNC_ONLINE_SEARCH_ACTION = "sync_online_search";
 
     public static final String ONLINE_QUERY_TEXT = "online_query_text";
+    public static final String SYNC_ENTITY_ID = "sync_entity_id";
+    public static final String SYNC_OWNER_ENTITY_ID = "sync_owner_entity_id";
 
     /**
      * Create an entry for this application in the system account list, if it isn't already there.
@@ -127,6 +129,23 @@ public class SyncUtils {
      */
     public static void TriggerRefreshPartialCloud(String repoToUpdate){
         Bundle b = new Bundle();
+        b.putString(SYNC_CLOUD_ACTION_PARTIAL,repoToUpdate);
+        ContentResolver.requestSync(
+                GenericAccountService.GetAccount(),      // Sync account
+                ActiveContract.CONTENT_AUTHORITY, // Content authority
+                b);
+    }
+
+    /**
+     * Trigger partial sync in order to upload local pending data to remote Server
+     * @param repoToUpdate constant defines the table / db source to sync
+     * @param patientId
+     * @see org.symptomcheck.capstone.provider.ActiveContract
+     */
+    public static void TriggerRefreshPartialCloud(String repoToUpdate, String entityId, String owner_entity_id){
+        Bundle b = new Bundle();
+        b.putString(SYNC_OWNER_ENTITY_ID,owner_entity_id);
+        b.putString(SYNC_ENTITY_ID,entityId);
         b.putString(SYNC_CLOUD_ACTION_PARTIAL,repoToUpdate);
         ContentResolver.requestSync(
                 GenericAccountService.GetAccount(),      // Sync account

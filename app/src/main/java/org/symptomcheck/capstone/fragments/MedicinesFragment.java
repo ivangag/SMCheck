@@ -465,13 +465,15 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
     public static class AlertMedicationDeleteFragment extends DialogFragment {
 
         public static AlertMedicationDeleteFragment newInstance(
-                int title,String message, String medicationName, String productId, Long baseId) {
+                int title,String message, String medicationName, String productId,
+                Long baseId, String patientId) {
             AlertMedicationDeleteFragment frag = new AlertMedicationDeleteFragment();
             Bundle args = new Bundle();
             args.putInt("title", title);
             args.putString("message", message);
             args.putString("medication", medicationName);
             args.putString("productId", productId);
+            args.putString("patientId", patientId);
             args.putLong("baseId", baseId);
             frag.setArguments(args);
             return frag;
@@ -483,6 +485,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             final String message = getArguments().getString("message");
             final String medicationName = getArguments().getString("medication");
             final String productId = getArguments().getString("productId");
+            final String patientId = getArguments().getString("patientId");
             final Long id = getArguments().getLong("baseId");
 
             return new AlertDialog.Builder(getActivity())
@@ -493,8 +496,8 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {
-                                    //PainMedication.delete(PainMedication.class,id);
-                                    SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_MEDICINES);
+                                    PainMedication.delete(PainMedication.class,id);
+                                    SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_DELETE_MEDICINES,productId,patientId);
                                     Toast.makeText(getActivity(),"Medication "
                                             + medicationName + " (" + id + ")" + " removed successfully",Toast.LENGTH_SHORT).show();
 
@@ -586,12 +589,13 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                     final int id = item.getItemId();
                     final String mMedicineName = ((MedicineCursorCard) card).mainTitle;
                     if (id == R.id.menu_pop_delete_medicine) {
-                        AlertMedicationDeleteFragment.newInstance(R.id.txt_medication_delete,
-                                "Are you sure to delete " + mMedicineName + " ?", mMedicineName,
-                                painMedication.getProductId(), painMedication.getId())
-                                .show(getFragmentManager(), "Alert_Medication_Delete");
+                        if(painMedication != null) {
+                            AlertMedicationDeleteFragment.newInstance(R.id.txt_medication_delete,
+                                    "Are you sure to delete " + mMedicineName + " ?", mMedicineName,
+                                    painMedication.getProductId(), painMedication.getId(), painMedication.getPatientMedicalNumber())
+                                    .show(getFragmentManager(), "Alert_Medication_Delete");
+                        }
                     }
-                    //Toast.makeText(getContext(), "Click on card="+card.getId()+" item=" +  item.getTitle(), Toast.LENGTH_SHORT).show();
                 }
             });
             header.setPopupMenuPrepareListener(new CardHeader.OnPrepareCardHeaderPopupMenuListener() {
@@ -647,12 +651,30 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             final int medicineId = cursor.getInt(ID_COLUMN);
             card.setId(""+ medicineId);
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.MEDICINES_COLUMNS.NAME));
+            if(painMedication != null) {
+                card.mainHeader = getString(R.string.medicine_header);
 
-            card.mainHeader = /* mPatientOwner.getFirstName() + " " + mPatientOwner.getLastName() + " "  +*/ getString(R.string.medicine_header);
-            card.secondaryTitle = "Added on " + (painMedication.getLastTakingDateTime().equals(Constants.STRINGS.EMPTY)
-                                        ? "NA" : DateTimeUtils.convertEpochToHumanTime(painMedication.getLastTakingDateTime(),"YYYY-MM-DD hh:mm"));
+                card.secondaryTitle = "Added on " + (painMedication.getLastTakingDateTime().equals(Constants.STRINGS.EMPTY)
+                        ? "NA" : DateTimeUtils.convertEpochToHumanTime(painMedication.getLastTakingDateTime(), "YYYY-MM-DD hh:mm"));
+            }else {
+                card.mainHeader = "Medicine is deleting...";
+            }
             card.resourceIdThumb=R.drawable.ic_medicine;
 
+        }
+
+        private void removeCard(Card card) {
+
+            //Use this code to delete getItemsQuestion on DB
+/*
+            ContentResolver resolver = getActivity().getContentResolver();
+            long noDeleted = resolver.delete
+                    (CardCursorContract.CardCursor.CONTENT_URI,
+                            CardCursorContract.CardCursor.KeyColumns.KEY_ID + " = ? ",
+                            new String[]{card.getId()});
+
+            mAdapter.notifyDataSetChanged();
+*/
         }
     }
     //-------------------------------------------------------------------------------------------------------------

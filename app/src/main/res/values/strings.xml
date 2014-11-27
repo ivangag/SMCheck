@@ -49,7 +49,7 @@
     <string name="patients_header">Patients</string>
     <string name="doctor_header">Doctor</string>
     <string name="error_login_header">Login Error\n%s</string>
-    <string name="checkin_header">Check-In</string>
+    <string name="checkin_header">View Check-In</string>
     <string name="action_search">Search</string>
     <string name="share">Share</string>
     <string name="action_take_photo">Take Throat Picture</string>
@@ -65,7 +65,7 @@
     <string name="alert_dialog_cancel">Cancel</string>
     <string name="alert_dialog_title_checkin_submission">Do you confirm this CheckIn?</string>
     <string name="title_check_in_confirmation">Click here to confirm Check-In</string>
-    <string name="medicines_header">Medicines</string>
+    <string name="medicines_header">View Medicines</string>
     <string name="title_activity_settings">Symptom Management Settings</string>
 
     <!-- Preference resources -->
@@ -147,6 +147,8 @@
     <string name="severe_or_moderate">Severe or Moderate Pain</string>
     <string name="cannot_eat">Cannot Eat Feed</string>
     <string name="txt_card_info_button">click for more info</string>
+    <string name="call_other_user_header">Call</string>
+    <string name="send_email_other_user_header">Contact via E-mail</string>
 
 
 </resources>

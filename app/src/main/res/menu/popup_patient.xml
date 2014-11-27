@@ -4,11 +4,21 @@
     <item android:id="@+id/menu_pop_open_check_ins"
         android:title="@string/checkin_header"
         android:orderInCategory="1"
-        android:showAsAction="always"
+        android:showAsAction="ifRoom"
         tools:ignore="AppCompatResource" />
     <item android:id="@+id/menu_pop_open_medicines"
         android:title="@string/medicines_header"
         android:orderInCategory="2"
-        android:showAsAction="always"
+        android:showAsAction="ifRoom"
+        tools:ignore="AppCompatResource" />
+    <item android:id="@+id/menu_pop_call_patient"
+        android:title="@string/call_other_user_header"
+        android:orderInCategory="2"
+        android:showAsAction="ifRoom"
+        tools:ignore="AppCompatResource" />
+    <item android:id="@+id/menu_pop_send_email_patient"
+        android:title="@string/send_email_other_user_header"
+        android:orderInCategory="2"
+        android:showAsAction="ifRoom"
         tools:ignore="AppCompatResource" />
 </menu>

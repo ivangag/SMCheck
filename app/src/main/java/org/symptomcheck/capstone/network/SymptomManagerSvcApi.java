@@ -105,6 +105,12 @@ public interface SymptomManagerSvcApi {
 
 
     //----------------- DOCTOR methods ----------------- //
+
+    @DELETE(PATIENT_SVC_PATH + "/{medicalRecordNumber}/medications/delete/")
+    public boolean deletePainMedication(
+            @Path("medicalRecordNumber") String medicalCardNumber,
+            @Query("medicineProductId") String medicineProductId);
+
     @GET(DOCTOR_SVC_PATH + "/{uniqueDoctorID}/patients/checkins/searchByPatientName")
     public Collection<CheckIn> findCheckInsByPatientName(
             @Path("uniqueDoctorID") String uniqueDoctorID,

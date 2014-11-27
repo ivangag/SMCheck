@@ -297,7 +297,7 @@ public class MainActivity extends Activity implements ICardEventListener {
                 fragment = CheckInFragment.newInstance(ownerId);
                 break;
             case PATIENT_ONLINE_CHECKINS:
-                fragment = CheckInOnlineFragment.newInstance(Constants.STRINGS.EMPTY);
+                fragment = CheckInOnlineFragment.newInstance();
                 break;
             case PATIENT_DOCTORS:
                 fragment = new DoctorFragment();
@@ -408,7 +408,6 @@ public class MainActivity extends Activity implements ICardEventListener {
     }
 
     private void doLogout() {
-
         DAOManager.get().wipeAllData();
         UserPreferencesManager.get().setLogged(this, false);
         finish();
@@ -549,7 +548,6 @@ public class MainActivity extends Activity implements ICardEventListener {
 
 
     String urlPicassoTest = "http://chart.apis.google.com/chart?cht=p3&chs=500x200&chd=e:TNTNTNGa&chts=000000,16&chtt=A+Better+Web&chl=Hello|Hi|anas|Explorer&chco=FF5533,237745,9011D3,335423&chdl=Apple|Mozilla|Google|Microsoft";
-
     String getUrlPicassoTest2 = "http://i.imgur.com/DvpvklR.png";
     String urlDoctorTest = "https://cdn0.iconfinder.com/data/icons/customicondesign-office6-shadow/256/doctor.png";
 
@@ -614,18 +612,10 @@ public class MainActivity extends Activity implements ICardEventListener {
             */
         }
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             openSettings();
             return true;
         }
-
-        /*
-        if (id == R.id.action_opencards) {
-            openFragment();
-            return true;
-        }*/
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -774,7 +764,7 @@ public class MainActivity extends Activity implements ICardEventListener {
 
     @Override
     public void onBackPressed() {
-        if(mFragmentBackStackCount == 1){
+        if(mFragmentBackStackCount >= 1){
             super.onBackPressed();
         }else{
             askForExit(AlertExitFragment.newInstance());

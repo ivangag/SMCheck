@@ -70,6 +70,15 @@ public class PatientExperience extends Model implements IModelBuilder{
 
     }
 
+
+    public int getNotifiedToDoctor() {
+        return notifiedToDoctor;
+    }
+
+    public void setNotifiedToDoctor(int notifiedToDoctor) {
+        this.notifiedToDoctor = notifiedToDoctor;
+    }
+
     public String getStartExperienceTime() {
         return startExperienceTime;
     }
@@ -187,9 +196,10 @@ public class PatientExperience extends Model implements IModelBuilder{
                 .append("Start: ").append(DateTimeUtils.convertEpochToHumanTime(startExperienceTime, Constants.TIME.DEFAULT_FORMAT))
                 .append("\n-------------------------\n")
                 .append("End: ").append(DateTimeUtils.convertEpochToHumanTime(endExperienceTime, Constants.TIME.DEFAULT_FORMAT))
-                .append("\n-------------------------\n")
-                .append("seenByDoctor? ").append(this.checkedByDoctor == 0 ? "NO" : "YES")
-                .append("\n-------------------------\n");
+                //.append("\n-------------------------\n")
+                //.append("seenByDoctor? ").append(this.checkedByDoctor == 0 ? "NO" : "YES")
+                //.append("\n-------------------------\n");
+        ;
         return sb.toString();
     }
 
@@ -203,10 +213,10 @@ public class PatientExperience extends Model implements IModelBuilder{
      * @return New Bad Experience(s) not handled yet by Doctor
      */
     public static List<PatientExperience> checkBadExperiences() {
-        HashMap<Patient, List<CheckIn>> painLevelOnlySevereWarningCheck = new HashMap<Patient, List<CheckIn>>();
+        //HashMap<Patient, List<CheckIn>> painLevelOnlySevereWarningCheck = new HashMap<Patient, List<CheckIn>>();
         HashMap<Patient, List<CheckIn>> painLevelModerateOrSevereWarningCheck = new HashMap<Patient, List<CheckIn>>();
         HashMap<Patient, List<CheckIn>> feedStatusWarningCheck = new HashMap<Patient, List<CheckIn>>();
-        List<CheckIn> painPartialLevelPrimaryWarningList = Lists.newArrayList();
+        //List<CheckIn> painPartialLevelPrimaryWarningList = Lists.newArrayList();
         List<CheckIn> painPartialLevelSecondaryWarningList = Lists.newArrayList();
         List<CheckIn> feedPartialLevelWarningList = Lists.newArrayList();
         boolean checkPainLevelPrimaryWarning;
@@ -216,7 +226,7 @@ public class PatientExperience extends Model implements IModelBuilder{
         PainLevel painLevel;
         FeedStatus feedStatus;
         for (Patient patient : patients) {
-            painPartialLevelPrimaryWarningList.clear();
+            //painPartialLevelPrimaryWarningList.clear();
             feedPartialLevelWarningList.clear();
             painPartialLevelSecondaryWarningList.clear();
 
@@ -228,13 +238,14 @@ public class PatientExperience extends Model implements IModelBuilder{
                     feedStatus = checkIns.get(idx).getIssueFeedStatus();
                     checkPainLevelPrimaryWarning = painLevel.equals(painLevelPrimaryToCheck);
                     // check only severe pain
-                    if(checkPainLevelPrimaryWarning){
+                    /*if(checkPainLevelPrimaryWarning){
                         painPartialLevelPrimaryWarningList.add(checkIns.get(idx));
                     }else{
                         if(painPartialLevelPrimaryWarningList.size() > 1)
                             painLevelOnlySevereWarningCheck.put(keyPatient, Lists.newArrayList(painPartialLevelPrimaryWarningList));
                         painPartialLevelPrimaryWarningList.clear();
-                    }
+                    }*/
+
                     //check severe or moderate pain
                     checkPainLevelSecondaryWarning = painLevel.equals(painLevelPrimaryToCheck)
                             || painLevel.equals(painLevelSecondaryToCheck);
@@ -257,8 +268,8 @@ public class PatientExperience extends Model implements IModelBuilder{
                     }
 
                 }
-                if(painPartialLevelPrimaryWarningList.size() > 1)
-                    painLevelOnlySevereWarningCheck.put(keyPatient, Lists.newArrayList(painPartialLevelPrimaryWarningList));
+                /*if(painPartialLevelPrimaryWarningList.size() > 1)
+                    painLevelOnlySevereWarningCheck.put(keyPatient, Lists.newArrayList(painPartialLevelPrimaryWarningList));*/
                 if(painPartialLevelSecondaryWarningList.size() > 1)
                     painLevelModerateOrSevereWarningCheck.put(keyPatient, Lists.newArrayList(painPartialLevelSecondaryWarningList));
                 if(feedPartialLevelWarningList.size() > 1)
@@ -326,11 +337,4 @@ public class PatientExperience extends Model implements IModelBuilder{
         return patientExperiences;
     }
 
-    public int getNotifiedToDoctor() {
-        return notifiedToDoctor;
-    }
-
-    public void setNotifiedToDoctor(int notifiedToDoctor) {
-        this.notifiedToDoctor = notifiedToDoctor;
-    }
 }

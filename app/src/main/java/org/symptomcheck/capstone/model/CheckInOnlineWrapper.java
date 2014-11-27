@@ -129,34 +129,12 @@ public class CheckInOnlineWrapper extends Model implements IModelBuilder {
 
     }
 
-    public static CheckInOnlineWrapper createCheckIn(PainLevel painLevel,
-                                        FeedStatus feedStatus,
-                                        Map<PainMedication,String> Medications) {
-
-        //final Calendar calendar = Calendar.getInstance();
-        Long timestamp = DateTime.now(TimeZone.getTimeZone(Constants.TIME.GMT00)).getMilliseconds(TimeZone.getTimeZone(Constants.TIME.GMT00));
-        //Long timestamp = calendar.getTimeInMillis();
-        CheckInOnlineWrapper checkIn = new CheckInOnlineWrapper(timestamp.toString(), painLevel, feedStatus);
-        checkIn.setUnitId(UUID.randomUUID().toString());
-        for (PainMedication medication : Medications.keySet()) {
-            QuestionOnlineWrapper question = new QuestionOnlineWrapper(String.format("Did you Take %s ?",
-                    medication.getMedicationName()),
-                    Medications.get(medication),
-                    QuestionType.Medication, medication.getLastTakingDateTime());
-            checkIn.addQuestions(question);
-        }
-        return checkIn;
-    }
-
-
     public static String getDetailedInfo(CheckInOnlineWrapper checkInOnline){
         StringBuilder sb = new StringBuilder();
         sb.append("Pain Level: ").append(checkInOnline.getIssuePainLevel())
                 .append("\n----------------------------\n")
                 .append("Feed Status: ").append(checkInOnline.getIssueFeedStatus())
         .append("\n----------------------------\n");
-
-        //List<QuestionOnlineWrapper> questions = useStoredQuestions ? checkIn.getItemsQuestion() : checkIn.getQuestions();
         List<QuestionOnlineWrapper> questions = checkInOnline.getItemsQuestion();
         for (QuestionOnlineWrapper question : questions) {
             final String time = question.getMedicationTime();
@@ -166,7 +144,6 @@ public class CheckInOnlineWrapper extends Model implements IModelBuilder {
                     .append("\n----------------------------\n");
 
         }
-
         return sb.toString();
     }
 
@@ -187,57 +164,6 @@ public class CheckInOnlineWrapper extends Model implements IModelBuilder {
                         //.where("Category = ?", category.getId())
                         //.orderBy("Name ASC")
                 .execute();
-    }
-
-    public static List<CheckInOnlineWrapper> getAllToSync() {
-        // This is how you execute a query
-        return new Select()
-                .from(CheckInOnlineWrapper.class)
-                        .where("needSync = ?", 1)
-                        //.orderBy("Name ASC")
-                .execute();
-    }
-    public String getIssueDateTimeClear() {
-        final String savedTime = this.getIssueDateTime();
-        String medicationTime;
-        if(savedTime != null &&
-                !savedTime.isEmpty()){
-            medicationTime = DateTime.forInstant(Long.valueOf(savedTime),
-                    TimeZone.getDefault()).format("YYYY-MM-DD hh:mm");
-        }
-        else{
-            medicationTime = Constants.STRINGS.EMPTY;
-        }
-        return medicationTime;
-    }
-
-    public static List<CheckInOnlineWrapper> getAllByPatient(Patient patient) {
-        // This is how you execute a query
-        return new Select()
-                .from(CheckInOnlineWrapper.class)
-                        .where("Patient = ?", patient.getId())
-                        .orderBy("issueDateTime DESC")
-                .execute();
-    }
-
-    public static int getCountAllFromDate(String time){
-        return new Select()
-                .from(CheckInOnlineWrapper.class)
-                .where("issueDateTime >= ?", time)
-                .execute().size();
-    }
-
-    public static int getCountInThisDay(){
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        long millisecondsFromMidNight = calendar.getTimeInMillis();
-        return getCountAllFromDate(String.valueOf(millisecondsFromMidNight));
-    }
-    public String getUnitId() {
-        return unitId;
     }
 
     public void setUnitId(String unitId) {

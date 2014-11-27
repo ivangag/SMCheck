@@ -336,7 +336,6 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
             PatientCursorCard card = new PatientCursorCard(super.getContext());
             setCardFromCursor(card,cursor);
 
-
             //Create a CardHeader
             CardHeader header = new CardHeader(getActivity());
 
@@ -419,8 +418,8 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
                         CardCursorContract.CardCursor.KeyColumns.KEY_ID + " = ? ",
         new String[]{card.getId()});
 
-        //mAdapter.notifyDataSetChanged();*/
-
+        mAdapter.notifyDataSetChanged();
+*/
     }
 
     //-------------------------------------------------------------------------------------------------------------

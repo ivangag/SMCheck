@@ -119,8 +119,8 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         if(!accessToken.isEmpty()) {
             mSymptomClient = DownloadHelper.get().setAccessToken(accessToken).withRetrofitClient(getContext());
 
-            String online_to_search_query = Constants.STRINGS.EMPTY;
-            String[] online_to_search_query_list = new String[]{};
+            String entity_id = extras.getString(SyncUtils.SYNC_ENTITY_ID, Constants.STRINGS.EMPTY);
+            String owner_entity_id = extras.getString(SyncUtils.SYNC_OWNER_ENTITY_ID, Constants.STRINGS.EMPTY);
             String active_repo_local_to_sync;
             String active_repo_cloud_to_sync;
 
@@ -139,9 +139,6 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
             }else {
                 active_repo_local_to_sync = extras.getString(SyncUtils.SYNC_LOCAL_ACTION_PARTIAL, ActiveContract.SYNC_NONE);
                 active_repo_cloud_to_sync = extras.getString(SyncUtils.SYNC_CLOUD_ACTION_PARTIAL, ActiveContract.SYNC_NONE);
-                //active_repo_online_to_search = extras.getString(SyncUtils.SYNC_ONLINE_SEARCH_ACTION, ActiveContract.SYNC_NONE);
-                //online_to_search_query = extras.getString(SyncUtils.ONLINE_QUERY_TEXT, Constants.STRINGS.EMPTY);
-                //online_to_search_query_list = extras.getStringArray(SyncUtils.ONLINE_QUERY_TEXT);
             }
 
             final UserInfo user = DAOManager.get().getUser();
@@ -149,7 +146,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
                 Log.i(TAG, String.format("syncing: User:%s - Local:%s - Cloud:%s",
                         user.toString(),active_repo_local_to_sync,active_repo_cloud_to_sync));
                 if (user.getLogged()) {
-                    updateCloudData(active_repo_cloud_to_sync, user);
+                    updateCloudData(active_repo_cloud_to_sync, user,owner_entity_id,entity_id);
                     updateLocalData(active_repo_local_to_sync, user);
                     handleOtherUserSpecificTasks(user.getUserType());
 
@@ -205,8 +202,9 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
      * Basically we have to upload new Check-In submitted from the Patient
      * and Patient Medications list updated from the Doctor
      * @param sync sync type to be performed
+     * @param
      */
-    private synchronized void updateCloudData(String sync, UserInfo user) {
+    private synchronized void updateCloudData(String sync, UserInfo user, String owner_entity_id, String entity_id) {
         String method = new Object(){}.getClass().getEnclosingMethod().getName();
         Log.i(TAG, method);
         //if(sync.equals(ActiveContract.SYNC_NONE)) {
@@ -265,6 +263,22 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
                             Log.e(TAG,"Error " + method + e.getMessage());
                         }
                     }
+                }
+                if(sync.equals(ActiveContract.SYNC_DELETE_MEDICINES)){
+                    try {
+                        final boolean deleted =  mSymptomClient.deletePainMedication(owner_entity_id, entity_id);
+                        Log.d(TAG, method + String.format("deletePainMedication:%s (of %s)=> %b ",entity_id,owner_entity_id,deleted));
+                    }catch (RetrofitError error){
+                        DownloadHelper.get().handleRetrofitError(getContext(),error);
+                        Log.e(TAG, method + "::deletePainMedication error: " +  error.getCause().getMessage() +
+                                "; Status: " + error.getResponse().getStatus());
+                    }catch (Exception e){
+                        if(e.getCause().getClass().equals(RetrofitError.class)){
+                            DownloadHelper.get().handleRetrofitError(getContext(), (RetrofitError) e.getCause());
+                        }
+                        Log.e(TAG,"Error " + method + e.getCause().getMessage());
+                    }
+
                 }
                 break;
 
