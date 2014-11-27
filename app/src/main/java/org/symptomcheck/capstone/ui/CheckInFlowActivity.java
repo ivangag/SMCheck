@@ -69,7 +69,7 @@ import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.NotificationHelper;
 
 import hirondelle.date4j.DateTime;
-
+//TODO#BPR_3 Check-In Submission Activity
 public class CheckInFlowActivity extends Activity implements ActionBar.TabListener {
 
     /**
@@ -124,6 +124,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         progressBarHandler = new Handler();
         mUser = DAOManager.get().getUser();
 
+        // TODO#BPR_2 allow check-in only if user is a Patient and is logged
         if((mUser != null)
             && (mUser.getUserType().equals(UserType.PATIENT))){
 
@@ -341,7 +342,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                         public void run() {
                             if (checkinRes) {
                                 //re-schedule the next check-in
-                                SymptomAlarmRequest.get().setAlarm(getApplicationContext(), SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
+                                SymptomAlarmRequest.get().setAlarm(getApplicationContext(), SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER,false);
                                 SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_CHECK_IN);
                                 finish();
                                 Toast.makeText(getApplicationContext(), "Check-In Submitted Correctly", Toast.LENGTH_LONG).show();

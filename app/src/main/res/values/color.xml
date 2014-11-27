@@ -5,10 +5,10 @@
     <!-- color card -->
     <color name="card_background_orange">#FFBB33</color>
     <color name="card_background_orange_light">#FFDD44</color>
-    <color name="demoextra_card_background_color2">#98CC00</color>
+    <color name="card_background_green">#98CC00</color>
     <color name="demoextra_card_background_color3">#A966CC</color>
     <color name="demoextra_card_background_color4">#33B4E4</color>
-    <color name="demoextra_card_background_color5">#FF4343</color>
+    <color name="card_background_red">#FF4343</color>
     <color name="demoextra_card_background_color6">#A11143</color>
 </resources>
 

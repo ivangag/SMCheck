@@ -19,16 +19,16 @@ import org.apache.http.impl.client.HttpClients;
  */
 public class CustomHttpsClient {
 
+    //TODO#BPR_5 Http Client used to interacts over the network via HTTP(S)
 	public static HttpClient createUnsafeClient() {
 		try {
 			SSLContextBuilder builder = new SSLContextBuilder();
 			builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
 			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
 					builder.build());
-			CloseableHttpClient httpclient = HttpClients.custom()
-					.setSSLSocketFactory(sslsf).build();
 
-			return httpclient;
+            return HttpClients.custom()
+                    .setSSLSocketFactory(sslsf).build();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

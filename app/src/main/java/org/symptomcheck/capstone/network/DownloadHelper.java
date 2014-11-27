@@ -67,14 +67,6 @@ public class DownloadHelper {
         return downloadHelper;
     }
 
-    /*
-    public void setUser(UserInfo userInfo) {
-        this.userInfo = userInfo;
-    }
-
-    public UserInfo getUser() {
-        return userInfo;
-    }*/
 
     /**
      *
@@ -128,11 +120,8 @@ public class DownloadHelper {
             return error;
         }
     }
-    private static final String GAE_URL_TRUSTED = "https://spring-mvc-capstone-test.appspot.com";
-    private static final String TEST_URL_REMOTE_TRUSTED = "https://spring-mvc-capstone-test.appspot.com";
+    private static final String GAE_HTTPS_URL_TRUSTED = "https://spring-mvc-capstone-test.appspot.com";
 
-    private static final String USERNAME = "admin";
-    private static final String PASSWORD = "pass";
     private final String CLIENT_PATIENT_ID = "patient";
     private static final String CLIENT_DOCTOR_ID = "doctor";
     static ErrorRecorder error = new ErrorRecorder();
@@ -140,10 +129,10 @@ public class DownloadHelper {
     private SymptomManagerSvcApi symptomManagerSvcClient;
 
     SecuredRestBuilder builder =  new SecuredRestBuilder()
-            .setLoginEndpoint(GAE_URL_TRUSTED + SymptomManagerSvcApi.TOKEN_PATH)
+            .setLoginEndpoint(GAE_HTTPS_URL_TRUSTED + SymptomManagerSvcApi.TOKEN_PATH)
             .setClientId(this.CLIENT_PATIENT_ID)
             .setClient(new ApacheClient(CustomHttpsClient.createUnsafeClient()))
-            .setEndpoint(GAE_URL_TRUSTED)
+            .setEndpoint(GAE_HTTPS_URL_TRUSTED)
             .setLogLevel(RestAdapter.LogLevel.FULL);
 
     Executor executor = Executors.newSingleThreadExecutor();
@@ -162,6 +151,7 @@ public class DownloadHelper {
     }).create();
 
 
+    //TODO#BPR_4 Instantiate Retrofit Client
     public synchronized SymptomManagerSvcApi withRetrofitClient(Context context) {
         if(symptomManagerSvcClient == null) {
             symptomManagerSvcClient =

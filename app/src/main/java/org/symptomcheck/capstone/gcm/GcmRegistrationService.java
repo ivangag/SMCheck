@@ -22,12 +22,8 @@ import java.util.List;
 
 import retrofit.RetrofitError;
 
-/**
- * An {@link IntentService} subclass for handling asynchronous task requests in
- * a service on a separate handler thread.
- * <p/>
- * helper methods.
- */
+
+//TODO#BPR_3 IntentService for handling asynchronous task requests in
 public class GcmRegistrationService extends IntentService {
 
     private static final String TAG = "GcmRegistrationService";
@@ -181,6 +177,7 @@ public class GcmRegistrationService extends IntentService {
         List<String> gcmIds = Lists.newArrayList();
         try {
             if (user != null) {
+                //TODO#BPR_1
                 if (user.getUserType().equals(UserType.PATIENT)) {
                     Patient patient = DownloadHelper.get().withRetrofitClient(getApplicationContext()).findPatientByMedicalRecordNumber(user.getUserIdentification());
                     if (patient != null)

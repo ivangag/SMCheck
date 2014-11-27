@@ -45,16 +45,12 @@ public class CustomExpandCard extends CardExpand {
     }
 
     //You can set you properties here (example buttons visibility)
-
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
 
         if (view == null) return;
-
         //Retrieve TextView elements
         TextView tx1 = (TextView) view.findViewById(R.id.carddemo_expand_text);
-
-
         if(tx1 != null)
         {
             tx1.setText(this.mRawInfo);

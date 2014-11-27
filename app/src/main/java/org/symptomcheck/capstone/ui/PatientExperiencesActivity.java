@@ -38,7 +38,8 @@ import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
 
 import java.util.List;
-
+//TODO#BPR_3 Patient Bad Experience Activity
+//TODO#BPR_6
 public class PatientExperiencesActivity extends Activity {
 
     public final static String PATIENT_ID = "patient_id";

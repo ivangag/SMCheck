@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+//TODO#BPR_3 Broadcast receiver called when Patient dismisses Check-In notification. It re-schedules Check-In in the next minutes
 public class CheckinDismissingReceiver extends BroadcastReceiver {
     public CheckinDismissingReceiver() {
     }
@@ -13,6 +14,6 @@ public class CheckinDismissingReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         // an Intent broadcast.
         Log.d("CheckinDismissingReceiver","Re-scheduling of dismissed Check-In...");
-        SymptomAlarmRequest.get().setAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
+        SymptomAlarmRequest.get().setAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER,true);
     }
 }

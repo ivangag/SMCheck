@@ -132,6 +132,7 @@
             android:name="AA_SERIALIZERS"
             android:value="org.symptomcheck.capstone.mode.StringArraySerializer" />
 
+        <!-- //TODO#BPR_3 ContentProvider exposed by ActiveAndroid DAO library  -->
         <provider
             android:name="com.activeandroid.content.ContentProvider"
             android:authorities="org.symptomcheck.capstone"

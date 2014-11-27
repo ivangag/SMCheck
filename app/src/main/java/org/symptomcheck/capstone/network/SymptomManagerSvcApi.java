@@ -36,14 +36,9 @@ import retrofit.http.PUT;
 import retrofit.http.Path;
 import retrofit.http.Query;
 
+//TODO#BPR_4 Api Interface implemented by Retrofit and used to communicate via Http with remote Java Server Spring-based
+//TODO#BPR_5 All Api use HTTP protocol and perform requests to a REST URL path
 public interface SymptomManagerSvcApi {
-    public static final String PATIENT_ID_1 = "patient001";
-    public static final String PATIENT_ID_2 = "patient002";
-    public static final String PATIENT_ID_3 = "patient003";
-    public static final String PATIENT_ID_4= "patient004";
-
-    public static final String DOCTOR_ID_1 = "doctor001";
-    public static final String DOCTOR_ID_2 = "doctor002";
 
     public static final String DOCTOR_SEARCH_BY_PATIENT_PATH = SymptomManagerSvcApi.DOCTOR_SVC_PATH + "/search/findByPatient";
 

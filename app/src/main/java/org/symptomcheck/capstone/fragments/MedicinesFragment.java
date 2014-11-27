@@ -83,11 +83,8 @@ import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
 import it.gmariotti.cardslib.library.internal.base.BaseCard;
 import it.gmariotti.cardslib.library.view.CardListView;
 
-/**
- * List with Cursor Example
- *
- * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
- */
+
+//TODO#BPR_6 Medicines Fragment Interface Screen
 public class MedicinesFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>, IFragmentListener {
 
     MedicinesCursorCardAdapter mAdapter;
@@ -163,6 +160,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
         final UserInfo userInfo = DAOManager.get().getUser();
         if(null != userInfo) {
+            //TODO#BPR_1
             menuItemAddMedicine.setVisible(userInfo.getUserType().equals(UserType.DOCTOR));
         }
 
@@ -274,6 +272,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
     }
 
+    //TODO#BPR_3 Create Cursor over ContentProvider
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(getActivity(),
@@ -455,9 +454,6 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                     );
                     dialog.dismiss();
                 }
-
-                //Log.i("Medication", "New Medication inserted: " + entry_medication_name.getText().toString());
-
             }
         });
     }
@@ -498,8 +494,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                                                     int whichButton) {
                                     PainMedication.delete(PainMedication.class,id);
                                     SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_DELETE_MEDICINES,productId,patientId);
-                                    Toast.makeText(getActivity(),"Medication "
-                                            + medicationName + " (" + id + ")" + " removed successfully",Toast.LENGTH_SHORT).show();
+                                    //Toast.makeText(getActivity(),"Medication " + medicationName + " (" + id + ")" + " removed successfully",Toast.LENGTH_SHORT).show();
 
                                 }
                             })
@@ -507,8 +502,6 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {
-
-                                    //Toast.makeText(getActivity(),"Medication removed successfully",Toast.LENGTH_SHORT);
                                 }
                             }).create();
         }
@@ -522,7 +515,6 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             @Override
             public void run() {
                 try {
-                    //waitForDebugger();
                     final boolean painMedicationRes = savePainMedication(medication);
                     if (painMedicationRes) {
                         SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_MEDICINES);
@@ -604,6 +596,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                     MenuItem item = popupMenu.getMenu().findItem(R.id.menu_pop_delete_medicine);
                     final UserInfo userInfo = DAOManager.get().getUser();
                     if(null != userInfo) {
+                        //TODO#BPR_1
                         item.setVisible(userInfo.getUserType().equals(UserType.DOCTOR));
                     }
                     return true;
@@ -623,13 +616,6 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                 @Override
                 public void onClick(Card card, View view) {
                     //Toast.makeText(getContext(), "Card id=" + card.getId() + " Title=" + card.getCardHeader().getTitle(), Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            card.setOnExpandAnimatorEndListener(new Card.OnExpandAnimatorEndListener() {
-                @Override
-                public void onExpandEnd(Card card) {
-                    //Toast.makeText(getContext(), "Card Expanded id=" + card.getId(),Toast.LENGTH_SHORT).show();
                 }
             });
 

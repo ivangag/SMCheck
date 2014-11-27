@@ -49,7 +49,7 @@
     <string name="patients_header">Patients</string>
     <string name="doctor_header">Doctor</string>
     <string name="error_login_header">Login Error\n%s</string>
-    <string name="checkin_header">View Check-In</string>
+    <string name="checkin_header">Check-In Data</string>
     <string name="action_search">Search</string>
     <string name="share">Share</string>
     <string name="action_take_photo">Take Throat Picture</string>

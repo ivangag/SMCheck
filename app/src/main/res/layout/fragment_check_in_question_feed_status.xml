@@ -26,7 +26,7 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:gravity="center"
-                android:text="Feeed Status Question ?"
+                android:text="Feed Status Question ?"
                 style="@style/Theme.Capstone"
                 android:textColor="@android:color/white"
                 android:background="@drawable/ab_solid_capstone" />

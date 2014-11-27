@@ -61,11 +61,7 @@ import it.gmariotti.cardslib.library.internal.CardThumbnail;
 import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
 import it.gmariotti.cardslib.library.view.CardListView;
 
-/**
- * List with Cursor Example
- *
- * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
- */
+//TODO#BPR_6 Doctor Fragment Interface Screen
 public class DoctorFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>
 ,IFragmentListener {
 
@@ -189,6 +185,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
         mListView = (CardListView) getActivity().findViewById(R.id.card_doctors_list_cursor);
         final UserInfo user = DAOManager.get().getUser();
 
+        //TODO#BPR_1
         if(user.getUserType().equals(UserType.PATIENT)){
             mPatientOwner = Patient.getByMedicalNumber(user.getUserIdentification());
         }
@@ -209,6 +206,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
 
     }
 
+    //TODO#BPR_3 Create Cursor over ContentProvider
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 

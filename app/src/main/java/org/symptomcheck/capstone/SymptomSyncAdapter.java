@@ -160,6 +160,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void handleOtherUserSpecificTasks(UserType userType){
+        //TODO#BPR_1
         switch (userType){
             case PATIENT:
                 break;
@@ -208,6 +209,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         String method = new Object(){}.getClass().getEnclosingMethod().getName();
         Log.i(TAG, method);
         //if(sync.equals(ActiveContract.SYNC_NONE)) {
+        //TODO#BPR_1
         switch (user.getUserType()) {
                // if PATIENT
             // 1) look for Check-In to upload N.B Check-in are "marked" with a needSync field set to true
@@ -219,7 +221,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
                     for (CheckIn checkIn : checkIns) {
                         checkIn.setQuestions(Question.getAll(checkIn));
                         try {
-                            mSymptomClient.addCheckIn(user.getUserIdentification(), checkIn);
+                            mSymptomClient.addCheckIn(user.getUserIdentification(), checkIn); //TODO#BPR_4
                             new Update(CheckIn.class)
                                     .set("needSync = 0")
                                     .where("_id = ?", checkIn.getId())
@@ -246,7 +248,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
                     Log.i(TAG, method + "::Medications to sync: " + painMedications.size());
                     for (PainMedication medication : painMedications) {
                         try {
-                            mSymptomClient.addPainMedication(medication.getPatientMedicalNumber(), medication);
+                            mSymptomClient.addPainMedication(medication.getPatientMedicalNumber(), medication); //TODO#BPR_4
                             new Update(PainMedication.class)
                                     .set("needSync = 0")
                                     .where("_id = ?", medication.getId())
@@ -266,7 +268,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
                 }
                 if(sync.equals(ActiveContract.SYNC_DELETE_MEDICINES)){
                     try {
-                        final boolean deleted =  mSymptomClient.deletePainMedication(owner_entity_id, entity_id);
+                        final boolean deleted =  mSymptomClient.deletePainMedication(owner_entity_id, entity_id); //TODO#BPR_4
                         Log.d(TAG, method + String.format("deletePainMedication:%s (of %s)=> %b ",entity_id,owner_entity_id,deleted));
                     }catch (RetrofitError error){
                         DownloadHelper.get().handleRetrofitError(getContext(),error);
@@ -291,6 +293,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
      * @param sync sync type to be performed
      */
     private synchronized void updateLocalData(String sync, UserInfo user) {
+        //TODO#BPR_1
         switch (user.getUserType()) {
             case DOCTOR:
                 if (sync.equals(ActiveContract.SYNC_ALL)) {
@@ -347,7 +350,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.i(TAG, method);
         List<Doctor> doctors = null;
         try {
-            doctors = (List<Doctor>) mSymptomClient.findDoctorsByPatient(user.getUserIdentification());
+            doctors = (List<Doctor>) mSymptomClient.findDoctorsByPatient(user.getUserIdentification()); //TODO#BPR_4
             DAOManager.get().rebuildDoctors(doctors, user.getUserIdentification());
         }catch (RetrofitError e){
             DownloadHelper.get().handleRetrofitError(getContext(),e);
@@ -366,7 +369,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         String method = new Object(){}.getClass().getEnclosingMethod().getName();
         Log.i(TAG, method);
         try {
-            Patient patient = mSymptomClient.findPatientByMedicalRecordNumber(user.getUserIdentification());;
+            Patient patient = mSymptomClient.findPatientByMedicalRecordNumber(user.getUserIdentification()); //TODO#BPR_4
             DAOManager.get().rebuildPatients(Lists.newArrayList(patient), user.getUserIdentification());
         }catch (RetrofitError e){
             DownloadHelper.get().handleRetrofitError(getContext(),e);
@@ -380,11 +383,12 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
 
+
     private void syncDoctorBaseInfo(UserInfo user){
         String method = new Object(){}.getClass().getEnclosingMethod().getName();
         Log.i(TAG, method);
         try {
-            Doctor doctor = mSymptomClient.findDoctorByUniqueDoctorID(user.getUserIdentification());
+            Doctor doctor = mSymptomClient.findDoctorByUniqueDoctorID(user.getUserIdentification()); //TODO#BPR_4
             DAOManager.get().rebuildDoctors(Lists.newArrayList(doctor), user.getUserIdentification());
         }catch (RetrofitError e){
             DownloadHelper.get().handleRetrofitError(getContext(),e);
@@ -404,7 +408,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         List<Patient> patients = null;
 
         try {
-             patients = (List<Patient>) mSymptomClient.findPatientsByDoctor(user.getUserIdentification());
+             patients = (List<Patient>) mSymptomClient.findPatientsByDoctor(user.getUserIdentification()); //TODO#BPR_4
              DAOManager.get().rebuildPatients(patients, user.getUserIdentification());
         }catch (RetrofitError e){
             DownloadHelper.get().handleRetrofitError(getContext(),e);
@@ -429,7 +433,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
 
                 DAOManager.get().deleteCheckIns();
                 for(Patient patient : patients){
-                    List<CheckIn> checkIns = (List<CheckIn>) mSymptomClient.findCheckInsByPatient(patient.getMedicalRecordNumber());
+                    List<CheckIn> checkIns = (List<CheckIn>) mSymptomClient.findCheckInsByPatient(patient.getMedicalRecordNumber()); //TODO#BPR_4
                     for(int idx=0; idx< checkIns.size(); idx++){
                         checkIns.get(idx).setNeedSync(0);
                     }
@@ -467,7 +471,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
 
                 DAOManager.get().deleteMedicines();
                 for(Patient patient : patients){
-                    List<PainMedication> medications = (List<PainMedication>) mSymptomClient.findPainMedicationsByPatient(patient.getMedicalRecordNumber());
+                    List<PainMedication> medications = (List<PainMedication>) mSymptomClient.findPainMedicationsByPatient(patient.getMedicalRecordNumber());//TODO#BPR_4
                     medications.addAll(medicationsToSync);
                     if((medications.size() > 0)) {
                         DAOManager.get().savePainMedications(medications, patient.getMedicalRecordNumber(), false);

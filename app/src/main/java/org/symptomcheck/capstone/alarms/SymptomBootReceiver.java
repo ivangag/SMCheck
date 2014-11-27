@@ -29,6 +29,7 @@ import android.util.Log;
  * When the user cancels the alarm, the receiver is disabled, so that rebooting the
  * device will not trigger this receiver.
  */
+//TODO#BPR_3 Broadcast Receiver handles re-boot of device and re-set the alarm
 public class SymptomBootReceiver extends BroadcastReceiver {
 
     final private String  TAG = SymptomBootReceiver.this.getClass().getSimpleName();
@@ -38,7 +39,7 @@ public class SymptomBootReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED"))
         {
-           SymptomAlarmRequest.get().setAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
+           SymptomAlarmRequest.get().setAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER,false);
         }
         Log.i(TAG,"SymptomBootReceiver=>onReceive");
     }

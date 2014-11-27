@@ -221,6 +221,7 @@ public  abstract class BaseFragment extends Fragment {
         return selection;
     }
 
+    //TODO#BPR_3 build query for searching over ContentProvider, according to fragment UI type
     protected Cursor queryAllField(String filterPattern,String selection){
 
         Cursor cursor = null;
@@ -307,6 +308,7 @@ public  abstract class BaseFragment extends Fragment {
         return cursor;
     }
 
+    //TODO#BPR_3 default Uri according to fragment type
     private Uri getDefaultUriProvider(){
 
         Uri uriContentProvider = Uri.EMPTY;// = ContentProvider.createUri(Patient.class, null);
@@ -335,7 +337,7 @@ public  abstract class BaseFragment extends Fragment {
         }
         return uriContentProvider;
     }
-
+    //TODO#BPR_3 default Uri according to fragment type and selection query pattern obtained by text entered in the Search View
     protected Cursor getDefaultCursorProvider(Uri uriContentProvider, String selection) {
         Cursor cursor = null;
         if(getActivity() != null) {

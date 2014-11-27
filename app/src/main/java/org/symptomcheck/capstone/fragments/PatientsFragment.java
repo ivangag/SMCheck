@@ -63,11 +63,7 @@ import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
 import it.gmariotti.cardslib.library.internal.base.BaseCard;
 import it.gmariotti.cardslib.library.view.CardListView;
 
-/**
- * List with Cursor Example
- *
- * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
- */
+//TODO#BPR_6 Patients Fragment Interface Screen
 public class PatientsFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>
     ,IFragmentListener {
 
@@ -191,6 +187,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         mUriContentProvider=  ContentProvider.createUri(Patient.class, null);
         final  UserInfo user = DAOManager.get().getUser();
 
+        //TODO#BPR_1
         if(user.getUserType().equals(UserType.DOCTOR)){
             mDoctorOwner = Doctor.getByDoctorNumber(user.getUserIdentification());
         }
@@ -212,6 +209,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
         getLoaderManager().restartLoader(0, null, this);
     }
 
+    //TODO#BPR_3 Create Cursor over ContentProvider
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 

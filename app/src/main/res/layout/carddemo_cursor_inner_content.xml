@@ -50,15 +50,36 @@
             android:layout_marginBottom="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
-
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+        <ImageButton
+            android:id="@+id/card_capstone_icon_indicator"
+            android:layout_marginBottom="4dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="start"
+            android:visibility="gone"
+            android:contentDescription="@string/txt_card_info_button" />
         <ImageButton
             android:id="@+id/card_rds_expand_button_info"
-            android:layout_marginRight="8dp"
-            android:layout_marginEnd="8dp"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_gravity="end"
-            android:contentDescription="@string/txt_card_info_button" />
+            android:contentDescription="@string/txt_card_info_button"
+            android:layout_marginEnd="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+        </RelativeLayout>
+        </LinearLayout>
+
     </LinearLayout>
 
 </RelativeLayout>

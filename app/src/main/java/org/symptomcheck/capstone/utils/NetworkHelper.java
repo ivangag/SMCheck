@@ -25,7 +25,7 @@ import android.net.ConnectivityManager;
  */
 public class NetworkHelper {
 
-    //region TODO#00001 Checks if Internet Connection is present
+    //region Checks if Internet Connection is present
     public static boolean isOnline(Context context) {
         ConnectivityManager cm =
                 (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);

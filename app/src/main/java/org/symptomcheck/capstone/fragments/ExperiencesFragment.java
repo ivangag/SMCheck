@@ -61,11 +61,8 @@ import it.gmariotti.cardslib.library.internal.CardThumbnail;
 import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
 import it.gmariotti.cardslib.library.view.CardListView;
 
-/**
- * List with Cursor Example
- *
- * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
- */
+
+//TODO#BPR_6 Patient Bad Experiences Fragment Interface Screen
 public class ExperiencesFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>, IFragmentListener {
 
     ExperiencesCursorCardAdapter mAdapter;
@@ -412,6 +409,7 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
 
             ;
             card.resourceIdBackground = R.drawable.card_background;
+            if(patientExperience != null) {
             /*
             if(patientExperience.getCheckedByDoctor() >= 1){
                 card.resourceIdBackground = R.drawable.card_background;
@@ -419,6 +417,7 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
                 card.resourceIdBackground = R.drawable.card_background_color_orange;
             }
             */
+            }
             card.resourceIdThumb=R.drawable.ic_experience_2;
 
 
@@ -448,11 +447,14 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
             TextView mSecondaryTitleTextView = (TextView) parent.findViewById(R.id.carddemo_cursor_main_inner_subtitle);
             mButtonExpandCustom = (ImageButton)parent.findViewById(R.id.card_rds_expand_button_info);
 
-            if (mTitleTextView != null)
+            if (mTitleTextView != null) {
                 mTitleTextView.setText(mainTitle);
+                //mTitleTextView.setBackgroundResource(resourceIdBackground);
+            }
 
-            if (mSecondaryTitleTextView != null)
+            if (mSecondaryTitleTextView != null) {
                 mSecondaryTitleTextView.setText(secondaryTitle);
+            }
 
             //Set Background resource
             this.setBackgroundResourceId(resourceIdBackground);

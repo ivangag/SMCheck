@@ -79,7 +79,8 @@ import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
-
+//TODO#BPR_3 Main Screen Activity
+//TODO#BPR_6
 public class MainActivity extends Activity implements ICardEventListener {
 
 
@@ -144,6 +145,7 @@ public class MainActivity extends Activity implements ICardEventListener {
         user = DAOManager.get().getUser();
 
         App.hideSoftKeyboard(MainActivity.this);
+        // TODO#BPR_2 activate functionality only if user is logged
         if (user != null) {
             initUserResource();
             getFragmentManager().
@@ -205,6 +207,8 @@ public class MainActivity extends Activity implements ICardEventListener {
             };
             mDrawerLayout.setDrawerListener(mDrawerToggle);
 
+            //TODO#BPR_1
+            //TODO#BPR_2
             if (user.getUserType().equals(UserType.DOCTOR)) {
                 selectDrawerItem(CASE_SHOW_DOCTOR_PATIENTS);
             } else if (user.getUserType().equals(UserType.PATIENT)) {
@@ -222,9 +226,12 @@ public class MainActivity extends Activity implements ICardEventListener {
             final UserType userType = user.getUserType();
             String detailUser = "";
 
+
             detailUser = user.getFirstName()
                     + " " + user.getLastName();
             try {
+                //TODO#BPR_1
+                //TODO#BPR_2
                 if (userType.equals(UserType.DOCTOR)) {
                     mFragmentTitles = getResources().getStringArray(R.array.doctor_fragments_array);
                     mDrawerImagesResources = new int[]{
@@ -276,16 +283,12 @@ public class MainActivity extends Activity implements ICardEventListener {
 
         MenuItem menuCheckInTest = menu.findItem(R.id.action_test);
         menuCheckInTest.setVisible(true);
-        /*
-        if((menuCheckInTest != null)
-                && (user != null)) {
-            menuCheckInTest.setVisible(user.getUserType().equals(UserType.PATIENT));
-        }*/
         return super.onPrepareOptionsMenu(menu);
 
     }
 
 
+    //TODO#BPR_6 select Screen Fragment depending on data to be monitored
     private Fragment selectFragment(ShowFragmentType fragmentType, String ownerId) {
 
         Fragment fragment = null;
@@ -322,7 +325,10 @@ public class MainActivity extends Activity implements ICardEventListener {
 
     private Fragment selectFragment(int position) {
 
+
         Fragment fragment = null;
+        //TODO#BPR_1
+        //TODO#BPR_2
         switch (user.getUserType()) {
             case DOCTOR:
                 switch (position) {
@@ -379,6 +385,7 @@ public class MainActivity extends Activity implements ICardEventListener {
     }
 
 
+    //TODO#BPR_6 open Settings Screen Activity
     private void openSettings() {
         UserPreferencesManager.get().printAll(this);
         //SettingsActivity.startSettingActivity(getApplicationContext());
@@ -395,7 +402,7 @@ public class MainActivity extends Activity implements ICardEventListener {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 Log.d(TAG, "!!User Settings Modified!!");
-                SymptomAlarmRequest.get().setAlarm(this, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
+                SymptomAlarmRequest.get().setAlarm(this, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER,false);
             }
         }
     }

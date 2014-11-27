@@ -24,10 +24,8 @@ import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
 import android.util.Log;
 
-/**
- * When the alarm fires, this WakefulBroadcastReceiver receives the broadcast Intent 
- * and then starts the IntentService {@code SampleSchedulingService} to do some work.
- */
+
+//TODO#BPR_3 Broadcast Receiver called when the Check-In reminder alarm is fired, then it starts an Intent Service used for raising Notification
 public class ReminderReceiver extends WakefulBroadcastReceiver {
 
     final private String  TAG = ReminderReceiver.this.getClass().getSimpleName();

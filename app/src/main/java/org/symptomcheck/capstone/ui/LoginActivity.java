@@ -70,7 +70,9 @@ import retrofit.client.Response;
  * https://developers.google.com/+/mobile/android/getting-started#step_1_enable_the_google_api
  * and follow the steps in "Step 1" to create an OAuth 2.0 client for your package.
  */
-public class LoginActivity extends Activity {
+public class LoginActivity extends Activity { //TODO#BPR_3
+
+    private static final String TAG = "LoginActivity";
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -85,12 +87,8 @@ public class LoginActivity extends Activity {
     private View mLoginFormView;
     private View mErrorFormView;
     private CheckBox mCheckInRememberMe;
-    private static final String TAG = "LoginActivity";
-
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    //GoogleCloudMessaging gcm;
-    //private String regid;
 
     private int mNextActivityToLaunch;
 
@@ -99,10 +97,7 @@ public class LoginActivity extends Activity {
 
         super.onCreate(savedInstanceState);
 
-        Intent intent = getIntent();
         mNextActivityToLaunch = getIntent().getIntExtra(NotificationHelper.NEXT_ACTIVITY_TO_LAUNCH, NotificationHelper.GO_TO_MAIN);
-
-
         setContentView(R.layout.activity_login);
         // Set up the login form.
         mErrorLoginMsg = (TextView) findViewById(R.id.txt_login_error);
@@ -150,7 +145,6 @@ public class LoginActivity extends Activity {
         if (mAuthTask != null) {
             return;
         }
-
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
@@ -161,14 +155,10 @@ public class LoginActivity extends Activity {
         boolean skipCheckField = false;
         if (UserPreferencesManager.get().getLoginRememberMe(this)
                 && UserPreferencesManager.get().isLogged(this)
-            //&& (DAOManager.get().getUser() !=  null)
-            //&& (DAOManager.get().getUser().getLogged())
                 ) {
             email = "";
             password = "";
             skipCheckField = true;
-            //email = UserPreferencesManager.get().getLoginUsername(this);
-            //password = UserPreferencesManager.get().getLoginPassword(this);
         } else {
             email = mEmailView.getText().toString();
             password = mPasswordView.getText().toString();
@@ -192,11 +182,7 @@ public class LoginActivity extends Activity {
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
-        }/* else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
-            cancel = true;
-        }*/
+        }
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first
@@ -208,30 +194,7 @@ public class LoginActivity extends Activity {
             showProgress(true, false);
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);
-/*
-            DownloadHelper.get().setPassword(password).setUserName(email)
-                    .withRetrofitClient()
-                    .verifyUser(new Callback<UserInfo>() {
-                        @Override
-                        public void success(UserInfo userInfo, Response response) {
-                            userInfo.setLogged(true);
-                            DownloadHelper.get().setUser(userInfo);
-                            DAOManager.get().saveUser(userInfo);
-                            handleAfterLoginAttempt(true,email,password);
-                        }
-
-                        @Override
-                        public void failure(RetrofitError error) {
-                            handleAfterLoginAttempt(false,email,password);
-                        }
-                    });
-*/
         }
-    }
-
-
-    private boolean isEmailValid(String email) {
-        return email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
@@ -315,13 +278,14 @@ public class LoginActivity extends Activity {
             errorLogin.onSuccess = true;
             boolean useToken = mEmail.isEmpty()
                     || mPassword.isEmpty();
-            final String token = UserPreferencesManager.get().getBearerToken(getApplicationContext());
+            final String bearerToken = UserPreferencesManager.get().getBearerToken(getApplicationContext());
             try {
-                // Check network access.
+                // Check user account credentials
+                // TODO#BPR_2
                 SymptomManagerSvcApi client;
                 if (useToken) {
                     client = DownloadHelper.get()
-                            .setAccessToken(token)
+                            .setAccessToken(bearerToken)
                             .withRetrofitClient(getApplicationContext());
                 } else {
                     client = DownloadHelper.get().
@@ -332,6 +296,7 @@ public class LoginActivity extends Activity {
 
                 if (!NetworkHelper.isOnline(getApplicationContext())
                         && useToken) {
+                    // here we enable the use to go to main activity even if internet connection is down
                     errorLogin.onSuccess = true;
                 } else {
                     userInfo = client.verifyUser();
@@ -349,7 +314,7 @@ public class LoginActivity extends Activity {
             } catch (Exception e) {
                 errorLogin.onSuccess = false;
                 errorLogin.error = e;
-                Log.e(TAG, String.format("Error on verifyUser:%s; User:%s Pw:%s Token:%s. ", e.getMessage(), mEmail, mPassword, token));
+                Log.e(TAG, String.format("Error on verifyUser:%s; User:%s Pw:%s Token:%s. ", e.getMessage(), mEmail, mPassword, bearerToken));
             }
             return errorLogin;
         }
@@ -399,7 +364,6 @@ public class LoginActivity extends Activity {
 
             } else {
                 Log.i(TAG, "This device is not supported.");
-                //finish();
             }
             return false;
         }
@@ -413,15 +377,13 @@ public class LoginActivity extends Activity {
         String errorMsg = "";
         if (result.onSuccess) {
             //SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_ALL);
+            //TODO#BPR_1
             if(DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)) {
-                SymptomAlarmRequest.get().setAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
+                SymptomAlarmRequest.get().setAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER,false);
             }else {
                 SymptomAlarmRequest.get().cancelAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
             }
             UserPreferencesManager.get().setLoginRememberMe(context,mCheckInRememberMe.isChecked());
-            //UserPreferencesManager.get().setLoginUsername(context,username);
-            //UserPreferencesManager.get().setLoginPassword(context,password);
-
             finish();
 
             Intent intent = new Intent(getApplicationContext(),getNextActivityToLaunch());
@@ -459,14 +421,6 @@ public class LoginActivity extends Activity {
             activityToLaunch = MainActivity.class;
         }
         return activityToLaunch;
-    }
-
-    public static void startLogin(Context context/*, String param1, String param2*/) {
-        Intent intent = new Intent(context, LoginActivity.class);
-        //intent.setAction(ACTION_GCM_DEVICE_REGISTRATION);
-        //intent.putExtra(EXTRA_PARAM1, param1);
-        //intent.putExtra(EXTRA_PARAM2, param2);
-        context.startService(intent);
     }
 
     private static class ErrorLogin {

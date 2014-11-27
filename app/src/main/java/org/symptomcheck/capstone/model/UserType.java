@@ -17,6 +17,7 @@
  */
 package org.symptomcheck.capstone.model;
 
+//TODO#BPR_1
 public enum UserType {
 
 	PATIENT("PATIENT"),

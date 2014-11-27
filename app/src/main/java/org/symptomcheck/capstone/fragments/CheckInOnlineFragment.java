@@ -77,10 +77,7 @@ import retrofit.client.Response;
  */
 public class CheckInOnlineFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>, IFragmentListener {
 
-
     private static final String TAG = "CheckInOnlineFragment";
-
-
     private Handler progressBarHandler = new Handler();
     CheckinCursorCardAdapter mAdapter;
     CardListView mListView;

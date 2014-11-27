@@ -31,13 +31,8 @@ import org.symptomcheck.capstone.ui.MainActivity;
 import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.NotificationHelper;
 
-/**
- * This {@code IntentService} does the actual handling of the GCM message.
- * {@code GcmBroadcastReceiver} (a {@code WakefulBroadcastReceiver}) holds a
- * partial wake lock for this service while the service does its work. When the
- * service is finished, it calls {@code completeWakefulIntent()} to release the
- * wake lock.
- */
+
+//TODO#BPR_3 IntentService does the actual handling of the GCM message.
 public class GcmIntentService extends IntentService {
     public static final int NOTIFICATION_ID = 2;
     NotificationCompat.Builder builder;
@@ -89,6 +84,7 @@ public class GcmIntentService extends IntentService {
 
     private void handleTriggerSync(String action, UserType userTypeSender) {
         switch (userTypeSender){
+            //TODO#BPR_1
             case PATIENT:
                 if(action.equals(GcmConstants.GCM_ACTION_CHECKIN_UPDATE)) {
                     SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_CHECK_IN);

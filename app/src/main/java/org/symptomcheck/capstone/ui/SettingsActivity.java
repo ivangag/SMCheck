@@ -59,6 +59,7 @@ import org.symptomcheck.capstone.preference.UserPreferencesManager;
  * href="http://developer.android.com/guide/topics/ui/activity_settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
  */
+//TODO#BPR_3 Settings Activity
 public class SettingsActivity extends Activity {
 
 
@@ -81,6 +82,7 @@ public class SettingsActivity extends Activity {
         // here we would customize Settings Screen according to User type (PATIENT, DOCTOR, ADMIN)
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         if(mUser != null) {
+            //TODO#BPR_1
             switch (mUser.getUserType()) {
                 case PATIENT:
                     fragmentTransaction
@@ -214,7 +216,7 @@ public class SettingsActivity extends Activity {
                 preference.setSummary(stringValue);
             }
             if(mIsSettingsModified){
-                SymptomAlarmRequest.get().setAlarm(preference.getContext(), SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER);
+                SymptomAlarmRequest.get().setAlarm(preference.getContext(), SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER,false);
             }
             final Preference nextScheduleCheckInPreference = preference.getPreferenceManager().findPreference(UserPreferencesManager.KEY_NEXT_SCHEDULED_CHECKIN);
             if (nextScheduleCheckInPreference != null) {

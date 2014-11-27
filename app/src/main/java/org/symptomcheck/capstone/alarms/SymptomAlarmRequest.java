@@ -61,11 +61,12 @@ public class SymptomAlarmRequest {
 
 
 
-    public void setAlarm(Context ctx,AlarmRequestedType alarmRequestedType){
+    public void setAlarm(Context ctx,AlarmRequestedType alarmRequestedType, boolean afterDismission){
         switch (alarmRequestedType){
             case ALARM_CHECK_IN_REMINDER:
+                //TODO#BPR_1
                 if(DAOManager.get().getUser().getUserType() == UserType.PATIENT)
-                    setReminderAlarm(ctx);
+                    setReminderAlarm(ctx,afterDismission);
                 break;
             case ALARM_CHECK_ALERTS:
                 break;
@@ -91,7 +92,7 @@ public class SymptomAlarmRequest {
      * alarm fires, the app broadcasts an Intent to this WakefulBroadcastReceiver.
      * @param context Context
      */
-    private void setReminderAlarm(Context context) {
+    private void setReminderAlarm(Context context, boolean afterDismission) {
 
         alarmReminderMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, ReminderReceiver.class);
@@ -146,35 +147,34 @@ public class SymptomAlarmRequest {
             long timeOfNextStartAsDue;
 
             if (timeLatestCheckin < timeToday_00) {
-                Log.d(TAG,"timeLatestCheckin IS < timeToday_00");
+                Log.d(TAG, "timeLatestCheckin IS < timeToday_00");
                 if (timeNow >= timeDailyStartAsPreference) {
-                    Log.d(TAG,"timeNow IS >= timeDailyStartAsPreference");
+                    Log.d(TAG, "timeNow IS >= timeDailyStartAsPreference");
                     timeOfNextStartAsDue = timeNow + AlarmManager.INTERVAL_FIFTEEN_MINUTES / 15;
                 } else {
-                    Log.d(TAG,"timeNow IS < timeDailyStartAsPreference");
+                    Log.d(TAG, "timeNow IS < timeDailyStartAsPreference");
                     timeOfNextStartAsDue = timeDailyStartAsPreference;
                 }
                 intervalRepeatFrequency = (timeToday_24 - timeOfNextStartAsDue) / userCheckinTimePref;
 
             } else {
-                Log.d(TAG,"timeLatestCheckin IS >= timeToday_00");
+                Log.d(TAG, "timeLatestCheckin IS >= timeToday_00");
                 intervalRepeatFrequency = (timeToday_24 - timeDailyStartAsPreference) / userCheckinTimePref;
                 if (checkInThisDay >= userCheckinTimePref) {
-                    Log.d(TAG,"checkInThisDay IS <= userCheckinTimePref");
+                    Log.d(TAG, "checkInThisDay IS <= userCheckinTimePref");
                     timeDailyStartAsPreference += AlarmManager.INTERVAL_DAY;
                     timeOfNextStartAsDue = timeDailyStartAsPreference;
-                }else {
-                    if(timeNow > timeDailyStartAsPreference) {
-                        Log.d(TAG,"timeNow IS > timeDailyStartAsPreference");
-                        timeOfNextStartAsDue = timeLatestCheckin + intervalRepeatFrequency;
-                    }
-                    else {
-                        Log.d(TAG,"timeNow IS <= timeDailyStartAsPreference");
+                } else {
+                    if (timeNow > timeDailyStartAsPreference) {
+                        Log.d(TAG, "timeNow IS > timeDailyStartAsPreference");
+                        //timeOfNextStartAsDue = timeLatestCheckin + intervalRepeatFrequency;
+                        timeOfNextStartAsDue = timeNow + AlarmManager.INTERVAL_FIFTEEN_MINUTES / 15;
+                    } else {
+                        Log.d(TAG, "timeNow IS <= timeDailyStartAsPreference");
                         intervalRepeatFrequency = (timeToday_24 - timeNow) / (userCheckinTimePref - checkInThisDay);
                         timeOfNextStartAsDue = timeNow + intervalRepeatFrequency;
                     }
                 }
-
             }
 
             boolean isNextDay = (timeOfNextStartAsDue > timeToday_24);

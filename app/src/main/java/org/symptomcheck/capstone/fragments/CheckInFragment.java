@@ -57,14 +57,10 @@ import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.CardThumbnail;
 import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
-import it.gmariotti.cardslib.library.internal.base.BaseCard;
 import it.gmariotti.cardslib.library.view.CardListView;
 
-/**
- * List with Cursor Example
- *
- * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
- */
+
+//TODO#BPR_6 Check-In Data Fragment Interface Screen
 public class CheckInFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>, IFragmentListener {
 
     CheckinCursorCardAdapter mAdapter;
@@ -211,6 +207,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         getLoaderManager().restartLoader(0, null, this);
     }
 
+    //TODO#BPR_3 Create Cursor over ContentProvider
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
@@ -377,8 +374,25 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
                 card.secondaryTitle = "Submitted on " + DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT);
                 final Patient patient = Patient.getByMedicalNumber(checkIn.getPatientMedicalNumber());
                 card.mainHeader = patient.getFirstName() + " " + patient.getLastName() + " " + getString(R.string.checkin_header);
+
+
+                switch (checkIn.getIssuePainLevel()){
+                    case UNKNOWN:
+                    case WELL_CONTROLLED:
+                        card.resourceIdAlertIcon = R.drawable.ic_alert_green;
+                        break;
+                    case MODERATE:
+                        card.resourceIdAlertIcon = R.drawable.ic_alert_orange;
+                        break;
+                    case SEVERE:
+                        card.resourceIdAlertIcon = R.drawable.ic_alert_red;
+                        break;
+                }
+            }else{
+                card.resourceIdAlertIcon = R.drawable.ic_alert_green;
             }
             card.resourceIdThumb=R.drawable.ic_check_in;
+
 
             //retrieve image
             //byte[] byteArray = Base64.decode("",Base64.DEFAULT);
@@ -415,7 +429,11 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
         String secondaryTitle;
         String mainHeader;
         int resourceIdThumb;
+        int resourceIdBackground;
+        int resourceIdMainTextColor;
+        int resourceIdAlertIcon;
         private ImageButton mButtonExpandCustom;
+        private ImageButton mButtonIconIndicator;
 
         public CheckinCursorCard(Context context) {
             super(context, R.layout.carddemo_cursor_inner_content);
@@ -427,12 +445,20 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             TextView mTitleTextView = (TextView) parent.findViewById(R.id.carddemo_cursor_main_inner_title);
             TextView mSecondaryTitleTextView = (TextView) parent.findViewById(R.id.carddemo_cursor_main_inner_subtitle);
             mButtonExpandCustom = (ImageButton)parent.findViewById(R.id.card_rds_expand_button_info);
+            mButtonIconIndicator = (ImageButton)parent.findViewById(R.id.card_capstone_icon_indicator);
 
-            if (mTitleTextView != null)
+            if (mTitleTextView != null) {
                 mTitleTextView.setText(mainTitle);
+                //mTitleTextView.setTextColor(resourceIdMainTextColor);
+            }
 
             if (mSecondaryTitleTextView != null)
                 mSecondaryTitleTextView.setText(secondaryTitle);
+
+            if(mButtonIconIndicator != null) {
+                mButtonIconIndicator.setVisibility(View.VISIBLE);
+                mButtonIconIndicator.setBackgroundResource(resourceIdAlertIcon);
+            }
 
             if(mButtonExpandCustom != null) {
                 mButtonExpandCustom.setBackgroundResource(R.drawable.card_menu_button_expand);

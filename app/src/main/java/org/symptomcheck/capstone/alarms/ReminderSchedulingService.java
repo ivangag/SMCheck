@@ -31,12 +31,7 @@ import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.ui.CheckInFlowActivity;
 import org.symptomcheck.capstone.ui.LoginActivity;
 
-/**
- * An {@link IntentService} subclass for handling asynchronous task requests in
- * a service on a separate handler thread.
- * <p/>
- * helper methods.
- */
+//TODO#BPR_3 Intent Service used for raising Check-In Alert Notification
 public class ReminderSchedulingService extends IntentService {
 
     private final String TAG = ReminderSchedulingService.this.getClass().getSimpleName();
