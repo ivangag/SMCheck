@@ -28,8 +28,11 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import org.symptomcheck.capstone.R;
+import org.symptomcheck.capstone.alarms.CheckinDismissingReceiver;
+import org.symptomcheck.capstone.ui.CheckInFlowActivity;
 import org.symptomcheck.capstone.ui.LoginActivity;
 import org.symptomcheck.capstone.ui.MainActivity;
 
@@ -159,5 +162,35 @@ public class NotificationHelper {
         AlertDialog alertDialog = alertDialogBuilder.create();
         // show it
         alertDialog.show();
+    }
+
+    /**
+     * Post a notification
+     * @param msg message to send with the notification
+     */
+    public static void raiseCheckinReminderNotification(Context context, int NOTIFICATION_ID, String msg) { //TODO#FDAR_2 create notification to alert the Patient it's time to do the Check-In
+        final NotificationManager mNotificationManager = (NotificationManager)
+                context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
+                new Intent(context, CheckInFlowActivity.class),0);
+
+        PendingIntent deleteIntent = PendingIntent.getBroadcast(context, 0,
+                new Intent(context, CheckinDismissingReceiver.class),0);
+
+        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(context)
+                        .setSmallIcon(R.drawable.ic_doctor)
+                        .setContentTitle(context.getString(R.string.checkin_reminder_title))
+                        .setStyle(new NotificationCompat.BigTextStyle()
+                                .bigText(msg))
+                        .setAutoCancel(true)
+                        .setTicker(context.getString(R.string.txt_checkin_reminder_ticker))
+                        .setSound(alarmSound)
+                        .setDeleteIntent(deleteIntent)
+                        .setContentText(msg);
+        mBuilder.setContentIntent(contentIntent);
+        mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
     }
 }

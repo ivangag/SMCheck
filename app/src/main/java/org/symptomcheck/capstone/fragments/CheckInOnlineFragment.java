@@ -208,7 +208,7 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
     }
 
     @Override
-    public void OnSearchOnLine(String textToSearch) {
+    public void OnSearchOnLine(String textToSearch) {//TODO#FDAR_11
         // here we have to trigger background sync service by stimulating a Server Hosted search
         if(mAdapter != null) {
             if(!textToSearch.isEmpty()){
@@ -263,7 +263,7 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
             @Override
             public void run() {
                 try {
-                    final List<CheckIn> checkIns = (List<CheckIn>) DownloadHelper.get().withRetrofitClient(getActivity())
+                    final List<CheckIn> checkIns = (List<CheckIn>) DownloadHelper.get().withRetrofitClient(getActivity()) //TODO#FDAR_11
                             .findCheckInsByPatientName(DAOManager.get().getUser().getUserIdentification(), FirstName, LastName);
                     final boolean checkinRes = checkIns.size() > 0;
                     Log.d(TAG, "CheckinsFound:" + checkIns.size());
@@ -336,14 +336,32 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
 
         private void setCardFromCursor(CheckinCursorCard card, Cursor cursor, CheckInOnlineWrapper checkIn) {
             final int checkInId = cursor.getInt(ID_COLUMN);
-            card.setId(""+ checkInId);
+            card.setId("" + checkInId);
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL))
-                        + " - " + cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS))
-                            ;
-            final Patient patient = Patient.getByMedicalNumber(checkIn.getPatientMedicalNumber());
-            card.mainHeader = patient.getFirstName() + " "  + patient.getLastName() + " " +  getString(R.string.checkin_header);
-            card.resourceIdThumb=R.drawable.ic_check_in;
+                    + " - " + cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS))
+            ;
+            if (checkIn != null) {
+                final Patient patient = Patient.getByMedicalNumber(checkIn.getPatientMedicalNumber());
+                card.mainHeader = patient.getFirstName() + " " + patient.getLastName() + " " + getString(R.string.checkin_header);
+                card.secondaryTitle = "Submitted on " + DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT);
+                card.mainHeader = patient.getFirstName() + " " + patient.getLastName() + " " + getString(R.string.checkin_header);
 
+                switch (checkIn.getIssuePainLevel()) {
+                    case UNKNOWN:
+                    case WELL_CONTROLLED:
+                        card.resourceIdAlertIcon = R.drawable.ic_alert_green;
+                        break;
+                    case MODERATE:
+                        card.resourceIdAlertIcon = R.drawable.ic_alert_orange;
+                        break;
+                    case SEVERE:
+                        card.resourceIdAlertIcon = R.drawable.ic_alert_red;
+                        break;
+                }
+            } else {
+                card.resourceIdAlertIcon = R.drawable.ic_alert_green;
+            }
+            card.resourceIdThumb = R.drawable.ic_check_in;
         }
     }
 
@@ -357,6 +375,8 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
         String mainHeader;
         int resourceIdThumb;
         private ImageButton mButtonExpandCustom;
+        public int resourceIdAlertIcon;
+        private ImageButton mButtonIconIndicator;
 
         public CheckinCursorCard(Context context) {
             super(context, R.layout.carddemo_cursor_inner_content);
@@ -368,12 +388,18 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
             TextView mTitleTextView = (TextView) parent.findViewById(R.id.carddemo_cursor_main_inner_title);
             TextView mSecondaryTitleTextView = (TextView) parent.findViewById(R.id.carddemo_cursor_main_inner_subtitle);
             mButtonExpandCustom = (ImageButton)parent.findViewById(R.id.card_rds_expand_button_info);
+            mButtonIconIndicator = (ImageButton)parent.findViewById(R.id.card_capstone_icon_indicator);
 
             if (mTitleTextView != null)
                 mTitleTextView.setText(mainTitle);
 
             if (mSecondaryTitleTextView != null)
                 mSecondaryTitleTextView.setText(secondaryTitle);
+
+            if(mButtonIconIndicator != null) {
+                mButtonIconIndicator.setVisibility(View.VISIBLE);
+                mButtonIconIndicator.setBackgroundResource(resourceIdAlertIcon);
+            }
 
             if(mButtonExpandCustom != null) {
                 mButtonExpandCustom.setBackgroundResource(R.drawable.card_menu_button_expand);

@@ -236,14 +236,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
     String mSelection = null;
     private void init() {
-
-
         final String patientMedicalNumber = getArguments().getString(ARG_PATIENT_ID, Constants.STRINGS.EMPTY);
-//        if((patientId > 0)){
-//            mPatientOwner = Patient.getById(patientId);
-//        }else if (DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)){
-//            mPatientOwner = Patient.getByMedicalNumber(DAOManager.get().getUser().getUserIdentification());
-//        }
         if(!patientMedicalNumber.isEmpty()) {
             mPatientOwner = Patient.getByMedicalNumber(patientMedicalNumber);
         }
@@ -492,8 +485,8 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {
-                                    PainMedication.delete(PainMedication.class,id);
-                                    SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_DELETE_MEDICINES,productId,patientId);
+                                    PainMedication.delete(PainMedication.class,id); //TODO#FDAR_12 Medication deleting
+                                    SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_DELETE_MEDICINES,productId,patientId); //TODO#FDAR_12 Trigger sync
                                     //Toast.makeText(getActivity(),"Medication " + medicationName + " (" + id + ")" + " removed successfully",Toast.LENGTH_SHORT).show();
 
                                 }
@@ -515,9 +508,9 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             @Override
             public void run() {
                 try {
-                    final boolean painMedicationRes = savePainMedication(medication);
+                    final boolean painMedicationRes = savePainMedication(medication);  //TODO#FDAR_12 Add new Medication
                     if (painMedicationRes) {
-                        SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_MEDICINES);
+                        SyncUtils.TriggerRefreshPartialCloud(ActiveContract.SYNC_MEDICINES);  //TODO#FDAR_12 Trigger sync
                         Thread.sleep(2000);
                     }
 
@@ -566,12 +559,8 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             MedicineCursorCard card = new MedicineCursorCard(super.getContext());
             setCardFromCursor(card,cursor,painMedication);
 
-
             //Create a CardHeader
             CardHeader header = new CardHeader(getActivity());
-
-            //Set visible the expand/collapse button
-            //header.setButtonExpandVisible(true);
 
             //Set the header title
             header.setTitle(card.mainHeader);
@@ -612,21 +601,12 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             thumb.setDrawableResource(card.resourceIdThumb);
             card.addCardThumbnail(thumb);
 
-            card.setOnClickListener(new Card.OnCardClickListener() {
-                @Override
-                public void onClick(Card card, View view) {
-                    //Toast.makeText(getContext(), "Card id=" + card.getId() + " Title=" + card.getCardHeader().getTitle(), Toast.LENGTH_SHORT).show();
-                }
-            });
-
             //This provides a simple (and useless) expand area
             String detailedMedicineInfo  = "";
             if(painMedication != null) {
-                //card.secondaryTitle = painMedication.getIssueDateTimeClear(); // fromMilliseconds.format("YYYY-MM-DD hh:ss");
                 detailedMedicineInfo = PainMedication.getDetailedInfo(painMedication);
             }
             CustomExpandCard expand = new CustomExpandCard(super.getContext(), detailedMedicineInfo);
-            //expand.setTitle("Check-In Details");
             //Add Expand Area to Card
             card.addCardExpand(expand);
 
@@ -638,7 +618,13 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             card.setId(""+ medicineId);
             card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.MEDICINES_COLUMNS.NAME));
             if(painMedication != null) {
-                card.mainHeader = getString(R.string.medicine_header);
+
+                if(mPatientOwner != null){
+                    card.mainHeader = mPatientOwner.getFirstName() + " " + mPatientOwner.getLastName() + " " + getString(R.string.medicine_header);
+                }else{
+                    card.mainHeader = getString(R.string.medicine_header);
+                }
+
 
                 card.secondaryTitle = "Added on " + (painMedication.getLastTakingDateTime().equals(Constants.STRINGS.EMPTY)
                         ? "NA" : DateTimeUtils.convertEpochToHumanTime(painMedication.getLastTakingDateTime(), "YYYY-MM-DD hh:mm"));
@@ -649,19 +635,6 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
 
         }
 
-        private void removeCard(Card card) {
-
-            //Use this code to delete getItemsQuestion on DB
-/*
-            ContentResolver resolver = getActivity().getContentResolver();
-            long noDeleted = resolver.delete
-                    (CardCursorContract.CardCursor.CONTENT_URI,
-                            CardCursorContract.CardCursor.KeyColumns.KEY_ID + " = ? ",
-                            new String[]{card.getId()});
-
-            mAdapter.notifyDataSetChanged();
-*/
-        }
     }
     //-------------------------------------------------------------------------------------------------------------
     // Cards

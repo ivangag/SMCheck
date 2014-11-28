@@ -295,7 +295,7 @@ public class MainActivity extends Activity implements ICardEventListener {
             case DOCTOR_PATIENTS:
                 fragment = new PatientsFragment();
                 break;
-            case PATIENT_CHECKINS:
+            case PATIENT_CHECKINS: //TODO#FDAR_10
                 fragment = CheckInFragment.newInstance(ownerId);
                 break;
             case PATIENT_ONLINE_CHECKINS:
@@ -505,7 +505,7 @@ public class MainActivity extends Activity implements ICardEventListener {
                 if (notifier != null) {
                     //notifier.OnFilterData(query);
                     App.hideSoftKeyboard(MainActivity.this);
-                    notifier.OnSearchOnLine(query);
+                    notifier.OnSearchOnLine(query); //TODO#FDAR_11 Doctor confirm Patient FirstName & LastName used to search ONLINE Check-Ins data
                     searchView.clearFocus();
                 }
                 return true;
@@ -555,13 +555,13 @@ public class MainActivity extends Activity implements ICardEventListener {
 
         if (id == R.id.action_test) {
 
-            List<CheckIn> checkIns = CheckIn.getAll();
-            DAOManager.get().saveCheckInsOnline(checkIns, Constants.STRINGS.EMPTY,user.getUserIdentification());
-            List<CheckInOnlineWrapper> checkInOnlineWrappers = CheckInOnlineWrapper.getAll();
-            List<QuestionOnlineWrapper> questionOnlineWrappers = QuestionOnlineWrapper.getAll();
+            NotificationHelper.raiseCheckinReminderNotification(this,1,getString(R.string.checkin_reminder_text));
 
-            Intent intent = new Intent(this, CheckInFlowActivity.class);
-            startActivity(intent);
+            //List<CheckIn> checkIns = CheckIn.getAll();
+            //DAOManager.get().saveCheckInsOnline(checkIns, Constants.STRINGS.EMPTY,user.getUserIdentification());
+            //Intent intent = new Intent(this, CheckInFlowActivity.class);
+            //startActivity(intent);
+
             List<PatientExperience> newBadPatientExperiences = PatientExperience.computeBadExperiences();
             //List<PatientExperience> patientExperiences = PatientExperience.getByPatient("patient001");
             List<PatientExperience> patientExperiences = PatientExperience.getAll();
@@ -613,6 +613,7 @@ public class MainActivity extends Activity implements ICardEventListener {
 
     @Override
     public void OnCheckInOpenRequired(String patientId) {
+        //TODO#FDAR_10 this method is called when a Doctor is logged and it wishes open and monitor the Check-Ins of a Patient
         final ShowFragmentType fragmentType = ShowFragmentType.PATIENT_CHECKINS;
         mPreviousFragment = mCurrentFragment;
         mCurrentFragment = selectFragment(fragmentType, patientId);

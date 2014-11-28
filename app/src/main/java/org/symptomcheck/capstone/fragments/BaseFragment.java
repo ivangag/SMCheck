@@ -278,7 +278,7 @@ public  abstract class BaseFragment extends Fragment {
                                     ActiveContract.MEDICINES_COLUMNS.PRODUCT_ID + " LIKE ? OR " +
                                             ActiveContract.MEDICINES_COLUMNS.PATIENT + " LIKE ? )",
                                     new String[]{"%" + filterPattern + "%", "%" + filterPattern + "%","%" + filterPattern + "%"}
-                                    , ActiveContract.MEDICINES_COLUMNS.NAME + " asc");
+                                    , ActiveContract.MEDICINES_COLUMNS.TAKING_TIME + " desc");
                     break;
                 case FRAGMENT_TYPE_EXPERIENCES:
                     cursor = getActivity().getContentResolver()
@@ -361,7 +361,7 @@ public  abstract class BaseFragment extends Fragment {
                     cursor = getActivity().getContentResolver()
                             .query(uriContentProvider,
                                     ActiveContract.MEDICINES_TABLE_PROJECTION, selection, null,
-                                    ActiveContract.MEDICINES_COLUMNS.NAME + " asc");
+                                    ActiveContract.MEDICINES_COLUMNS.TAKING_TIME + " desc");
                     break;
              case FRAGMENT_TYPE_EXPERIENCES:
                     cursor = getActivity().getContentResolver()

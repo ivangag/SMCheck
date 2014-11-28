@@ -86,11 +86,12 @@ public class GcmIntentService extends IntentService {
         switch (userTypeSender){
             //TODO#BPR_1
             case PATIENT:
-                if(action.equals(GcmConstants.GCM_ACTION_CHECKIN_UPDATE)) {
+                if(action.equals(GcmConstants.GCM_ACTION_CHECKIN_UPDATE)) { //TODO#FDAR_10 GCM message used to trigger sync and update Check-In Data
                     SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_CHECK_IN);
                 }
                 break;
             case DOCTOR:
+                //TODO#FDAR_12 GCM message received when Doctor update medicines list. Here we trigger a sync in order to update medicines list and Check-Ins tailored questions
                 if(action.equals(GcmConstants.GCM_ACTION_MEDICATION_UPDATE)){
                     SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_MEDICINES);
                 }

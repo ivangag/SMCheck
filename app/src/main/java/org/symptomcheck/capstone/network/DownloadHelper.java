@@ -33,9 +33,6 @@ import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.NotificationHelper;
 import org.symptomcheck.capstone.preference.UserPreferencesManager;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 import retrofit.ErrorHandler;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
@@ -120,6 +117,7 @@ public class DownloadHelper {
             return error;
         }
     }
+    //TODO#FDAR_14 HTTPS Enpoint
     private static final String GAE_HTTPS_URL_TRUSTED = "https://spring-mvc-capstone-test.appspot.com";
 
     private final String CLIENT_PATIENT_ID = "patient";
@@ -131,7 +129,7 @@ public class DownloadHelper {
     SecuredRestBuilder builder =  new SecuredRestBuilder()
             .setLoginEndpoint(GAE_HTTPS_URL_TRUSTED + SymptomManagerSvcApi.TOKEN_PATH)
             .setClientId(this.CLIENT_PATIENT_ID)
-            .setClient(new ApacheClient(CustomHttpsClient.createUnsafeClient()))
+            .setClient(new ApacheClient(CustomHttpsClient.createHttpsClient()))
             .setEndpoint(GAE_HTTPS_URL_TRUSTED)
             .setLogLevel(RestAdapter.LogLevel.FULL);
 

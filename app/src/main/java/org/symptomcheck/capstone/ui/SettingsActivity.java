@@ -86,7 +86,7 @@ public class SettingsActivity extends Activity {
             switch (mUser.getUserType()) {
                 case PATIENT:
                     fragmentTransaction
-                            .replace(R.id.content_settings_checkin_reminder, new CheckInReminderPreferenceFragment())
+                            .replace(R.id.content_settings_checkin_reminder, new CheckInReminderPreferenceFragment()) //TODO#FDAR_2
                             .replace(R.id.content_settings_data_sync, new DataSyncPreferenceFragment())
                             .replace(R.id.content_settings_notification, new NotificationPreferenceFragment());
                     break;
@@ -302,6 +302,7 @@ public class SettingsActivity extends Activity {
      * This fragment shows data and sync preferences only. It is used when the
      * activity is showing a two-pane activity_settings UI.
      */
+    //TODO#FDAR_2 Fragment used to show and set Check-In Alert Reminder
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class CheckInReminderPreferenceFragment extends PreferenceFragment {
         @Override

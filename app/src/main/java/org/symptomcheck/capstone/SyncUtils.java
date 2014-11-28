@@ -72,7 +72,7 @@ public class SyncUtils {
             // Recommend a schedule for automatic synchronization. The system may modify this based
             // on other scheduled syncs and network utilization.
             ContentResolver.addPeriodicSync(
-                    account, CONTENT_AUTHORITY, new Bundle(),SYNC_FREQUENCY);
+                    account, CONTENT_AUTHORITY, new Bundle(),SYNC_FREQUENCY); //TODO#FDAR_10 frequency of automatic synchronization, where  also we fetch Check-In data
             newAccount = true;
         }
 
@@ -139,8 +139,8 @@ public class SyncUtils {
     /**
      * Trigger partial sync in order to upload local pending data to remote Server
      * @param repoToUpdate constant defines the table / db source to sync
-     * @param patientId
-     * @see org.symptomcheck.capstone.provider.ActiveContract
+     * @param entityId unique id of entity to sync
+     * @param owner_entity_id user unique id owner of entity
      */
     public static void TriggerRefreshPartialCloud(String repoToUpdate, String entityId, String owner_entity_id){
         Bundle b = new Bundle();

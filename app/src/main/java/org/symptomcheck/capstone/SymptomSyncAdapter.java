@@ -181,15 +181,13 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
         final int count = patientExperiences.size();
         Log.i(TAG, "BadExperienceNotNotifiedYetFound:" + count);
         if(count > 0){
-            //final PatientExperience experience = patientExperiences.get(0);
-            //final String patientId = experience.getPatientId();
-            //Log.i(TAG, "BadExperiencePatient:" + patientId);
             for(PatientExperience patientExperience : patientExperiences) {
                 (new Update(PatientExperience.class))
                         .set("notifiedToDoctor = 1")
                         .where("_id = ?", patientExperience.getId())
                         .execute();
             }
+            //TODO#FDAR_13 Here we alert the Doctor of the presence of one or more Patient Bad Experiences
             final Context context = getContext();
             NotificationHelper.sendNotification(context, 3,
                     context.getResources().getString(R.string.title_bad_experience_notification),
@@ -221,7 +219,9 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
                     for (CheckIn checkIn : checkIns) {
                         checkIn.setQuestions(Question.getAll(checkIn));
                         try {
-                            mSymptomClient.addCheckIn(user.getUserIdentification(), checkIn); //TODO#BPR_4
+                            //TODO#BPR_4
+                            //TODO#FDAR_3 Save Checkin to remote datastore by calling REST Service exposed by Spring Server
+                            mSymptomClient.addCheckIn(user.getUserIdentification(), checkIn);
                             new Update(CheckIn.class)
                                     .set("needSync = 0")
                                     .where("_id = ?", checkIn.getId())
@@ -248,7 +248,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
                     Log.i(TAG, method + "::Medications to sync: " + painMedications.size());
                     for (PainMedication medication : painMedications) {
                         try {
-                            mSymptomClient.addPainMedication(medication.getPatientMedicalNumber(), medication); //TODO#BPR_4
+                            mSymptomClient.addPainMedication(medication.getPatientMedicalNumber(), medication); //TODO#BPR_4 TODO#FDAR_12
                             new Update(PainMedication.class)
                                     .set("needSync = 0")
                                     .where("_id = ?", medication.getId())
@@ -268,7 +268,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
                 }
                 if(sync.equals(ActiveContract.SYNC_DELETE_MEDICINES)){
                     try {
-                        final boolean deleted =  mSymptomClient.deletePainMedication(owner_entity_id, entity_id); //TODO#BPR_4
+                        final boolean deleted =  mSymptomClient.deletePainMedication(owner_entity_id, entity_id); //TODO#BPR_4 TODO#FDAR_12
                         Log.d(TAG, method + String.format("deletePainMedication:%s (of %s)=> %b ",entity_id,owner_entity_id,deleted));
                     }catch (RetrofitError error){
                         DownloadHelper.get().handleRetrofitError(getContext(),error);
@@ -308,7 +308,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
                     syncPatientsMedicines(user);
                 } else if (sync.equals(ActiveContract.SYNC_PATIENTS)) {
                     syncDoctorPatients(user);
-                } else if (sync.equals(ActiveContract.SYNC_CHECK_IN)) {
+                } else if (sync.equals(ActiveContract.SYNC_CHECK_IN)) { //TODO#FDAR_10 Fetch Check-In data from remote server
                     syncDoctorBaseInfo(user);
                     syncPatientsCheckIns(user);
                 } else if (sync.equals(ActiveContract.SYNC_DOCTORS)) {

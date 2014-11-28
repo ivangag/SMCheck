@@ -65,7 +65,7 @@ public class SymptomAlarmRequest {
         switch (alarmRequestedType){
             case ALARM_CHECK_IN_REMINDER:
                 //TODO#BPR_1
-                if(DAOManager.get().getUser().getUserType() == UserType.PATIENT)
+                if(DAOManager.get().getUser().getUserType().equals(UserType.PATIENT))
                     setReminderAlarm(ctx,afterDismission);
                 break;
             case ALARM_CHECK_ALERTS:
@@ -92,6 +92,7 @@ public class SymptomAlarmRequest {
      * alarm fires, the app broadcasts an Intent to this WakefulBroadcastReceiver.
      * @param context Context
      */
+    //TODO#FDAR_2 set Alarm for firing Check-In Reminder Notification
     private void setReminderAlarm(Context context, boolean afterDismission) {
 
         alarmReminderMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
@@ -146,12 +147,12 @@ public class SymptomAlarmRequest {
             long intervalRepeatFrequency;
             long timeOfNextStartAsDue;
 
-            if (timeLatestCheckin < timeToday_00) {
+            if (timeLatestCheckin < timeToday_00) { // las check-in occurred yesterday
                 Log.d(TAG, "timeLatestCheckin IS < timeToday_00");
-                if (timeNow >= timeDailyStartAsPreference) {
+                if (timeNow >= timeDailyStartAsPreference) { // preference time is gone, start ASAP
                     Log.d(TAG, "timeNow IS >= timeDailyStartAsPreference");
                     timeOfNextStartAsDue = timeNow + AlarmManager.INTERVAL_FIFTEEN_MINUTES / 15;
-                } else {
+                } else { // start at the time chosen by the Patient
                     Log.d(TAG, "timeNow IS < timeDailyStartAsPreference");
                     timeOfNextStartAsDue = timeDailyStartAsPreference;
                 }
@@ -165,11 +166,12 @@ public class SymptomAlarmRequest {
                     timeDailyStartAsPreference += AlarmManager.INTERVAL_DAY;
                     timeOfNextStartAsDue = timeDailyStartAsPreference;
                 } else {
-                    if (timeNow > timeDailyStartAsPreference) {
+                    if (timeNow > timeDailyStartAsPreference) { // continue the normal flow
                         Log.d(TAG, "timeNow IS > timeDailyStartAsPreference");
                         //timeOfNextStartAsDue = timeLatestCheckin + intervalRepeatFrequency;
-                        timeOfNextStartAsDue = timeNow + AlarmManager.INTERVAL_FIFTEEN_MINUTES / 15;
-                    } else {
+                        //timeOfNextStartAsDue = timeNow + AlarmManager.INTERVAL_FIFTEEN_MINUTES / 15;
+                        timeOfNextStartAsDue = timeLatestCheckin + intervalRepeatFrequency;
+                    } else { // user could have changed the time of start, then try to continue the flow from now as
                         Log.d(TAG, "timeNow IS <= timeDailyStartAsPreference");
                         intervalRepeatFrequency = (timeToday_24 - timeNow) / (userCheckinTimePref - checkInThisDay);
                         timeOfNextStartAsDue = timeNow + intervalRepeatFrequency;

@@ -77,7 +77,6 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
     UserInfo mUser;
     private boolean checkInPermitted = true;
 
-    //public final static String EMPTY = Costants.STRINGS.EMPTY;
     public final static String NO = "NO";
     public final static String YES = "YES";
     List<PainMedication> mMedicines = Lists.newArrayList();
@@ -322,7 +321,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         final ProgressDialog ringProgressDialog = ProgressDialog.show(this, "Please wait ...",
                 "Check-In submission in progress ...", true);
         ringProgressDialog.setCancelable(true);
-        new Thread(new Runnable() { //TODO#BPR_8 Check-In saving in background
+        new Thread(new Runnable() { //TODO#BPR_8 Check-In saving performed in a background Thread
             @Override
             public void run() {
                 try {
@@ -399,7 +398,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                 return CheckInQuestionFragment.newInstance(position + 1, FragmentType.FRAGMENT_TYPE_PAIN_LEVEL);
             } else if (position == totalItem - 1) {
                 return CheckInQuestionFragment.newInstance(position + 1, FragmentType.FRAGMENT_TYPE_FEED_STATUS);
-            } else {
+            } else {  //TODO#FDAR_6 Instantiate different Screen showing separate Question for each Medication
                 return CheckInQuestionFragment.newInstance(position + 1, FragmentType.FRAGMENT_TYPE_MEDICINES);
             }
         }
@@ -428,9 +427,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
         }
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
+    //TODO#FDAR_3 Fragment Screen used to show an store Questions Response for Check-In submission
     public static class CheckInQuestionFragment extends Fragment {
 
         View rootView;
@@ -496,6 +493,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
 
             switch (mFragmentType){
                 case FRAGMENT_TYPE_PAIN_LEVEL:
+                    //TODO#FDAR_4 CHECK-IN INCLUDES THE QUESTION, “HOW BAD IS YOUR MOUTH PAIN/SORE THROAT?” TO WHICH A PATIENT CAN RESPOND, “WELL-CONTROLLED,” “MODERATE,” OR “SEVERE.
                     title.setText(getString(R.string.pain_title_question));
                     painQuestionsView = rootView.findViewById(R.id.viewRadioBtnPaintQuestions);
                     painQuestionsView.findViewById(R.id.radioBtnPainModerate).setOnClickListener(new View.OnClickListener() {
@@ -518,6 +516,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                     });
                     break;
                 case FRAGMENT_TYPE_FEED_STATUS:
+                    //TODO#FDAR_8 DURING A CHECK-IN, THE PATIENT IS ASKED “DOES YOUR PAIN STOP YOU FROM EATING/DRINKING?” TO THIS, THE PATIENT CAN RESPOND, “NO,” “SOME,” OR “I CAN’T EAT.
                     title.setText(getString(R.string.feed_status_title_question));
                     feedQuestionsView = rootView.findViewById(R.id.viewRadioBtnFeedQuestions);
                     feedQuestionsView.findViewById(R.id.radioBtnFeedNo).setOnClickListener(new View.OnClickListener() {
@@ -540,8 +539,9 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                     });
                     break;
                 case FRAGMENT_TYPE_MEDICINES:
+                    //TODO#FDAR_5 CHECK-IN INCLUDES THE QUESTION, “DID YOU TAKE YOUR PAIN MEDICATION?” TO WHICH A PATIENT CAN RESPOND “YES” OR “NO”.
                     mMedicineName = parentActivity.mMedicines.get(mPageFragment - 2).getMedicationName();
-                    title.setText(String.format(getString(R.string.medicine_title_question),mMedicineName));
+                    title.setText(String.format(getString(R.string.medicine_title_question),mMedicineName)); //TODO#FDAR_6 Separate Question for each Medication
                     medicinesQuestionsView = rootView.findViewById(R.id.viewRadioBtnMedQuestions);
                     medicinesQuestionsView.findViewById(R.id.radioBtnMedicineNO).setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -555,7 +555,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                         public void onClick(View v) {
                             txtMedicineTakingTime.setVisibility(View.VISIBLE);
                             parentActivity.mReportMedicationsResponse.put(mMedicineName, YES);
-                            showTimePickerDialog(rootView,mMedicineName);
+                            showTimePickerDialog(rootView,mMedicineName); //TODO#FDAR_7 DateTime Dialog is shown when Patient select YES button
                         }
                     });
                     final boolean YES = ((RadioButton)medicinesQuestionsView.findViewById(R.id.radioBtnMedicineYES)).isChecked();
@@ -564,7 +564,7 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
                     txtMedicineTakingTime.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            showTimePickerDialog(rootView,mMedicineName);
+                            showTimePickerDialog(rootView,mMedicineName); //TODO#FDAR_7 DateTime Dialog is also shown when Patient select click over the textview allowing to modify the choice
                         }
                     });
                     break;
@@ -585,12 +585,13 @@ public class CheckInFlowActivity extends Activity implements ActionBar.TabListen
             super.onResume();
         }
 
+        //TODO#FDAR_7 Interactive used by Patient to enter the Date & Time he/shee took the specified medicine
         private void showTimePickerDialog(View v, String mMedicineName) {
             final Dialog dialog = new Dialog(getActivity());
 
             dialog.setContentView(R.layout.custom_dialog_datetime);
 
-            dialog.setTitle(String.format("When did you take the %s",mMedicineName));
+            dialog.setTitle(String.format("%s",mMedicineName));
 
             dialog.show();
 

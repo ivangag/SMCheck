@@ -20,7 +20,8 @@ import org.apache.http.impl.client.HttpClients;
 public class CustomHttpsClient {
 
     //TODO#BPR_5 Http Client used to interacts over the network via HTTP(S)
-	public static HttpClient createUnsafeClient() {
+    //TODO#BPR_14
+	public static HttpClient createHttpsClient() {
 		try {
 			SSLContextBuilder builder = new SSLContextBuilder();
 			builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());

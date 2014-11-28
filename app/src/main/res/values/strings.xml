@@ -97,9 +97,9 @@
     <string name="pref_title_checkin_frequency">Check-In Reminder frequency</string>
 
     <string-array name="pref_checkin_frequency_titles">
-        <item>4 times per day</item>
-        <item>5 times per day</item>
-        <item>6 times per day</item>
+        <item>4 times a day</item>
+        <item>5 times a day</item>
+        <item>6 times a day</item>
     </string-array>
     <string-array name="pref_checkin_frequency_values">
         <item>4</item>
@@ -150,6 +150,7 @@
     <string name="call_other_user_header">Call</string>
     <string name="send_email_other_user_header">Contact via E-mail</string>
     <string name="txt_checkin_reminder_ticker">It\'s time to submit your periodically Check-In</string>
+    <string name="add_new_medicine">Add Pain Medication</string>
 
 
 </resources>

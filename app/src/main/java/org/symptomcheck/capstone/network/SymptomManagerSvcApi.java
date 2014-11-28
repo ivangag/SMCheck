@@ -89,10 +89,6 @@ public interface SymptomManagerSvcApi {
     @POST(PATIENT_SVC_PATH + "/{medicalRecordNumber}/checkins")
     public CheckIn addCheckIn(@Path("medicalRecordNumber") String medicalCardNumber, @Body CheckIn checkIn);
 
-    @POST(PATIENT_SVC_PATH + "/{medicalRecordNumber}/medications")
-    public PainMedication addPainMedication(
-            @Path("medicalRecordNumber") String medicalCardNumber,
-            @Body PainMedication painMedication);
 
     @GET(PATIENT_SVC_PATH + "/{medicalRecordNumber}/medications/search")
     public Collection<PainMedication> findPainMedicationsByPatient(
@@ -101,19 +97,24 @@ public interface SymptomManagerSvcApi {
 
     //----------------- DOCTOR methods ----------------- //
 
+    @POST(PATIENT_SVC_PATH + "/{medicalRecordNumber}/medications")
+    public PainMedication addPainMedication( //TODO#FDAR_12 Used to add a new Patient Medication
+            @Path("medicalRecordNumber") String medicalCardNumber,
+            @Body PainMedication painMedication);
+
     @DELETE(PATIENT_SVC_PATH + "/{medicalRecordNumber}/medications/delete/")
-    public boolean deletePainMedication(
+    public boolean deletePainMedication( //TODO#FDAR_12 Used to delete Patient Medication
             @Path("medicalRecordNumber") String medicalCardNumber,
             @Query("medicineProductId") String medicineProductId);
 
     @GET(DOCTOR_SVC_PATH + "/{uniqueDoctorID}/patients/checkins/searchByPatientName")
-    public Collection<CheckIn> findCheckInsByPatientName(
+    public Collection<CheckIn> findCheckInsByPatientName( //TODO#FDAR_11
             @Path("uniqueDoctorID") String uniqueDoctorID,
             @Query("firstName") String patientFirstName,
             @Query("lastName") String patientLastName);
 
     @GET(DOCTOR_SVC_PATH + "/{uniqueDoctorID}/patients/checkins/searchByPatientName")
-    public void findCheckInsByPatientName(
+    public void findCheckInsByPatientName( //TODO#FDAR_11 Async method
             @Path("uniqueDoctorID") String uniqueDoctorID,
             @Query("firstName") String patientFirstName,
             @Query("lastName") String patientLastName, Callback<Collection<CheckIn>> result);

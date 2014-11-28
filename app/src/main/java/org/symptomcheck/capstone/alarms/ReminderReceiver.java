@@ -26,6 +26,7 @@ import android.util.Log;
 
 
 //TODO#BPR_3 Broadcast Receiver called when the Check-In reminder alarm is fired, then it starts an Intent Service used for raising Notification
+//TODO#FDAR_2
 public class ReminderReceiver extends WakefulBroadcastReceiver {
 
     final private String  TAG = ReminderReceiver.this.getClass().getSimpleName();

@@ -35,6 +35,7 @@ import java.util.UUID;
 
 import hirondelle.date4j.DateTime;
 
+//TODO#FDAR_3 Check-In unit data define a Patient, Date & Time and Questions Response
 @Table(name = "CheckIns", id = BaseColumns._ID)
 public class CheckIn extends Model implements IModelBuilder {
 

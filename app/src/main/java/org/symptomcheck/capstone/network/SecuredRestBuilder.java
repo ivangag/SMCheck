@@ -53,7 +53,7 @@ import retrofit.mime.FormUrlEncodedTypedOutput;
 			.setUsername(USERNAME)
 			.setPassword(PASSWORD)
 			.setClientId(CLIENT_ID)
-			.setClient(new ApacheClient(UnsafeHttpsClient.createUnsafeClient()))
+			.setClient(new ApacheClient(UnsafeHttpsClient.createHttpsClient()))
 			.setEndpoint(TEST_URL).setLogLevel(LogLevel.FULL).build()
 			.create(VideoSvcApi.class);
  * 

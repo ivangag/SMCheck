@@ -346,7 +346,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
                     final String ownerId = patient.getMedicalRecordNumber();
                     Activity activity = getActivity();
                     //Long cardId = Long.valueOf(card.getId());
-                    if(id == R.id.menu_pop_open_check_ins){
+                    if(id == R.id.menu_pop_open_check_ins){ //TODO#FDAR_10 Doctor clicked the menu voice for monitoring Check-Ins data
                         if((activity != null)
                             && (activity instanceof ICardEventListener)){
                             ((ICardEventListener)(activity)).OnCheckInOpenRequired(ownerId);

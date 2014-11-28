@@ -61,6 +61,7 @@ import it.gmariotti.cardslib.library.view.CardListView;
 
 
 //TODO#BPR_6 Check-In Data Fragment Interface Screen
+//TODO#FDAR_10
 public class CheckInFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>, IFragmentListener {
 
     CheckinCursorCardAdapter mAdapter;
@@ -449,7 +450,6 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
 
             if (mTitleTextView != null) {
                 mTitleTextView.setText(mainTitle);
-                //mTitleTextView.setTextColor(resourceIdMainTextColor);
             }
 
             if (mSecondaryTitleTextView != null)
