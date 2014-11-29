@@ -373,7 +373,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
                             ;
             if(checkIn != null) {
                 card.secondaryTitle = "Submitted on " + DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT);
-                final Patient patient = Patient.getByMedicalNumber(checkIn.getPatientMedicalNumber());
+                final Patient patient = Patient.getByMedicalNumber(mPatientOwner.getMedicalRecordNumber());
                 card.mainHeader = patient.getFirstName() + " " + patient.getLastName() + " " + getString(R.string.checkin_header);
 
 

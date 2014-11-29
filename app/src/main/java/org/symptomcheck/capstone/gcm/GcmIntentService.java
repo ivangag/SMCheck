@@ -93,7 +93,7 @@ public class GcmIntentService extends IntentService {
                     if((userCurrentlyLogged != null)
                         && !userCurrentlyLogged.getUserType().equals(UserType.PATIENT)) {
                         NotificationHelper.sendNotification(getApplicationContext(),NOTIFICATION_ID,
-                                "Push Notification", "A Patient has submitted new Check-In", MainActivity.class,false, Constants.STRINGS.EMPTY,null);
+                                "Push Notification", "A Patient submitted new Check-In", MainActivity.class,false, Constants.STRINGS.EMPTY,null);
                         SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_CHECK_IN);
                     }
                 }
@@ -104,7 +104,7 @@ public class GcmIntentService extends IntentService {
                     if((userCurrentlyLogged != null)
                             && !userCurrentlyLogged.getUserType().equals(UserType.DOCTOR)) {
                         NotificationHelper.sendNotification(getApplicationContext(),NOTIFICATION_ID,
-                                "Push Notification", "A Doctor has update your Medicines List", MainActivity.class,false, Constants.STRINGS.EMPTY,null);
+                                "Push Notification", "A Doctor updated your Medicines List", MainActivity.class,false, Constants.STRINGS.EMPTY,null);
                         SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_MEDICINES);
                     }
                 }

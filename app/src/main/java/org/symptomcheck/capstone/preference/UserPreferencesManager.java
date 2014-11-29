@@ -72,6 +72,10 @@ public class UserPreferencesManager {
         return PreferenceManager.getDefaultSharedPreferences(context)
                 .getString(KEY_CHECK_IN_START, Constants.STRINGS.EMPTY);
     }
+    private String setStartHourMinutes(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(KEY_CHECK_IN_START, "08:00");
+    }
 
     public int getStartCheckInHour(Context context){
        int hour = 8;

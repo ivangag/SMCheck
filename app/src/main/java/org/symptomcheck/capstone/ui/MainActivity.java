@@ -213,6 +213,8 @@ public class MainActivity extends Activity implements ICardEventListener {
             } else if (user.getUserType().equals(UserType.PATIENT)) {
                 selectDrawerItem(CASE_SHOW_PATIENT_CHECKINS);
             }
+            Toast.makeText(this,"Welcome " + user.getFirstName().toUpperCase() + " "
+                        + user.getLastName().toUpperCase(),Toast.LENGTH_LONG).show();
         } else {
             Toast.makeText(this, "User not more Logged!!!!!", Toast.LENGTH_LONG).show();
             finish();
@@ -416,6 +418,7 @@ public class MainActivity extends Activity implements ICardEventListener {
     private void doLogout() {
         DAOManager.get().wipeAllData();
         UserPreferencesManager.get().setLogged(this, false);
+        UserPreferencesManager.get().setNextScheduledCheckin(getApplicationContext(), Constants.STRINGS.EMPTY);
         finish();
         Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
         startActivity(intent);
