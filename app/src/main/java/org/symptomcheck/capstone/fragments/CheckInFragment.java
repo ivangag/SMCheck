@@ -381,12 +381,15 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
                     case UNKNOWN:
                     case WELL_CONTROLLED:
                         card.resourceIdAlertIcon = R.drawable.ic_alert_green;
+                        card.resourceIdMainTextColor = getResources().getColor(R.color.card_background_green);
                         break;
                     case MODERATE:
                         card.resourceIdAlertIcon = R.drawable.ic_alert_orange;
+                        card.resourceIdMainTextColor = getResources().getColor(R.color.card_background_orange);
                         break;
                     case SEVERE:
                         card.resourceIdAlertIcon = R.drawable.ic_alert_red;
+                        card.resourceIdMainTextColor = getResources().getColor(R.color.card_background_red);
                         break;
                 }
             }else{
@@ -449,6 +452,8 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             mButtonIconIndicator = (ImageButton)parent.findViewById(R.id.card_capstone_icon_indicator);
 
             if (mTitleTextView != null) {
+                //mTitleTextView.setTextColor(getResources().getColor(R.color.card_background_orange));
+                mTitleTextView.setTextColor(resourceIdMainTextColor);
                 mTitleTextView.setText(mainTitle);
             }
 

@@ -25,6 +25,7 @@ import android.app.LoaderManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.content.SyncStatusObserver;
 import android.database.Cursor;
@@ -40,6 +41,7 @@ import android.view.ViewGroup;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.activeandroid.content.ContentProvider;
 
@@ -344,6 +346,8 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
                 public void onMenuItemClick(BaseCard card, MenuItem item) {
                     int id = item.getItemId();
                     final String ownerId = patient.getMedicalRecordNumber();
+                    final String phoneNumber = patient.getPhoneNumber();
+                    final String email = patient.getEmail();
                     Activity activity = getActivity();
                     //Long cardId = Long.valueOf(card.getId());
                     if(id == R.id.menu_pop_open_check_ins){ //TODO#FDAR_10 Doctor clicked the menu voice for monitoring Check-Ins data
@@ -356,7 +360,28 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
                                 && (activity instanceof ICardEventListener)){
                             ((ICardEventListener)(activity)).OnMedicinesOpenRequired(ownerId);
                         }
+                    }else if(id == R.id.menu_pop_call_patient){
+                        if(phoneNumber != null) {
+                            Intent callIntent = new Intent(Intent.ACTION_CALL);
+                            //callIntent.setData(Uri.parse("tel:123456789"));
+                            callIntent.setData(Uri.parse("tel:" + phoneNumber));
+                            startActivity(callIntent);
+                        }
+                    } else if(id == R.id.menu_pop_send_email_patient){
+                        if(email != null) {
+                            Intent i = new Intent(Intent.ACTION_SEND);
+                            i.setType("message/rfc822");
+                            i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"email"});
+                            i.putExtra(Intent.EXTRA_SUBJECT, "Your Doctor wishes to hear more from you");
+                            i.putExtra(Intent.EXTRA_TEXT   , "Here write your body message");
+                            try {
+                                startActivity(Intent.createChooser(i, "Send mail..."));
+                            } catch (android.content.ActivityNotFoundException ex) {
+                                Toast.makeText(getActivity(), "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
                     }
+
                 }
             });
 

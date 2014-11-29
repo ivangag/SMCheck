@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.symptomcheck.capstone" >
 
+    <!-- Required for allow the user to perform a call phone -->
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
+
     <!-- Required for retrieving the status and type of internet connection -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Required for fetching remote data. -->

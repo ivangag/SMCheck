@@ -350,12 +350,15 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
                     case UNKNOWN:
                     case WELL_CONTROLLED:
                         card.resourceIdAlertIcon = R.drawable.ic_alert_green;
+                        card.resourceIdMainTextColor = getResources().getColor(R.color.card_background_green);
                         break;
                     case MODERATE:
                         card.resourceIdAlertIcon = R.drawable.ic_alert_orange;
+                        card.resourceIdMainTextColor = getResources().getColor(R.color.card_background_orange);
                         break;
                     case SEVERE:
                         card.resourceIdAlertIcon = R.drawable.ic_alert_red;
+                        card.resourceIdMainTextColor = getResources().getColor(R.color.card_background_red);
                         break;
                 }
             } else {
@@ -377,6 +380,7 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
         private ImageButton mButtonExpandCustom;
         public int resourceIdAlertIcon;
         private ImageButton mButtonIconIndicator;
+        public int resourceIdMainTextColor;
 
         public CheckinCursorCard(Context context) {
             super(context, R.layout.carddemo_cursor_inner_content);
@@ -390,8 +394,10 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
             mButtonExpandCustom = (ImageButton)parent.findViewById(R.id.card_rds_expand_button_info);
             mButtonIconIndicator = (ImageButton)parent.findViewById(R.id.card_capstone_icon_indicator);
 
-            if (mTitleTextView != null)
+            if (mTitleTextView != null) {
                 mTitleTextView.setText(mainTitle);
+                mTitleTextView.setTextColor(resourceIdMainTextColor);
+            }
 
             if (mSecondaryTitleTextView != null)
                 mSecondaryTitleTextView.setText(secondaryTitle);

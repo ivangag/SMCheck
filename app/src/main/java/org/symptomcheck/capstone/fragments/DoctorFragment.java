@@ -25,9 +25,11 @@ import android.app.LoaderManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.content.SyncStatusObserver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -39,6 +41,7 @@ import android.view.ViewGroup;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.activeandroid.content.ContentProvider;
 
@@ -59,6 +62,7 @@ import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.CardThumbnail;
 import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
+import it.gmariotti.cardslib.library.internal.base.BaseCard;
 import it.gmariotti.cardslib.library.view.CardListView;
 
 //TODO#BPR_6 Doctor Fragment Interface Screen
@@ -338,13 +342,37 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
 
             //Set the header title
             header.setTitle(card.mainHeader);
-            /*
-            header.setPopupMenu(R.menu.popup_patient, new CardHeader.OnClickCardHeaderPopupMenuListener() {
+
+            header.setPopupMenu(R.menu.popup_doctor, new CardHeader.OnClickCardHeaderPopupMenuListener() {
                 @Override
                 public void onMenuItemClick(BaseCard card, MenuItem item) {
-                    Toast.makeText(getContext(), "Click on card="+card.getId()+" item=" +  item.getTitle(), Toast.LENGTH_SHORT).show();
+                    final String email = doctor.getEmail();
+                    final String phoneNumber = doctor.getPhoneNumber();
+                    final int id = item.getItemId();
+
+                    if (id == R.id.menu_pop_call_doctor) {
+                        if (phoneNumber != null) {
+                            Intent callIntent = new Intent(Intent.ACTION_CALL);
+                            //callIntent.setData(Uri.parse("tel:123456789"));
+                            callIntent.setData(Uri.parse("tel:" + phoneNumber));
+                            startActivity(callIntent);
+                        }
+                    } else if (id == R.id.menu_pop_send_email_doctor) {
+                        if (email != null) {
+                            Intent i = new Intent(Intent.ACTION_SEND);
+                            i.setType("message/rfc822");
+                            i.putExtra(Intent.EXTRA_EMAIL, new String[]{"email"});
+                            i.putExtra(Intent.EXTRA_SUBJECT, "Your Patient needs you");
+                            i.putExtra(Intent.EXTRA_TEXT, "Here write your body message");
+                            try {
+                                startActivity(Intent.createChooser(i, "Send mail..."));
+                            } catch (android.content.ActivityNotFoundException ex) {
+                                Toast.makeText(getActivity(), "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
                 }
-            });*/
+            });
 
             //Add Header to card
             card.addCardHeader(header);
@@ -370,21 +398,6 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
                     //Toast.makeText(getContext(), "Card Expanded id=" + card.getId(),Toast.LENGTH_SHORT).show();
                 }
             });
-
-            /*
-            card.setOnExpandAnimatorEndListener(new Card.OnExpandAnimatorEndListener() {
-                @Override
-                public void onExpandEnd(Card card) {
-
-                }
-            });
-
-            card.setOnExpandAnimatorStartListener(new Card.OnExpandAnimatorStartListener() {
-                @Override
-                public void onExpandStart(Card card) {
-                    Toast.makeText(getContext(), "Card Expanded id=" + card.getId(),Toast.LENGTH_SHORT).show();
-                }
-            })*/
 
             //This provides a simple (and useless) expand area
             String detailedInfo = "";

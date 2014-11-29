@@ -25,6 +25,8 @@ import android.util.Log;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.symptomcheck.capstone.SyncUtils;
+import org.symptomcheck.capstone.dao.DAOManager;
+import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.ui.MainActivity;
@@ -70,30 +72,41 @@ public class GcmIntentService extends IntentService {
                 final String action = extras.getString(GcmConstants.GCM_EXTRAS_KEY_ACTION);
                 Log.i(TAG, "GCMMessage Received: " + extras.toString() + "=> " + action + "-" + userName + "-" + userType);
 
+                final UserInfo currentLoggedUser = DAOManager.get().getUser();
                 UserType userOriginMsg = UserType.valueOf(userType);
-                handleTriggerSync(action, userOriginMsg);
+                handleTriggerSync(action, userOriginMsg,currentLoggedUser);
 
                 // Post notification of received message.
-                NotificationHelper.sendNotification(getApplicationContext(),NOTIFICATION_ID,
-                        "Gcm message", "Received: " + extras.toString(), MainActivity.class,false, Constants.STRINGS.EMPTY,null);
+                //NotificationHelper.sendNotification(getApplicationContext(),NOTIFICATION_ID,
+                 //       "Gcm message", "Received: " + extras.toString(), MainActivity.class,false, Constants.STRINGS.EMPTY,null);
             }
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.
         GcmBroadcastReceiver.completeWakefulIntent(intent);
     }
 
-    private void handleTriggerSync(String action, UserType userTypeSender) {
+    private void handleTriggerSync(String action, UserType userTypeSender, UserInfo userCurrentlyLogged) {
         switch (userTypeSender){
             //TODO#BPR_1
             case PATIENT:
                 if(action.equals(GcmConstants.GCM_ACTION_CHECKIN_UPDATE)) { //TODO#FDAR_10 GCM message used to trigger sync and update Check-In Data
-                    SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_CHECK_IN);
+                    if((userCurrentlyLogged != null)
+                        && !userCurrentlyLogged.getUserType().equals(UserType.PATIENT)) {
+                        NotificationHelper.sendNotification(getApplicationContext(),NOTIFICATION_ID,
+                                "Push Notification", "A Patient has submitted new Check-In", MainActivity.class,false, Constants.STRINGS.EMPTY,null);
+                        SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_CHECK_IN);
+                    }
                 }
                 break;
             case DOCTOR:
                 //TODO#FDAR_12 GCM message received when Doctor update medicines list. Here we trigger a sync in order to update medicines list and Check-Ins tailored questions
                 if(action.equals(GcmConstants.GCM_ACTION_MEDICATION_UPDATE)){
-                    SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_MEDICINES);
+                    if((userCurrentlyLogged != null)
+                            && !userCurrentlyLogged.getUserType().equals(UserType.DOCTOR)) {
+                        NotificationHelper.sendNotification(getApplicationContext(),NOTIFICATION_ID,
+                                "Push Notification", "A Doctor has update your Medicines List", MainActivity.class,false, Constants.STRINGS.EMPTY,null);
+                        SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_MEDICINES);
+                    }
                 }
                 break;
             case ADMIN:
