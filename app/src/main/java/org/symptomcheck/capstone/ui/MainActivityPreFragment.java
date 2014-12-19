@@ -17,7 +17,6 @@
  */
 package org.symptomcheck.capstone.ui;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -38,7 +37,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -66,12 +64,9 @@ import org.symptomcheck.capstone.fragments.ICardEventListener;
 import org.symptomcheck.capstone.fragments.IFragmentListener;
 import org.symptomcheck.capstone.fragments.MedicinesFragment;
 import org.symptomcheck.capstone.fragments.PatientsFragment;
-import org.symptomcheck.capstone.model.CheckIn;
-import org.symptomcheck.capstone.model.CheckInOnlineWrapper;
 import org.symptomcheck.capstone.model.Doctor;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.PatientExperience;
-import org.symptomcheck.capstone.model.QuestionOnlineWrapper;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.preference.UserPreferencesManager;
@@ -86,9 +81,9 @@ import de.greenrobot.event.EventBus;
 
 //TODO#BPR_3 Main Screen Activity
 //TODO#BPR_6
-public class MainActivity extends ActionBarActivity implements ICardEventListener {
+public class MainActivityPreFragment extends ActionBarActivity implements ICardEventListener {
 
-    private final String TAG = MainActivity.this.getClass().getSimpleName();
+    private final String TAG = MainActivityPreFragment.this.getClass().getSimpleName();
     ImageView mImageView;
     private String[] mFragmentTitles = new String[]{};
     private int[] mDrawerImagesResources;
@@ -132,7 +127,6 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
     private Toolbar toolbar;
     private TextView toolbarTitle;
-    NavigationDrawerFragment mDrawerFragment;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -177,7 +171,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             //mDrawerList.addHeaderView(mTextViewHeaderUser);
 
             // set a custom shadow that overlays the main content when the drawer opens
-            //mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+            mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
             // Set the adapter for the list view
             List<DrawerItem> drawerItems = new ArrayList<DrawerItem>();
             for (int idx = 0; idx < mFragmentTitles.length; idx++) {
@@ -196,26 +190,21 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
             getSupportActionBar().setDisplayShowTitleEnabled(false);
-            mDrawerFragment = (NavigationDrawerFragment)
-                    getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
-            mDrawerFragment.setUp(R.id.fragment_navigation_drawer,(DrawerLayout)findViewById(R.id.drawer_layout), toolbar);
-
-
-/*            mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,toolbar,
+            mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,toolbar,
                     R.string.drawer_open, R.string.drawer_close) {
 
-                *//**
+                /**
                  * Called when a drawer has settled in a completely closed state.
-                 *//*
+                 */
                 public void onDrawerClosed(View view) {
                     super.onDrawerClosed(view);
                     //getSupportActionBar().setTitle(mTitle);
                     invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
                 }
 
-                *//**
+                /**
                  * Called when a drawer has settled in a completely open state.
-                 *//*
+                 */
                 public void onDrawerOpened(View drawerView) {
                     super.onDrawerOpened(drawerView);
                     //getSupportActionBar().setTitle(mDrawerTitle);
@@ -228,8 +217,8 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                         toolbar.setAlpha(1 - slideOffset);
                     }
                 }
-            };*/
-            //mDrawerLayout.setDrawerListener(mDrawerToggle);
+            };
+            mDrawerLayout.setDrawerListener(mDrawerToggle);
 
             //TODO#BPR_1
             //TODO#BPR_2
@@ -322,7 +311,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         // If the nav drawer is open, hide action getItemsQuestion related to the content view
-        //boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
+        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
 
         MenuItem menuCheckInTest = menu.findItem(R.id.action_test);
         menuCheckInTest.setVisible(true);
@@ -492,14 +481,14 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
-        //mDrawerToggle.syncState();
+        mDrawerToggle.syncState();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         // Pass any configuration change to the drawer toggls
-        //mDrawerToggle.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -512,7 +501,6 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     protected void onResume() {
         super.onResume();
         EventBus.getDefault().register(this);
-        mDrawerFragment.closeDrawer();
         //this.setTitle("MainActivity");
     }
 
@@ -550,7 +538,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                 IFragmentListener notifier = getCurrentDisplayedFragment();
                 if (notifier != null) {
                     //notifier.OnFilterData(query);
-                    App.hideSoftKeyboard(MainActivity.this);
+                    App.hideSoftKeyboard(MainActivityPreFragment.this);
                     notifier.OnSearchOnLine(query); //TODO#FDAR_11 Doctor confirm Patient FirstName & LastName used to search ONLINE Check-Ins data
                     searchView.clearFocus();
                 }
@@ -579,6 +567,9 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
         // The action bar home/up action should open or close the drawer.
         // ActionBarDrawerToggle will take care of this.
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
 
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -697,8 +688,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             }
         }
 
-        //mDrawerLayout.closeDrawer(mDrawerList);
-        mDrawerFragment.closeDrawer();
+        mDrawerLayout.closeDrawer(mDrawerList);
     }
 
     @Override
@@ -734,7 +724,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {
-                                    ((MainActivity) getActivity())
+                                    ((MainActivityPreFragment) getActivity())
                                             .doLogout();
                                 }
                             })

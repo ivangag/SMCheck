@@ -1,10 +1,11 @@
 <menu
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.MainActivity"
     >
     <item android:id="@+id/menu_refresh"
-        android:icon="@drawable/ic_action_refresh"
+        android:icon="@drawable/ic_refresh_white_24dp"
         android:title="@string/description_refresh"
         android:orderInCategory="110"
         android:showAsAction="ifRoom" />
@@ -16,14 +17,15 @@
     <item android:id="@+id/action_search"
         android:title="@string/action_search"
         android:orderInCategory="100"
-        android:icon="@drawable/ic_action_search"
-        android:showAsAction="ifRoom|collapseActionView"
-        android:actionViewClass="android.widget.SearchView" />
+        android:icon="@drawable/ic_search_white_24dp"
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="android.widget.SearchView" />
+    <!--
     <item android:id="@+id/action_share"
         android:icon="@drawable/ic_action_share"
         android:title="@string/share"
         android:visible="false"
-        android:showAsAction="never"
-        android:actionProviderClass="android.widget.ShareActionProvider"
-        />
+        app:showAsAction="never"
+        app:actionProviderClass="android.widget.ShareActionProvider"
+        />-->
 </menu>

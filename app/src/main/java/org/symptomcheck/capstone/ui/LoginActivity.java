@@ -26,6 +26,8 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -71,7 +73,7 @@ import retrofit.client.Response;
  * https://developers.google.com/+/mobile/android/getting-started#step_1_enable_the_google_api
  * and follow the steps in "Step 1" to create an OAuth 2.0 client for your package.
  */
-public class LoginActivity extends Activity { //TODO#BPR_3
+public class LoginActivity extends ActionBarActivity { //TODO#BPR_3
 
     private static final String TAG = "LoginActivity";
 
@@ -92,7 +94,7 @@ public class LoginActivity extends Activity { //TODO#BPR_3
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     private int mNextActivityToLaunch;
-
+    //private Toolbar toolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -100,6 +102,11 @@ public class LoginActivity extends Activity { //TODO#BPR_3
 
         mNextActivityToLaunch = getIntent().getIntExtra(NotificationHelper.NEXT_ACTIVITY_TO_LAUNCH, NotificationHelper.GO_TO_MAIN);
         setContentView(R.layout.activity_login);
+
+
+        //toolbar = (Toolbar) findViewById(R.id.app_bar);
+        //setSupportActionBar(toolbar);
+
         // Set up the login form.
         mErrorLoginMsg = (TextView) findViewById(R.id.txt_login_error);
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);

@@ -60,6 +60,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -69,9 +70,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="64dp"
                     android:gravity="center"
-                    android:background="#ff45a0ff"
+                    android:background="@color/primary"
                     style="@style/Theme.Capstone"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@color/icons" />
                 </LinearLayout>
 
             <LinearLayout android:id="@+id/email_login_form" android:layout_width="match_parent"
@@ -79,6 +80,7 @@
 
                 <AutoCompleteTextView
                     android:id="@+id/email"
+                    style="@style/AppTheme.Base"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" android:hint="@string/prompt_username"
                     android:inputType="text" android:maxLines="1"
@@ -87,6 +89,7 @@
                 <EditText android:id="@+id/password" android:layout_width="match_parent"
                     android:layout_height="wrap_content" android:hint="@string/prompt_password"
                     android:imeActionId="@+id/login"
+                    style="@style/AppTheme.Base"
                     android:imeActionLabel="@string/action_sign_in_short"
                     android:imeOptions="actionUnspecified" android:inputType="textPassword"
                     android:maxLines="1" android:singleLine="true" />
@@ -95,6 +98,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
+                    style="@style/AppTheme.Base"
                     android:text="@string/remember_me"
                     android:id="@+id/checkBoxRememberMe"
                     android:layout_gravity="end" />

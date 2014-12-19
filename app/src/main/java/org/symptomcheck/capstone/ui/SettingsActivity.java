@@ -76,7 +76,8 @@ public class SettingsActivity extends Activity {
 
         setContentView(R.layout.activity_settings);
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        if(getActionBar() != null)
+            getActionBar().setDisplayHomeAsUpEnabled(true);
         // Display the fragment as the main content.
 
         // here we would customize Settings Screen according to User type (PATIENT, DOCTOR, ADMIN)

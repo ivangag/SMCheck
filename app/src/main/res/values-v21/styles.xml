@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--
     <style name="AppTheme" parent="android:Theme.Material.Light">
+    </style>-->
+
+    <style name="AppTheme" parent="AppTheme.Base">
+        <item name="floatingActionButtonStyle">@style/AppTheme.Fab</item>
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:textColorSecondary">@color/secondary_text</item>
+        <item name="android:textColorPrimary">@color/primary_text</item>
+        <item name="android:windowActionBarOverlay">true</item>
     </style>
 
+
+    <style name="AppTheme.Fab" parent="FloatingActionButton">
+        <item name="floatingActionButtonColor">@color/accent</item>
+    </style>
 </resources>

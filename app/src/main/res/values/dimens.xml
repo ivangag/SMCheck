@@ -11,4 +11,8 @@
     <dimen name="card_thumbnail_height_capstone">48dp</dimen>
 
     <dimen name="card_header_simple_title_text_size">18sp</dimen>
+
+
+    <dimen name="nav_drawer_width">280dp</dimen>
+
 </resources>
