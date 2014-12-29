@@ -42,7 +42,8 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SearchView;
+//import android.widget.SearchView;
+import android.support.v7.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -788,12 +789,27 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
     @Override
     public void onBackPressed() {
+        /*
         if(mFragmentBackStackCount >= 1){
             super.onBackPressed();
         }else{
             askForExit(AlertExitFragment.newInstance());
         }
 
+*/
+        // initialize variables
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
 
+// check to see if stack is empty
+        if (fm.getBackStackEntryCount() > 0) {
+            fm.popBackStack();
+            ft.commit();
+        }
+        else {
+            askForExit(AlertExitFragment.newInstance());
+        }
     }
+
+
 }

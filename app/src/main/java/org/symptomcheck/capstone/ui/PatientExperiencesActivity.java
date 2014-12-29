@@ -20,6 +20,7 @@ package org.symptomcheck.capstone.ui;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -41,7 +42,7 @@ import java.util.List;
 //TODO#BPR_3 Patient Bad Experience Activity
 //TODO#BPR_6
 //TODO#FDAR_13
-public class PatientExperiencesActivity extends Activity {
+public class PatientExperiencesActivity extends ActionBarActivity {
 
     public final static String PATIENT_ID = "patient_id";
     public final static String TAG = "PatientExperiencesActivity";
@@ -89,8 +90,10 @@ public class PatientExperiencesActivity extends Activity {
             }
         }
         // enable ActionBar app icon to behave as action to toggle nav drawer
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        if(getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
         if(btnGoToAllExperiences != null){
             btnGoToAllExperiences.setOnClickListener(new View.OnClickListener() {
                 @Override
