@@ -30,6 +30,7 @@ import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.ui.MainActivity;
+import org.symptomcheck.capstone.ui.MainActivityFirstMaterial;
 import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.NotificationHelper;
 
@@ -60,10 +61,10 @@ public class GcmIntentService extends IntentService {
              */
             if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
                 NotificationHelper.sendNotification(getApplicationContext(),NOTIFICATION_ID,
-                        "Gcm message","Send error: " + extras.toString(),MainActivity.class,false, Constants.STRINGS.EMPTY,null);
+                        "Gcm message","Send error: " + extras.toString(),MainActivityFirstMaterial.class,false, Constants.STRINGS.EMPTY,null);
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
                 NotificationHelper.sendNotification(getApplicationContext(),NOTIFICATION_ID,
-                        "Gcm message","Deleted messages on server: " + extras.toString(),MainActivity.class,false, Constants.STRINGS.EMPTY,null);
+                        "Gcm message","Deleted messages on server: " + extras.toString(),MainActivityFirstMaterial.class,false, Constants.STRINGS.EMPTY,null);
             // If it's a regular GCM message, do some work.
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
 

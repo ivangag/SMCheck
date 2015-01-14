@@ -27,12 +27,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -42,14 +40,12 @@ import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
+//import android.widget.SearchView;
+import android.support.v7.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.activeandroid.query.Update;
-import com.google.common.collect.Lists;
-import com.heinrichreimersoftware.materialdrawer.DrawerView;
-import com.heinrichreimersoftware.materialdrawer.structure.DrawerItem;
-import com.heinrichreimersoftware.materialdrawer.structure.DrawerProfile;
 import com.makeramen.RoundedTransformationBuilder;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
@@ -58,6 +54,8 @@ import com.squareup.picasso.Transformation;
 
 import org.symptomcheck.capstone.App;
 import org.symptomcheck.capstone.R;
+import org.symptomcheck.capstone.adapters.DrawerItem;
+import org.symptomcheck.capstone.adapters.DrawerItemAdapter;
 import org.symptomcheck.capstone.alarms.SymptomAlarmRequest;
 import org.symptomcheck.capstone.bus.DownloadEvent;
 import org.symptomcheck.capstone.dao.DAOManager;
@@ -79,23 +77,21 @@ import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
 import org.symptomcheck.capstone.utils.NotificationHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
-//import android.widget.SearchView;
-
 //TODO#BPR_3 Main Screen Activity
 //TODO#BPR_6
-public class MainActivity extends ActionBarActivity implements ICardEventListener {
+public class MainActivityFirstMaterial extends ActionBarActivity implements ICardEventListener {
 
-    private final String TAG = MainActivity.this.getClass().getSimpleName();
+    private final String TAG = MainActivityFirstMaterial.this.getClass().getSimpleName();
     ImageView mImageView;
     private String[] mFragmentTitles = new String[]{};
-    private List<DrawerItemHelper> mDrawerItemTitles = Lists.newArrayList();
-
     private int[] mDrawerImagesResources;
-
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
     private CharSequence mTitle;
     private ActionBarDrawerToggle mDrawerToggle;
     private CharSequence mDrawerTitle;
@@ -136,21 +132,16 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     private TextView toolbarTitle;
     NavigationDrawerFragment mDrawerFragment;
     private View mFloatingActionButton;
-
-    private DrawerLayout mDrawerLayout;
-    private DrawerView mDrawer;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_materialdrawer);
+        setContentView(R.layout.activity_main);
         mImageView = (ImageView) findViewById(R.id.imageChartApi);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-        mDrawer = (DrawerView) findViewById(R.id.drawer_material);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
         mFloatingActionButton = (View) findViewById(R.id.fab_main);
 
@@ -162,34 +153,12 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         setSupportActionBar(toolbar);
         toolbarTitle = (TextView) findViewById(R.id.txt_toolbar_title);
 
-        mDrawerToggle = new ActionBarDrawerToggle(
-                this,
-                mDrawerLayout,
-                toolbar,
-                R.string.drawer_open,
-                R.string.drawer_close
-        ){
-
-            public void onDrawerClosed(View view) {
-                invalidateOptionsMenu();
-            }
-
-            public void onDrawerOpened(View drawerView) {
-                invalidateOptionsMenu();
-            }
-        };
-
-        mDrawerLayout.setStatusBarBackgroundColor(getResources().getColor(R.color.primary_dark));
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-        mDrawerLayout.closeDrawer(mDrawer);
-
-
         //App.hideSoftKeyboard(MainActivity.this);
         // TODO#BPR_2 activate functionality only if user is logged
         if (user != null) {
+
             initMaterialResource();
             initUserResource();
-            updateDrawer();
             getFragmentManager().
                     addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
                         @Override
@@ -205,7 +174,6 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                         }
                     });
 
-            /*
             List<DrawerItem> drawerItems = new ArrayList<DrawerItem>();
             for (int idx = 0; idx < mFragmentTitles.length; idx++) {
                 drawerItems.add(new DrawerItem(mFragmentTitles[idx], mDrawerImagesResources[idx]));
@@ -216,15 +184,13 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             // Set the list's click listener
             mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
-            // enable ActionBar app icon to behave as action to toggle nav mDrawer
+            // enable ActionBar app icon to behave as action to toggle nav drawer
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
             getSupportActionBar().setDisplayShowTitleEnabled(false);
             mDrawerFragment = (NavigationDrawerFragment)
                     getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
             mDrawerFragment.setUp(R.id.fragment_navigation_drawer,(DrawerLayout)findViewById(R.id.drawer_layout), toolbar);
-            */
-
 
             //TODO#BPR_1
             //TODO#BPR_2
@@ -240,209 +206,6 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             finish();
         }
     }
-
-    public void updateDrawer() {
-        mDrawer.clearItems();
-
-        //mDrawerImagesResources
-        for(int idx =0 ;idx < mFragmentTitles.length;idx++){
-//            mDrawer.addItem(new DrawerItem()
-//                            .setImage(getResources().getDrawable(mDrawerImagesResources[idx]))
-//                            .setTextPrimary(mFragmentTitles[idx])
-//                            //.setTextSecondary(getString(R.string.item_1))
-//            );
-        }
-        for(DrawerItemHelper item : mDrawerItemTitles){
-            if(item.isNeedDivider()){
-                mDrawer.addDivider();
-            }
-            mDrawer.addItem(new DrawerItem()
-                            .setImage(getResources().getDrawable(item.getImage()))
-                            .setTextPrimary(item.getmTitle())
-                            .setTextSecondary(item.getExtra_info())
-                            .setId(item.getPosition())
-            );
-        }
-
-        Drawable avatar = null;
-        if (user.getUserType().equals(UserType.DOCTOR)) {
-            avatar = getResources().getDrawable(R.drawable.ic_doctor);
-        }else {
-            avatar = getResources().getDrawable(R.drawable.ic_patient);
-        }
-        Drawable background = getResources().getDrawable(R.drawable.mat2);
-
-        mDrawer.setProfile(new DrawerProfile()
-                        .setAvatar(avatar)
-                        .setBackground(background)
-                        .setName(user.getFirstName() + " " + user.getLastName())
-                        .setDescription(user.getUserIdentification())
-                        .setOnProfileClickListener(new DrawerProfile.OnProfileClickListener() {
-                            @Override
-                            public void onClick(DrawerProfile drawerProfile) {
-                                Toast.makeText(getApplicationContext(),drawerProfile.getName() + "-" +drawerProfile.getDescription(),Toast.LENGTH_SHORT).show();
-                            }
-                        })
-        );
-
-        mDrawer.selectItem(1);
-        mDrawer.setOnItemClickListener(new com.heinrichreimersoftware.materialdrawer.structure.DrawerItem.OnItemClickListener() {
-            @Override
-            public void onClick(DrawerItem item, int id, int position) {
-                selectDrawerItem(id);
-                mDrawer.selectItem(position);
-                Toast.makeText(getApplicationContext(), "Clicked item #" + position + " id #" + id, Toast.LENGTH_SHORT).show();
-
-            }
-        });
-
-    }
-
-
-    public void updateDrawerTest() {
-        mDrawer.clearItems();
-
-        mDrawer.addItem(new com.heinrichreimersoftware.materialdrawer.structure.DrawerItem()
-                        .setTextPrimary(getString(R.string.app_name))
-                        .setTextSecondary(getString(R.string.item_1))
-        );
-
-        Drawable icon1 = getResources().getDrawable(R.drawable.ic_doctor);
-        mDrawer.addItem(new com.heinrichreimersoftware.materialdrawer.structure.DrawerItem()
-                        .setImage(icon1)
-                        .setTextPrimary(getString(R.string.app_name))
-                        .setTextSecondary(getString(R.string.item_1))
-        );
-
-        mDrawer.addDivider();
-
-        Drawable icon2;
-        if (Math.random() >= .5) {
-            icon2 = getResources().getDrawable(R.drawable.ic_patient);
-        } else {
-            icon2 = getResources().getDrawable(R.drawable.ic_doctor);
-        }
-        mDrawer.addItem(new com.heinrichreimersoftware.materialdrawer.structure.DrawerItem()
-                        .setImage(icon2, com.heinrichreimersoftware.materialdrawer.structure.DrawerItem.AVATAR)
-                        .setTextPrimary(getString(R.string.app_name))
-                        .setTextSecondary(getString(R.string.item_1))
-        );
-
-        Drawable icon3;
-        if (Math.random() >= .5) {
-            icon3 = getResources().getDrawable(R.drawable.ic_patient);
-        } else {
-            icon3 = getResources().getDrawable(R.drawable.ic_doctor);
-        }
-        mDrawer.addItem(new com.heinrichreimersoftware.materialdrawer.structure.DrawerItem()
-                        .setImage(icon3)
-                        .setTextPrimary(getString(R.string.app_name))
-                        .setTextSecondary(getString(R.string.item_1), com.heinrichreimersoftware.materialdrawer.structure.DrawerItem.THREE_LINE)
-        );
-        Drawable avatar = getResources().getDrawable(R.drawable.ic_patient);
-
-        Drawable background = getResources().getDrawable(R.drawable.mat2);
-
-        mDrawer.setProfile(new DrawerProfile()
-                .setAvatar(avatar)
-                .setBackground(background)
-                .setName(user.getFirstName() + " " + user.getLastName())
-                .setDescription(user.getUserIdentification())
-                .setOnProfileClickListener(new DrawerProfile.OnProfileClickListener() {
-                    @Override
-                    public void onClick(DrawerProfile drawerProfile) {
-                        Toast.makeText(getApplicationContext(), drawerProfile.getName() + "-" + drawerProfile.getDescription(), Toast.LENGTH_SHORT).show();
-                    }
-                })
-        );
-
-        mDrawer.selectItem(1);
-        mDrawer.setOnItemClickListener(new com.heinrichreimersoftware.materialdrawer.structure.DrawerItem.OnItemClickListener() {
-            @Override
-            public void onClick(com.heinrichreimersoftware.materialdrawer.structure.DrawerItem item, int id, int position) {
-                mDrawer.selectItem(position);
-                Toast.makeText(getApplicationContext(), "Clicked item #" + position, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-    }
-
-    private void initUserResource() {
-        final UserType userType = user.getUserType();
-        String detailUser = "";
-        detailUser = user.getFirstName()
-                + " " + user.getLastName();
-        try {
-            //TODO#BPR_1
-            //TODO#BPR_2
-            if (userType.equals(UserType.DOCTOR)) {
-
-                mDrawerItemTitles.add(
-                        new DrawerItemHelper (getResources().getString(R.string.patients_header),
-                                getResources().getString(R.string.patients_header_info),
-                                R.drawable.ic_people_grey600_48dp,
-                                CASE_SHOW_DOCTOR_PATIENTS,false));
-                mDrawerItemTitles.add(
-                        new DrawerItemHelper (getResources().getString(R.string.title_bad_experience_notification),
-                                getResources().getString(R.string.title_bad_experience_notification_info),
-                                R.drawable.ic_poll_grey600_48dp,
-                                CASE_SHOW_DOCTOR_PATIENTS_EXPERIENCES,false));
-                mDrawerItemTitles.add(
-                        new DrawerItemHelper (getResources().getString(R.string.title_search_checkin_online),
-                                getResources().getString(R.string.title_search_checkin_online_info),
-                                R.drawable.ic_search_grey600_48dp,
-                                CASE_SHOW_DOCTOR_PATIENTS_ONLINE_CHECKINS,false));
-
-                mDrawerItemTitles.add(
-                        new DrawerItemHelper (getResources().getString(R.string.action_settings),
-                                getResources().getString(R.string.action_settings_info),
-                                R.drawable.ic_settings_applications_grey600_48dp,
-                                CASE_SHOW_DOCTOR_SETTINGS,true));
-                mDrawerItemTitles.add(
-                        new DrawerItemHelper (getResources().getString(R.string.action_logout),
-                                getResources().getString(R.string.action_logout_info),
-                                R.drawable.ic_exit_to_app_grey600_48dp,
-                                CASE_SHOW_DOCTOR_LOGOUT,false));
-
-                mFragmentTitles = getResources().getStringArray(R.array.doctor_fragments_array);
-                mDrawerImagesResources = new int[]{
-                        R.drawable.ic_patient,
-                        R.drawable.ic_experience_2,
-                        R.drawable.ic_action_web_site
-                        //R.drawable.ic_action_settings,
-                        //R.drawable.ic_logout
-                        }
-                ;
-                Picasso.with(this).load(R.drawable.ic_doctor)
-                        //.resize(96, 96)
-                        //.centerCrop()
-                        //.transform(transformation)
-                        .into(mImageView);
-                detailUser += "\nID " + Doctor.getByDoctorNumber(user.getUserIdentification()).getUniqueDoctorId();
-            } else if (userType.equals(UserType.PATIENT)) { //TODO#FDAR_1 show details of Patient on the a view in front of the main activity
-                mFragmentTitles = getResources().getStringArray(R.array.patient_fragments_array);
-                mDrawerImagesResources = new int[]{
-                        R.drawable.ic_check_in,
-                        R.drawable.ic_doctor,
-                        R.drawable.ic_medicine,
-                //        R.drawable.ic_action_settings,
-                //        R.drawable.ic_logout
-                };
-                Picasso.with(this).load(R.drawable.ic_patient)
-                        //.resize(96, 96)
-                        //.centerCrop()
-                        //.transform(transformation)
-                        .into(mImageView);
-                detailUser +=
-                        "\nBorn on " + DateTimeUtils.convertEpochToHumanTime(Patient.getByMedicalNumber(user.getUserIdentification()).getBirthDate(), "DD/MM/YYYY")
-                                + "\nMedical Number " + user.getUserIdentification()
-                ;
-            }
-        } catch (Exception e) {
-            Toast.makeText(this, "Picasso error:" + e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-        }
-    }
-
 
     private void initMaterialResource() {
         SubActionButton.Builder itemBuilder = new SubActionButton.Builder(this);
@@ -527,11 +290,58 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             .oval(true)
             .build();
 
+    private void initUserResource() {
+
+
+
+        final UserType userType = user.getUserType();
+        String detailUser = "";
+        detailUser = user.getFirstName()
+                + " " + user.getLastName();
+        try {
+            //TODO#BPR_1
+            //TODO#BPR_2
+            if (userType.equals(UserType.DOCTOR)) {
+                mFragmentTitles = getResources().getStringArray(R.array.doctor_fragments_array);
+                mDrawerImagesResources = new int[]{
+                        R.drawable.ic_patient,
+                        R.drawable.ic_experience_2,
+                        R.drawable.ic_action_web_site,
+                        R.drawable.ic_action_settings,
+                        R.drawable.ic_logout};
+                Picasso.with(this).load(R.drawable.ic_doctor)
+                        //.resize(96, 96)
+                        //.centerCrop()
+                        //.transform(transformation)
+                        .into(mImageView);
+                detailUser += "\nID " + Doctor.getByDoctorNumber(user.getUserIdentification()).getUniqueDoctorId();
+            } else if (userType.equals(UserType.PATIENT)) { //TODO#FDAR_1 show details of Patient on the a view in front of the main activity
+                mFragmentTitles = getResources().getStringArray(R.array.patient_fragments_array);
+                mDrawerImagesResources = new int[]{
+                        R.drawable.ic_check_in,
+                        R.drawable.ic_doctor,
+                        R.drawable.ic_medicine,
+                        R.drawable.ic_action_settings,
+                        R.drawable.ic_logout};
+                Picasso.with(this).load(R.drawable.ic_patient)
+                        //.resize(96, 96)
+                        //.centerCrop()
+                        //.transform(transformation)
+                        .into(mImageView);
+                detailUser +=
+                        "\nBorn on " + DateTimeUtils.convertEpochToHumanTime(Patient.getByMedicalNumber(user.getUserIdentification()).getBirthDate(), "DD/MM/YYYY")
+                                + "\nMedical Number " + user.getUserIdentification()
+                ;
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Picasso error:" + e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
 
     /* Called whenever we call invalidateOptionsMenu() */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        // If the nav mDrawer is open, hide action getItemsQuestion related to the content view
+        // If the nav drawer is open, hide action getItemsQuestion related to the content view
         //boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
 
         MenuItem menuCheckInTest = menu.findItem(R.id.action_test);
@@ -667,7 +477,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         logoutFragment.show(getFragmentManager(), "logout_dialog");
     }
 
-    public void doLogout() {
+    private void doLogout() {
         DAOManager.get().wipeAllData();
         UserPreferencesManager.get().setLogged(this, false);
         UserPreferencesManager.get().setNextScheduledCheckin(getApplicationContext(), Constants.STRINGS.EMPTY);
@@ -702,14 +512,14 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
-        mDrawerToggle.syncState();
+        //mDrawerToggle.syncState();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        // Pass any configuration change to the mDrawer toggls
-        mDrawerToggle.onConfigurationChanged(newConfig);
+        // Pass any configuration change to the drawer toggls
+        //mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -722,7 +532,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     protected void onResume() {
         super.onResume();
         EventBus.getDefault().register(this);
-        mDrawerLayout.closeDrawers();
+        mDrawerFragment.closeDrawer();
         //this.setTitle("MainActivity");
     }
 
@@ -760,7 +570,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                 IFragmentListener notifier = getCurrentDisplayedFragment();
                 if (notifier != null) {
                     //notifier.OnFilterData(query);
-                    App.hideSoftKeyboard(MainActivity.this);
+                    App.hideSoftKeyboard(MainActivityFirstMaterial.this);
                     notifier.OnSearchOnLine(query); //TODO#FDAR_11 Doctor confirm Patient FirstName & LastName used to search ONLINE Check-Ins data
                     searchView.clearFocus();
                 }
@@ -787,12 +597,9 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-
-        // The action bar home/up action should open or close the mDrawer.
+        // The action bar home/up action should open or close the drawer.
         // ActionBarDrawerToggle will take care of this.
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
+
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
@@ -825,6 +632,24 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                         "Bad Patient Experience", "Experience of one or more Patients require your attention",
                         PatientExperiencesActivity.class, true, PatientExperiencesActivity.ACTION_NEW_PATIENT_BAD_EXPERIENCE, null);
             }
+            /*
+            try {
+                if(DAOManager.get().getUser().getUserType().equals(UserType.DOCTOR)) {
+                    Picasso.with(this).load(R.drawable.ic_doctor)
+                            //.resize(96, 96)
+                            //.centerCrop()
+                            .into(mImageView);
+                }else if(DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)) {
+                    Picasso.with(this).load(R.drawable.ic_patient)
+                            //.resize(96, 96)
+                            //.centerCrop()
+                            .into(mImageView);
+                }
+                }catch (Exception e){
+                Toast.makeText(this, "Picasso error:" + e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
+            }
+            testAddCheckIn();
+            */
         }
 
         if (id == R.id.action_settings) {
@@ -884,16 +709,16 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
         if (mCurrentFragment != null) {
             if (!(mCurrentFragment instanceof DialogFragment)) {
-                // Highlight the selected item, update the mTitle, and close the mDrawer
-                mDrawer.selectItem(position);
+                // Highlight the selected item, update the title, and close the drawer
+                mDrawerList.setItemChecked(position, true);
                 //setTitle(mFragmentTitles[position]);
             } else {
                 askForLogout((DialogFragment) mCurrentFragment);
             }
         }
 
-        mDrawerLayout.closeDrawers();
-        //mDrawerFragment.closeDrawer();
+        //mDrawerLayout.closeDrawer(mDrawerList);
+        mDrawerFragment.closeDrawer();
     }
 
     @Override
@@ -910,7 +735,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         public static AlertLogoutFragment newInstance() {
             AlertLogoutFragment frag = new AlertLogoutFragment();
             Bundle args = new Bundle();
-            //args.putInt("mTitle", mTitle);
+            //args.putInt("title", title);
             //args.putString("message", message);
             frag.setArguments(args);
             return frag;
@@ -918,7 +743,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-            //final int mTitle = getArguments().getInt("mTitle");
+            //final int title = getArguments().getInt("title");
             //final String message = getArguments().getString("message");
 
             return new AlertDialog.Builder(getActivity())
@@ -929,7 +754,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {
-                                    ((MainActivity) getActivity())
+                                    ((MainActivityFirstMaterial) getActivity())
                                             .doLogout();
                                 }
                             })
@@ -955,7 +780,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-            //final int mTitle = getArguments().getInt("mTitle");
+            //final int title = getArguments().getInt("title");
             //final String message = getArguments().getString("message");
 
             return new AlertDialog.Builder(getActivity())
@@ -1002,43 +827,6 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         }
         else {
             askForExit(AlertExitFragment.newInstance());
-        }
-    }
-
-    class DrawerItemHelper {
-
-        private boolean mNeedDivider;
-        private String mTitle;
-        private String mExtra_info;
-        private int mPosition;
-        private int mImage;
-
-        public DrawerItemHelper(String title, String extra_info, int image,int position,  boolean needDivider){
-            mTitle = title;
-            mExtra_info = extra_info;
-            mPosition = position;
-            mImage = image;
-            mNeedDivider = needDivider;
-        }
-
-        public String getmTitle() {
-            return mTitle;
-        }
-
-        public String getExtra_info() {
-            return mExtra_info;
-        }
-
-        public int getPosition() {
-            return mPosition;
-        }
-
-        public int getImage() {
-            return mImage;
-        }
-
-        public boolean isNeedDivider() {
-            return mNeedDivider;
         }
     }
 

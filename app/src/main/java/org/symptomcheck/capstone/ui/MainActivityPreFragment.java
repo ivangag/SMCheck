@@ -138,8 +138,6 @@ public class MainActivityPreFragment extends ActionBarActivity implements ICardE
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
-        mTextViewHeaderUser = (TextView) findViewById(R.id.txt_header_user);
-        mTextViewUserDetails = (TextView) findViewById(R.id.txt_header_user_details);
 
         mTitle = mDrawerTitle = getTitle();
 

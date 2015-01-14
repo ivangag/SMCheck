@@ -28,13 +28,11 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.alarms.CheckinDismissingReceiver;
 import org.symptomcheck.capstone.ui.CheckInFlowActivity;
 import org.symptomcheck.capstone.ui.LoginActivity;
-import org.symptomcheck.capstone.ui.MainActivity;
 
 /**
  * Created by igaglioti on 12/11/2014.

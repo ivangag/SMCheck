@@ -5,16 +5,16 @@
         <item>Check-Ins</item>
         <item>Doctors</item>
         <item>Medicines</item>
-        <item>Settings</item>
-        <item>Logout</item>
-    </string-array>
+        <!--  <item>Settings</item>
+         <item>Logout</item>-->
+     </string-array>
 
-    <string-array
-        name="doctor_fragments_array">
-        <item>Patients</item>
-        <item>Patients Bad Experiences</item>
-        <item>Search Patient Check-In Data</item>
-        <item>Settings</item>
-        <item>Logout</item>
+     <string-array
+         name="doctor_fragments_array">
+         <item>Patients</item>
+         <item>Patients Bad Experiences</item>
+         <item>Search Patient Check-In Data</item>
+         <!--  <item>Settings</item>
+         <item>Logout</item>-->
     </string-array>
 </resources>
