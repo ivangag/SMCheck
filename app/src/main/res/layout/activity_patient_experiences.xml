@@ -12,7 +12,7 @@
     <ScrollView
         android:id="@+id/viewIntroExperience"
         android:layout_width="match_parent"
-        android:background="#FFBB33"
+        style="@style/AppTheme.Base"
         android:layout_height="match_parent">
 
     <RelativeLayout
@@ -25,14 +25,24 @@
         android:layout_gravity="end|top">
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+
+        <include
+                android:id="@+id/app_bar"
+                layout="@layout/app_bar" />
+        <LinearLayout
             android:id="@+id/view_bad_experience_header"
             android:layout_width="match_parent"
             android:orientation="horizontal"
-            android:background="@drawable/ab_solid_capstone"
+            android:background="@color/primary"
             android:layout_height="wrap_content">
+
         <ImageView
-            android:id="@+id/imageChartApi"
-            android:src="@drawable/ic_experience_2"
+            android:id="@+id/imageToolBar"
+            android:src="@drawable/ic_bad_experience"
             android:layout_gravity="center"
             android:layout_width="48dp"
             android:layout_height="48dp"
@@ -47,8 +57,7 @@
             android:textStyle="bold"
             android:layout_height="64dp"
             android:gravity="center"
-            style="@style/Theme.Capstone"
-            android:textColor="@android:color/white" />
+            android:textColor="@color/accent" />
         </LinearLayout>
 
         <LinearLayout
@@ -65,14 +74,12 @@
                     android:layout_gravity="center"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-
                     android:gravity="top|center"
                     android:layout_marginTop="0dp"
-                    android:background="#FFBB33"
                     style="@style/Theme.Capstone"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@color/primary_dark_material_dark" />
             </LinearLayout>
-
+        </LinearLayout>
     </RelativeLayout>
 </ScrollView>
 
@@ -83,7 +90,8 @@
         android:text="@string/text_ok_go_to_all_experiences"
         android:textStyle="bold"
         android:layout_gravity="center_horizontal|bottom"
-        android:background="@drawable/ab_solid_capstone" />
+        android:textColor="@color/accent"
+        android:background="@color/primary" />
 
 </FrameLayout>
 

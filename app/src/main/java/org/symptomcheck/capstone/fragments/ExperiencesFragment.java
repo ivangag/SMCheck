@@ -46,7 +46,6 @@ import org.symptomcheck.capstone.App;
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
-import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.ExperienceType;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.model.PatientExperience;
@@ -147,9 +146,9 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
         String title = TITLE_NONE;
         if(mPatientOwner != null){
             title = //mPatientOwner.getFirstName() + " " +
-                    mPatientOwner.getLastName() + "'s " + getString(R.string.experiences_header);
+                    mPatientOwner.getLastName() + "'s " + getString(R.string.bad_experiences_header);
         }else{
-            title = "Patients " + getString(R.string.experiences_header);
+            title = "Patients " + getString(R.string.bad_experiences_header);
         }
         return title;
     }
@@ -419,7 +418,7 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
             }
             */
             }
-            card.resourceIdThumb=R.drawable.ic_experience_2;
+            card.resourceIdThumb=R.drawable.ic_bad_experience;
 
 
         }

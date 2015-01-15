@@ -17,7 +17,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_marginRight="4dp"
         android:layout_marginEnd="4dp"
-        android:id="@+id/imageChartApi"
+        android:id="@+id/imageToolBar"
         android:src="@drawable/ic_patient"
         android:scaleType="centerCrop"
         android:layout_width="40dp"
@@ -32,7 +32,7 @@
 
     <TextView
         android:visibility="visible"
-        android:id="@+id/txt_toolbar_title"
+        android:id ="@+id/txt_toolbar_title"
         android:layout_gravity="fill"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

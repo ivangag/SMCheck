@@ -110,6 +110,7 @@
     <orderEntry type="library" exported="" name="fab-0.0.6" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-21.0.3" level="project" />
     <orderEntry type="library" exported="" name="activeandroid-3.1.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" exported="" name="android-styled-dialogs-2.0.1" level="project" />
     <orderEntry type="library" exported="" name="cardslib-core-2.0.1" level="project" />
     <orderEntry type="library" exported="" name="gson-2.3" level="project" />
     <orderEntry type="library" exported="" name="support-v13-21.0.0" level="project" />

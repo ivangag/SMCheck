@@ -65,7 +65,7 @@
     <string name="alert_dialog_cancel">Cancel</string>
     <string name="alert_dialog_title_checkin_submission">Do you confirm this CheckIn?</string>
     <string name="title_check_in_confirmation">Click here to confirm Check-In</string>
-    <string name="medicines_header">View Medicines</string>
+    <string name="medicines_header">Medicines</string>
     <string name="title_activity_settings">Symptom Management Settings</string>
 
     <!-- Preference resources -->
@@ -127,10 +127,10 @@
     <item name="txt_medication_delete" type="id">Medication Delete</item>
 
     <string name="title_activity_patient_experiences">Patients Experiences</string>
-    <string name="experiences_header">Bad Experiences</string>
+    <string name="bad_experiences_header">Bad Experiences</string>
     <string name="experience_header">Experience</string>
     <string name="exit_question">Are you sure to exit?</string>
-    <string name="alert_exit_cancel">No</string>
+    <string name="alert_dialog_no">No</string>
     <string name="pref_summary_new_message_notifications">Enable the sending/receiving of important messages</string>
     <string name="text_bad_experience_notification">Experience of one or more Patients require your attention</string>
     <string name="title_bad_experience_notification">Bad Patients Experience</string>
@@ -158,6 +158,10 @@
     <string name="title_search_checkin_online">Search Patient Check-In Data</string>
     <string name="title_search_checkin_online_info">To Search on the Server</string>
     <string name="title_bad_experience_notification_info">Take care of your Patients</string>
+    <string name="checkins_header_info">Check-Ins History</string>
+    <string name="doctors_header">Doctors</string>
+    <string name="doctors_header_info">Your Doctors List</string>
+    <string name="medicines_header_info">Your Pain Medications</string>
 
 
 </resources>

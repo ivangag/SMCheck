@@ -133,7 +133,7 @@ public class MainActivityPreFragment extends ActionBarActivity implements ICardE
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mImageView = (ImageView) findViewById(R.id.imageChartApi);
+        mImageView = (ImageView) findViewById(R.id.imageToolBar);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
@@ -264,7 +264,7 @@ public class MainActivityPreFragment extends ActionBarActivity implements ICardE
                     mFragmentTitles = getResources().getStringArray(R.array.doctor_fragments_array);
                     mDrawerImagesResources = new int[]{
                             R.drawable.ic_patient,
-                            R.drawable.ic_experience_2,
+                            R.drawable.ic_bad_experience,
                             R.drawable.ic_action_web_site,
                             R.drawable.ic_action_settings,
                             R.drawable.ic_logout};
@@ -607,12 +607,12 @@ public class MainActivityPreFragment extends ActionBarActivity implements ICardE
                     Picasso.with(this).load(R.drawable.ic_doctor)
                             //.resize(96, 96)
                             //.centerCrop()
-                            .into(mImageView);
+                            .into(mToolBarImageView);
                 }else if(DAOManager.get().getUser().getUserType().equals(UserType.PATIENT)) {
                     Picasso.with(this).load(R.drawable.ic_patient)
                             //.resize(96, 96)
                             //.centerCrop()
-                            .into(mImageView);
+                            .into(mToolBarImageView);
                 }
                 }catch (Exception e){
                 Toast.makeText(this, "Picasso error:" + e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
@@ -763,7 +763,7 @@ public class MainActivityPreFragment extends ActionBarActivity implements ICardE
                                     getActivity().finish();
                                 }
                             })
-                    .setNegativeButton(R.string.alert_exit_cancel,
+                    .setNegativeButton(R.string.alert_dialog_no,
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {

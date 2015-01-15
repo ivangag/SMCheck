@@ -78,4 +78,7 @@ dependencies {
 
     //Material Navigation Drawer
     compile 'com.heinrichreimersoftware.materialdrawer:library:1.3.2'
+
+    // Material Material StyledDialogs
+    compile 'com.avast:android-styled-dialogs:2.0.1'
 }

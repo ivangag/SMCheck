@@ -17,10 +17,10 @@
  */
 package org.symptomcheck.capstone.ui;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,7 +28,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import org.symptomcheck.capstone.App;
 import org.symptomcheck.capstone.R;
@@ -50,10 +53,20 @@ public class PatientExperiencesActivity extends ActionBarActivity {
     View viewIntroNewExperienceInfo;
     TextView textViewDetails;
     Button btnGoToAllExperiences;
+    private Toolbar toolbar;
+    private TextView toolbarTitle;
+    private ImageView mToolBarImageView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient_experiences);
+        toolbar = (Toolbar) findViewById(R.id.app_bar);
+        setSupportActionBar(toolbar);
+        toolbarTitle = (TextView) findViewById(R.id.txt_toolbar_title);
+
+        mToolBarImageView = (ImageView) findViewById(R.id.imageToolBar);
+
         viewIntroNewExperienceInfo = findViewById(R.id.viewIntroExperience);
         textViewDetails = (TextView) findViewById(R.id.txt_view_bad_experience_test);
         btnGoToAllExperiences = (Button) findViewById(R.id.btn_go_to_all_experiences);
@@ -89,10 +102,23 @@ public class PatientExperiencesActivity extends ActionBarActivity {
                 showAllExperiencesList();
             }
         }
+
+
+        if(mToolBarImageView != null ){
+            Picasso.with(this).load(R.drawable.ic_bad_experience)
+                    //.resize(96, 96)
+                    //.centerCrop()
+                    //.transform(transformation)
+                    .into(mToolBarImageView);
+        }
+        if(toolbarTitle != null)
+            toolbarTitle.setText(getString(R.string.bad_experiences_header));
+
         // enable ActionBar app icon to behave as action to toggle nav drawer
         if(getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
         if(btnGoToAllExperiences != null){
             btnGoToAllExperiences.setOnClickListener(new View.OnClickListener() {
@@ -103,6 +129,7 @@ public class PatientExperiencesActivity extends ActionBarActivity {
                 }
             });
         }
+
     }
 
     private void showAllExperiencesList() {

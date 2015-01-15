@@ -29,6 +29,7 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -46,6 +47,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.activeandroid.query.Update;
+import com.avast.android.dialogs.core.BaseDialogFragment;
+import com.avast.android.dialogs.fragment.SimpleDialogFragment;
+import com.avast.android.dialogs.iface.ISimpleDialogCancelListener;
+import com.avast.android.dialogs.iface.ISimpleDialogListener;
 import com.google.common.collect.Lists;
 import com.heinrichreimersoftware.materialdrawer.DrawerView;
 import com.heinrichreimersoftware.materialdrawer.structure.DrawerItem;
@@ -53,7 +58,6 @@ import com.heinrichreimersoftware.materialdrawer.structure.DrawerProfile;
 import com.makeramen.RoundedTransformationBuilder;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
-import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 
 import org.symptomcheck.capstone.App;
@@ -87,10 +91,10 @@ import de.greenrobot.event.EventBus;
 
 //TODO#BPR_3 Main Screen Activity
 //TODO#BPR_6
-public class MainActivity extends ActionBarActivity implements ICardEventListener {
+public class MainActivity extends ActionBarActivity implements ICardEventListener,ISimpleDialogListener,ISimpleDialogCancelListener {
 
     private final String TAG = MainActivity.this.getClass().getSimpleName();
-    ImageView mImageView;
+    ImageView mToolBarImageView;
     private String[] mFragmentTitles = new String[]{};
     private List<DrawerItemHelper> mDrawerItemTitles = Lists.newArrayList();
 
@@ -105,6 +109,26 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     private Fragment mPreviousFragment;
     private int mSelectedFragmentPosition = -1;
     private ShowFragmentType mSelectedFragmentType;
+
+    @Override
+    public void onCancelled(int i) {
+
+    }
+
+    @Override
+    public void onPositiveButtonClicked(int i) {
+
+    }
+
+    @Override
+    public void onNegativeButtonClicked(int i) {
+
+    }
+
+    @Override
+    public void onNeutralButtonClicked(int i) {
+
+    }
 
     public enum ShowFragmentType {
         DOCTOR_PATIENTS,
@@ -146,7 +170,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_materialdrawer);
-        mImageView = (ImageView) findViewById(R.id.imageChartApi);
+        mToolBarImageView = (ImageView) findViewById(R.id.imageToolBar);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -184,6 +208,10 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         mDrawerLayout.closeDrawer(mDrawer);
 
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
         //App.hideSoftKeyboard(MainActivity.this);
         // TODO#BPR_2 activate functionality only if user is logged
         if (user != null) {
@@ -205,27 +233,6 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                         }
                     });
 
-            /*
-            List<DrawerItem> drawerItems = new ArrayList<DrawerItem>();
-            for (int idx = 0; idx < mFragmentTitles.length; idx++) {
-                drawerItems.add(new DrawerItem(mFragmentTitles[idx], mDrawerImagesResources[idx]));
-            }
-            final DrawerItemAdapter mDrawerItemAdapter = new DrawerItemAdapter(getApplicationContext(), drawerItems);
-
-            mDrawerList.setAdapter(mDrawerItemAdapter);
-            // Set the list's click listener
-            mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-
-            // enable ActionBar app icon to behave as action to toggle nav mDrawer
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setHomeButtonEnabled(true);
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
-            mDrawerFragment = (NavigationDrawerFragment)
-                    getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_drawer);
-            mDrawerFragment.setUp(R.id.fragment_navigation_drawer,(DrawerLayout)findViewById(R.id.drawer_layout), toolbar);
-            */
-
-
             //TODO#BPR_1
             //TODO#BPR_2
             if (user.getUserType().equals(UserType.DOCTOR)) {
@@ -244,14 +251,6 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     public void updateDrawer() {
         mDrawer.clearItems();
 
-        //mDrawerImagesResources
-        for(int idx =0 ;idx < mFragmentTitles.length;idx++){
-//            mDrawer.addItem(new DrawerItem()
-//                            .setImage(getResources().getDrawable(mDrawerImagesResources[idx]))
-//                            .setTextPrimary(mFragmentTitles[idx])
-//                            //.setTextSecondary(getString(R.string.item_1))
-//            );
-        }
         for(DrawerItemHelper item : mDrawerItemTitles){
             if(item.isNeedDivider()){
                 mDrawer.addDivider();
@@ -396,7 +395,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                 mDrawerItemTitles.add(
                         new DrawerItemHelper (getResources().getString(R.string.action_settings),
                                 getResources().getString(R.string.action_settings_info),
-                                R.drawable.ic_settings_applications_grey600_48dp,
+                                R.drawable.ic_action_settings,
                                 CASE_SHOW_DOCTOR_SETTINGS,true));
                 mDrawerItemTitles.add(
                         new DrawerItemHelper (getResources().getString(R.string.action_logout),
@@ -404,35 +403,35 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                                 R.drawable.ic_exit_to_app_grey600_48dp,
                                 CASE_SHOW_DOCTOR_LOGOUT,false));
 
-                mFragmentTitles = getResources().getStringArray(R.array.doctor_fragments_array);
-                mDrawerImagesResources = new int[]{
-                        R.drawable.ic_patient,
-                        R.drawable.ic_experience_2,
-                        R.drawable.ic_action_web_site
-                        //R.drawable.ic_action_settings,
-                        //R.drawable.ic_logout
-                        }
-                ;
-                Picasso.with(this).load(R.drawable.ic_doctor)
-                        //.resize(96, 96)
-                        //.centerCrop()
-                        //.transform(transformation)
-                        .into(mImageView);
                 detailUser += "\nID " + Doctor.getByDoctorNumber(user.getUserIdentification()).getUniqueDoctorId();
             } else if (userType.equals(UserType.PATIENT)) { //TODO#FDAR_1 show details of Patient on the a view in front of the main activity
-                mFragmentTitles = getResources().getStringArray(R.array.patient_fragments_array);
-                mDrawerImagesResources = new int[]{
-                        R.drawable.ic_check_in,
-                        R.drawable.ic_doctor,
-                        R.drawable.ic_medicine,
-                //        R.drawable.ic_action_settings,
-                //        R.drawable.ic_logout
-                };
-                Picasso.with(this).load(R.drawable.ic_patient)
-                        //.resize(96, 96)
-                        //.centerCrop()
-                        //.transform(transformation)
-                        .into(mImageView);
+
+                mDrawerItemTitles.add(
+                        new DrawerItemHelper (getResources().getString(R.string.checkins_header),
+                                getResources().getString(R.string.checkins_header_info),
+                                R.drawable.ic_poll_grey600_48dp,
+                                CASE_SHOW_PATIENT_CHECKINS,false));
+                mDrawerItemTitles.add(
+                        new DrawerItemHelper (getResources().getString(R.string.doctors_header),
+                                getResources().getString(R.string.doctors_header_info),
+                                R.drawable.ic_people_grey600_48dp,
+                                CASE_SHOW_PATIENT_DOCTORS,false));
+                mDrawerItemTitles.add(
+                        new DrawerItemHelper (getResources().getString(R.string.medicines_header),
+                                getResources().getString(R.string.medicines_header_info),
+                                R.drawable.ic_list_grey600_48dp,
+                                CASE_SHOW_DOCTOR_PATIENTS_ONLINE_CHECKINS,false));
+
+                mDrawerItemTitles.add(
+                        new DrawerItemHelper (getResources().getString(R.string.action_settings),
+                                getResources().getString(R.string.action_settings_info),
+                                R.drawable.ic_action_settings,
+                                CASE_SHOW_PATIENT_SETTINGS,true));
+                mDrawerItemTitles.add(
+                        new DrawerItemHelper (getResources().getString(R.string.action_logout),
+                                getResources().getString(R.string.action_logout_info),
+                                R.drawable.ic_exit_to_app_grey600_48dp,
+                                CASE_SHOW_PATIENT_LOGOUT,false));
                 detailUser +=
                         "\nBorn on " + DateTimeUtils.convertEpochToHumanTime(Patient.getByMedicalNumber(user.getUserIdentification()).getBirthDate(), "DD/MM/YYYY")
                                 + "\nMedical Number " + user.getUserIdentification()
@@ -661,10 +660,12 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     }
 
     private void askForExit(DialogFragment exitFragment) {
-        exitFragment.show(getFragmentManager(), "exit");
+        //exitFragment.show(getFragmentManager(), "exit");
+        AlertMaterialExitFragment.show(this);
     }
     private void askForLogout(DialogFragment logoutFragment) {
-        logoutFragment.show(getFragmentManager(), "logout_dialog");
+        //logoutFragment.show(getFragmentManager(), "logout_dialog");
+        AlertMaterialLogoutFragment.show(this);
     }
 
     public void doLogout() {
@@ -800,13 +801,8 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
         if (id == R.id.action_test) {
 
-            NotificationHelper.raiseCheckinReminderNotification(this,1,getString(R.string.checkin_reminder_text));
 
-            //List<CheckIn> checkIns = CheckIn.getAll();
-            //DAOManager.get().saveCheckInsOnline(checkIns, Constants.STRINGS.EMPTY,user.getUserIdentification());
-            //Intent intent = new Intent(this, CheckInFlowActivity.class);
-            //startActivity(intent);
-
+            NotificationHelper.raiseCheckinReminderNotification(this, 1, getString(R.string.checkin_reminder_text));
             List<PatientExperience> newBadPatientExperiences = PatientExperience.computeBadExperiences();
             //List<PatientExperience> patientExperiences = PatientExperience.getByPatient("patient001");
             List<PatientExperience> patientExperiences = PatientExperience.getAll();
@@ -825,6 +821,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                         "Bad Patient Experience", "Experience of one or more Patients require your attention",
                         PatientExperiencesActivity.class, true, PatientExperiencesActivity.ACTION_NEW_PATIENT_BAD_EXPERIENCE, null);
             }
+
         }
 
         if (id == R.id.action_settings) {
@@ -876,10 +873,11 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             mCurrentFragment = selectFragment(position);
             if (!(mCurrentFragment instanceof DialogFragment)) {
                 if (mCurrentFragment != null) {
-                    mSelectedFragmentPosition = position;
+                    //mSelectedFragmentPosition = position;
                     openFragment(mCurrentFragment, false);
                 }
             }
+            mSelectedFragmentPosition = position;
         }
 
         if (mCurrentFragment != null) {
@@ -943,6 +941,35 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         }
     }
 
+    public static class AlertMaterialLogoutFragment extends SimpleDialogFragment {
+        static String TAG = "AlertMaterialLogoutFragment";
+        public static void show(FragmentActivity activity) {
+            new AlertMaterialLogoutFragment().show(activity.getSupportFragmentManager(), TAG);
+        }
+        @Override
+        public BaseDialogFragment.Builder build(BaseDialogFragment.Builder builder) {
+            builder.setTitle(getString(R.string.title_activity_main));
+            builder.setMessage(getString(R.string.logout_question));
+            builder
+                    .setPositiveButton(getString(R.string.alert_dialog_yes), new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            ((MainActivity) getActivity())
+                                    .doLogout();
+                        }
+                    });
+            builder
+                    .setNegativeButton(getString(R.string.alert_dialog_no), new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dismiss();
+                        }
+                    });
+
+            return builder;
+        }
+    }
+
     static boolean isConfirmedExit = true;
     public static class AlertExitFragment extends DialogFragment {
 
@@ -970,7 +997,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                                     getActivity().finish();
                                 }
                             })
-                    .setNegativeButton(R.string.alert_exit_cancel,
+                    .setNegativeButton(R.string.alert_dialog_no,
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {
@@ -978,6 +1005,42 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                                     dismiss();
                                 }
                             }).create();
+        }
+    }
+
+    public static class AlertMaterialExitFragment extends SimpleDialogFragment {
+        static String TAG = "AlertMaterialExitFragment";
+        public static void show(FragmentActivity activity) {
+            new AlertMaterialExitFragment().show(activity.getSupportFragmentManager(), TAG);
+        }
+        @Override
+        public BaseDialogFragment.Builder build(BaseDialogFragment.Builder builder) {
+            builder.setTitle(getString(R.string.title_activity_main));
+            builder.setMessage(getString(R.string.exit_question));
+            //builder.setView(LayoutInflater.from(getActivity()).inflate(R.layout.view_jayne_hat, null));
+            builder
+                    .setPositiveButton(getString(R.string.alert_dialog_yes), new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+//                            ISimpleDialogListener listener = getDialogListener();
+//                            if (listener != null) {
+//                                listener.onPositiveButtonClicked(0);
+//                            }
+//                            dismiss();
+                            isConfirmedExit = true;
+                            getActivity().finish();
+                        }
+                    });
+            builder
+                    .setNegativeButton(getString(R.string.alert_dialog_no), new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            isConfirmedExit = false;
+                            dismiss();
+                        }
+                    });
+
+            return builder;
         }
     }
 

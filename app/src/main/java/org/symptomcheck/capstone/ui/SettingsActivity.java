@@ -64,7 +64,6 @@ public class SettingsActivity extends Activity {
 
 
     UserInfo mUser;
-
     public final static int MODIFY_USER_SETTINGS = 1;
     public static boolean mIsSettingsModified;
 
