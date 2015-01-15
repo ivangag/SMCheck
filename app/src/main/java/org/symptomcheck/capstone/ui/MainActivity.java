@@ -95,21 +95,14 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
     private final String TAG = MainActivity.this.getClass().getSimpleName();
     ImageView mToolBarImageView;
-    private String[] mFragmentTitles = new String[]{};
+
     private List<DrawerItemHelper> mDrawerItemTitles = Lists.newArrayList();
-
-    private int[] mDrawerImagesResources;
-
     private CharSequence mTitle;
     private ActionBarDrawerToggle mDrawerToggle;
-    private CharSequence mDrawerTitle;
-    private TextView mTextViewHeaderUser;
-    private TextView mTextViewUserDetails;
     private Fragment mCurrentFragment;
     private Fragment mPreviousFragment;
     private int mSelectedFragmentPosition = -1;
-    private ShowFragmentType mSelectedFragmentType;
-
+    private FloatingActionMenu mFabActionsMenu;
     @Override
     public void onCancelled(int i) {
 
@@ -156,7 +149,6 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
     private static int mFragmentBackStackCount = 0;
 
-    private Toolbar toolbar;
     private TextView toolbarTitle;
     NavigationDrawerFragment mDrawerFragment;
     private View mFloatingActionButton;
@@ -177,12 +169,20 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         mDrawer = (DrawerView) findViewById(R.id.drawer_material);
 
         mFloatingActionButton = (View) findViewById(R.id.fab_main);
+        if(mFloatingActionButton != null){
+            mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
-        mTitle = mDrawerTitle = getTitle();
+                }
+            });
+        }
+
+        mTitle = getTitle();
 
         user = DAOManager.get().getUser();
 
-        toolbar = (Toolbar) findViewById(R.id.app_bar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
         toolbarTitle = (TextView) findViewById(R.id.txt_toolbar_title);
 
@@ -200,6 +200,9 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
             public void onDrawerOpened(View drawerView) {
                 invalidateOptionsMenu();
+                if(mFabActionsMenu.isOpen()){
+                    mFabActionsMenu.close(true);
+                }
             }
         };
 
@@ -290,7 +293,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             public void onClick(DrawerItem item, int id, int position) {
                 selectDrawerItem(id);
                 mDrawer.selectItem(position);
-                Toast.makeText(getApplicationContext(), "Clicked item #" + position + " id #" + id, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), "Clicked item #" + position + " id #" + id, Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -499,7 +502,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         });
         // Build the menu with default options: light theme, 90 degrees, 72dp radius.
         // Set 4 default SubActionButtons
-        FloatingActionMenu rightLowerMenu = new FloatingActionMenu.Builder(this)
+        mFabActionsMenu = new FloatingActionMenu.Builder(this)
                 .addSubActionView(subAct1)
                 .addSubActionView(rLSubBuilder.setContentView(rlIcon2).setLayoutParams(new FrameLayout.LayoutParams(128,128)).build())
                 .addSubActionView(rLSubBuilder.setContentView(rlIcon3).setLayoutParams(new FrameLayout.LayoutParams(128,128)).build())
@@ -841,7 +844,6 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         final ShowFragmentType fragmentType = ShowFragmentType.PATIENT_CHECKINS;
         mPreviousFragment = mCurrentFragment;
         mCurrentFragment = selectFragment(fragmentType, patientId);
-        mSelectedFragmentType = fragmentType;
         if (mCurrentFragment != null)
             openFragment(mCurrentFragment, true);
     }
@@ -851,7 +853,6 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         final ShowFragmentType fragmentType = ShowFragmentType.PATIENT_MEDICINES;
         mPreviousFragment = mCurrentFragment;
         mCurrentFragment = selectFragment(fragmentType, patientId);
-        mSelectedFragmentType = fragmentType;
         if (mCurrentFragment != null)
             openFragment(mCurrentFragment, true);
     }
