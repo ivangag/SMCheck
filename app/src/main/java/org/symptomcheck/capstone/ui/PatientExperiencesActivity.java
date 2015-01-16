@@ -105,7 +105,7 @@ public class PatientExperiencesActivity extends ActionBarActivity {
 
 
         if(mToolBarImageView != null ){
-            Picasso.with(this).load(R.drawable.ic_bad_experience)
+            Picasso.with(this).load(R.drawable.ic_patient)
                     //.resize(96, 96)
                     //.centerCrop()
                     //.transform(transformation)

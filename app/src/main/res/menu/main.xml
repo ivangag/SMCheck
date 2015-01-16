@@ -5,12 +5,13 @@
     tools:context=".ui.MainActivity"
     >
     <item android:id="@+id/menu_refresh"
-        android:icon="@drawable/ic_refresh_white_24dp"
+        android:icon="@drawable/ic_refresh_white_48dp"
         android:title="@string/description_refresh"
         android:orderInCategory="110"
-        android:showAsAction="ifRoom" />
+        android:showAsAction="never" />
     <item android:id="@+id/action_test"
         android:title="@string/action_accept_checkin"
+        android:icon="@drawable/ic_timer_white_24dp"
         android:orderInCategory="120"
         android:visible="true"
         android:showAsAction="ifRoom" />

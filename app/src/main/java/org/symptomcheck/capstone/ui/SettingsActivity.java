@@ -37,9 +37,16 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.RingtonePreference;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.makeramen.RoundedImageView;
+import com.squareup.picasso.Picasso;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.alarms.SymptomAlarmRequest;
@@ -60,12 +67,15 @@ import org.symptomcheck.capstone.preference.UserPreferencesManager;
  * API Guide</a> for more information on developing a Settings UI.
  */
 //TODO#BPR_3 Settings Activity
-public class SettingsActivity extends Activity {
+public class SettingsActivity extends ActionBarActivity {
 
 
     UserInfo mUser;
     public final static int MODIFY_USER_SETTINGS = 1;
     public static boolean mIsSettingsModified;
+    private Toolbar toolbar;
+    private TextView toolbarTitle;
+    private RoundedImageView mToolBarImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,10 +85,29 @@ public class SettingsActivity extends Activity {
 
         setContentView(R.layout.activity_settings);
 
-        if(getActionBar() != null)
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-        // Display the fragment as the main content.
+        toolbar = (Toolbar) findViewById(R.id.app_bar);
+        setSupportActionBar(toolbar);
+        toolbarTitle = (TextView) findViewById(R.id.txt_toolbar_title);
+        mToolBarImageView = (RoundedImageView) findViewById(R.id.imageToolBar);
+        // enable ActionBar app icon to behave as action to toggle nav drawer
+        if(getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
 
+        if(toolbarTitle != null)
+            toolbarTitle.setText(getString(R.string.action_settings));
+        // Display the fragment as the main content.
+        if(mToolBarImageView != null ){
+            mToolBarImageView.setVisibility(View.GONE);
+            mToolBarImageView.setOval(false);
+            Picasso.with(this).load(R.drawable.ic_action_settings)
+                    //.resize(96, 96)
+                    //.centerCrop()
+                    //.transform(transformation)
+                    .into(mToolBarImageView);
+        }
         // here we would customize Settings Screen according to User type (PATIENT, DOCTOR, ADMIN)
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         if(mUser != null) {
@@ -157,6 +186,8 @@ public class SettingsActivity extends Activity {
     public void onBackPressed() {
         this.setResult(mIsSettingsModified ? RESULT_OK : RESULT_OK);
         super.onBackPressed();
+        finish();
+        overridePendingTransition(R.anim.hold, R.anim.push_out_to_bottom);
     }
 
 

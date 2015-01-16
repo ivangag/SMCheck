@@ -4,6 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="fill_parent">
 
+
+    <include
+        android:id="@+id/app_bar"
+        layout="@layout/app_bar" />
+    
     <FrameLayout
         android:id="@+id/content_settings_checkin_reminder"
         android:layout_width="match_parent"

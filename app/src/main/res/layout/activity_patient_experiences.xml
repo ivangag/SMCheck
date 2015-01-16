@@ -35,6 +35,7 @@
                 layout="@layout/app_bar" />
         <LinearLayout
             android:id="@+id/view_bad_experience_header"
+            android:visibility="visible"
             android:layout_width="match_parent"
             android:orientation="horizontal"
             android:background="@color/primary"
@@ -42,7 +43,7 @@
 
         <ImageView
             android:id="@+id/imageToolBar"
-            android:src="@drawable/ic_bad_experience"
+            android:src="@drawable/ic_poll_grey600_48dp"
             android:layout_gravity="center"
             android:layout_width="48dp"
             android:layout_height="48dp"
@@ -90,7 +91,7 @@
         android:text="@string/text_ok_go_to_all_experiences"
         android:textStyle="bold"
         android:layout_gravity="center_horizontal|bottom"
-        android:textColor="@color/accent"
+        android:textColor="@color/icons"
         android:background="@color/primary" />
 
 </FrameLayout>

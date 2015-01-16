@@ -11,6 +11,18 @@
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="colorAccent">@color/accent</item>
+        <item name="actionBarStyle">@style/AbStyle</item>
+        <item name="android:windowExitAnimation">@anim/push_out_to_bottom</item>
+    </style>
+
+    <style name="AbStyle" parent="Widget.AppCompat.Toolbar">
+        <item name="elevation">2dp</item>
+        <item name="displayOptions">homeAsUp|showTitle</item>
+        <item name="android:colorBackground">@color/Primary_Grey_300</item>
+        <item name="android:textColorPrimary">@color/primary_dark_material_dark</item>
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <!--showHome-->
     </style>
 
     <style name="MyCustomToolBarTheme" parent="ThemeOverlay.AppCompat.Light">

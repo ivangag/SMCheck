@@ -36,49 +36,38 @@ dependencies {
     compile 'com.google.android.gms:play-services:6.5.87'
     compile 'com.squareup.retrofit:retrofit:1.7.1'
     compile 'commons-io:commons-io:2.4'
-    compile group: 'org.apache.httpcomponents' , name: 'httpclient-android' , version: '4.3.5'
-
+    compile 'org.apache.httpcomponents:httpclient-android:4.3.5'
     ///****** date4j. It's an alternative to Date, Calendar, and related Java classes.
     //The main goals of date4j are:
     //      easy manipulation of dates/times in the Gregorian calendar (the civil calendar used in almost all countries).
     //      easy storage and retrieval of such dates/times from a relational database.
     //      a simplified model of civil timekeeping, similar to the model used by many databases.
     compile 'com.darwinsys:hirondelle-date4j:1.5.1'
-
     ///*****CardsLib dependencies
     //Core
     compile 'com.github.gabrielemariotti.cards:cardslib-core:2.0.1'
-
     //Optional for built-in cards
     compile 'com.github.gabrielemariotti.cards:cardslib-cards:2.0.1'
-
     //Optional for RecyclerView
     compile 'com.github.gabrielemariotti.cards:cardslib-recyclerview:2.0.1'
-
     //Optional for staggered grid view
     compile 'com.github.gabrielemariotti.cards:cardslib-extra-staggeredgrid:2.0.1'
-
     //Optional for drag and drop
     compile 'com.github.gabrielemariotti.cards:cardslib-extra-dragdrop:2.0.1'
-
     ///****FAB library
     compile 'com.shamanland:fab:0.0.6'
-
     ///**** Other FAB library
     compile 'com.melnykov:floatingactionbutton:1.1.0'
-
     ///****RoundedImageView
     compile 'com.makeramen:roundedimageview:1.5.0'
-
     ///***CircularFloatingActionMenu
     compile 'com.oguzdev:CircularFloatingActionMenu:1.0.2'
-
     //Navigation Drawer Activity with material design style and simplified methods
     //compile 'it.neokree:MaterialNavigationDrawer:1.2.9'
 
     //Material Navigation Drawer
-    compile 'com.heinrichreimersoftware.materialdrawer:library:1.3.2'
-
+    //compile 'com.heinrichreimersoftware.materialdrawer:library:1.3.2'
+    compile project(":material-drawer-library-release-1.4")
     // Material Material StyledDialogs
     compile 'com.avast:android-styled-dialogs:2.0.1'
 }
