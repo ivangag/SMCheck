@@ -29,36 +29,37 @@
 </FrameLayout>
 
 
-<com.melnykov.fab.FloatingActionButton
-    android:id="@+id/fab_main"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="bottom|end"
-    android:layout_margin="16dp"
-    android:src="@drawable/ic_add_white_24dp"
-    fab:fab_colorNormal="@color/accent"
-    fab:fab_colorPressed="@color/Secondary_Green_400"
-    fab:fab_colorRipple="@color/accent"
-    android:layout_alignParentBottom="true"
-    android:layout_alignParentRight="true"
-    android:layout_alignParentEnd="false"
-    />
+<!--<com.melnykov.fab.FloatingActionButton-->
+    <!--android:id="@+id/fab_main"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_gravity="bottom|end"-->
+    <!--android:layout_margin="16dp"-->
+    <!--android:src="@drawable/ic_add_white_24dp"-->
+    <!--fab:fab_colorNormal="@color/accent"-->
+    <!--fab:fab_colorPressed="@color/Secondary_Green_400"-->
+    <!--fab:fab_colorRipple="@color/accent"-->
+    <!--android:layout_alignParentBottom="true"-->
+    <!--android:layout_alignParentRight="true"-->
+    <!--android:layout_alignParentEnd="false"-->
+    <!--/>-->
 
-    <com.shamanland.fab.FloatingActionButton
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_action_edit_dark"
-        app:floatingActionButtonColor="@color/accent"
-        app:floatingActionButtonSize="normal"
-        android:elevation="5dp"
-        app:floatingActionButtonImplicitElevation="true"
-        android:layout_marginRight="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="20dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="false" />
+
+    <!--<com.shamanland.fab.FloatingActionButton-->
+        <!--android:visibility="gone"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:src="@drawable/ic_action_edit_dark"-->
+        <!--app:floatingActionButtonColor="@color/accent"-->
+        <!--app:floatingActionButtonSize="normal"-->
+        <!--android:elevation="5dp"-->
+        <!--app:floatingActionButtonImplicitElevation="true"-->
+        <!--android:layout_marginRight="16dp"-->
+        <!--android:layout_marginEnd="16dp"-->
+        <!--android:layout_marginBottom="20dp"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_alignParentEnd="false" />-->
 
 </RelativeLayout>
 

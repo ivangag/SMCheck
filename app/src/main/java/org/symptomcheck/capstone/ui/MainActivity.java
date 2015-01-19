@@ -17,12 +17,16 @@
  */
 package org.symptomcheck.capstone.ui;
 
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -51,17 +55,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.activeandroid.query.Update;
-import com.avast.android.dialogs.core.BaseDialogFragment;
-import com.avast.android.dialogs.fragment.SimpleDialogFragment;
-import com.avast.android.dialogs.iface.ISimpleDialogCancelListener;
-import com.avast.android.dialogs.iface.ISimpleDialogListener;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.google.common.collect.Lists;
 import com.heinrichreimersoftware.materialdrawer.DrawerView;
 import com.heinrichreimersoftware.materialdrawer.structure.DrawerItem;
 import com.heinrichreimersoftware.materialdrawer.structure.DrawerProfile;
 import com.makeramen.RoundedTransformationBuilder;
-import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
-import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
+//import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
+//import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
 import com.squareup.picasso.Transformation;
 
 import org.symptomcheck.capstone.App;
@@ -96,7 +98,7 @@ import de.greenrobot.event.EventBus;
 
 //TODO#BPR_3 Main Screen Activity
 //TODO#BPR_6
-public class MainActivity extends ActionBarActivity implements ICardEventListener,ISimpleDialogListener,ISimpleDialogCancelListener {
+public class MainActivity extends ActionBarActivity implements ICardEventListener{
 
     private final String TAG = MainActivity.this.getClass().getSimpleName();
     ImageView mToolBarImageView;
@@ -114,27 +116,8 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     private Fragment mPreviousFragment;
     private int mSelectedFragmentPosition = -1;
     private ShowFragmentType mSelectedFragmentType;
-    private FloatingActionMenu mFabActionsMenu;
 
-    @Override
-    public void onCancelled(int i) {
 
-    }
-
-    @Override
-    public void onPositiveButtonClicked(int i) {
-
-    }
-
-    @Override
-    public void onNegativeButtonClicked(int i) {
-
-    }
-
-    @Override
-    public void onNeutralButtonClicked(int i) {
-
-    }
 
     public enum ShowFragmentType {
         DOCTOR_PATIENTS,
@@ -166,9 +149,14 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     private TextView toolbarTitle;
     NavigationDrawerFragment mDrawerFragment;
     private View mFloatingActionButton;
-
+    //private FloatingActionMenu mFabActionsMenu;
+    private FloatingActionsMenu mFabActionsMenu;
     private DrawerLayout mDrawerLayout;
     private DrawerView mDrawer;
+
+    private View mFabTakePicture;
+    private View mFabSubmitCheckin;
+    private View mFabWriteMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,7 +170,14 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
         mDrawer = (DrawerView) findViewById(R.id.drawer_material);
 
-        mFloatingActionButton = (View) findViewById(R.id.fab_main);
+        //mFloatingActionButton = (View) findViewById(R.id.fab_main);
+        mFabActionsMenu = (FloatingActionsMenu) findViewById(R.id.fab_multiple_actions);
+        mFabTakePicture = (View) findViewById(R.id.fab_take_picture);
+        mFabSubmitCheckin = (View) findViewById(R.id.fab_submit_checkin);
+        mFabWriteMessage = (View) findViewById(R.id.fab_write_message);
+
+
+
 
         mTitle = mDrawerTitle = getTitle();
 
@@ -205,9 +200,13 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             }
 
             public void onDrawerOpened(View drawerView) {
-                if (mFabActionsMenu.isOpen()) {
-                    mFabActionsMenu.close(true);
+//                if (mFabActionsMenu.isOpen()) {
+//                    mFabActionsMenu.close(true);
+//                }
+                if (mFabActionsMenu.isExpanded()) {
+                    mFabActionsMenu.collapse();
                 }
+
                 invalidateOptionsMenu();
             }
         };
@@ -484,7 +483,35 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     }
 
 
+
     private void initMaterialResource() {
+
+        if(mFabWriteMessage != null){
+            mFabWriteMessage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getApplicationContext(),"Clicked Write a Message FAB",Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        if(mFabSubmitCheckin != null){
+            mFabSubmitCheckin.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getApplicationContext(),"Clicked Submit CheckIn  FAB",Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        if(mFabTakePicture != null){
+            mFabTakePicture.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getApplicationContext(),"Clicked Take a Picture FAB",Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+    /*
         SubActionButton.Builder itemBuilder = new SubActionButton.Builder(this);
         // repeat many times:
         ImageView itemIcon = new ImageView(this);
@@ -509,14 +536,16 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                 .setLayoutParams(new FrameLayout.LayoutParams(128,128))
                 .build();
 
-        /*
+        */
+/*
         FloatingActionMenu actionMenu = new FloatingActionMenu.Builder(this)
                 .addSubActionView(button1)
                 .addSubActionView(button2)
                 .addSubActionView(button3)
                         // ...
                 .attachTo(mFloatingActionButton)
-                .build();*/
+                .build();*//*
+
 
         SubActionButton.Builder rLSubBuilder = new SubActionButton.Builder(this);
         ImageView rlIcon1 = new ImageView(this);
@@ -549,7 +578,29 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                 .build();
 
 
+        // Listen menu open and close events to animate the button content view
+        mFabActionsMenu.setStateChangeListener(new FloatingActionMenu.MenuStateChangeListener() {
+            @Override
+            public void onMenuOpened(FloatingActionMenu menu) {
+                // Rotate the icon of rightLowerButton 45 degrees clockwise
+                mFloatingActionButton.setRotation(0);
+                PropertyValuesHolder pvhR = PropertyValuesHolder.ofFloat(View.ROTATION, 45);
+                ObjectAnimator animation = ObjectAnimator.ofPropertyValuesHolder(mFloatingActionButton, pvhR);
+                animation.start();
+            }
+
+            @Override
+            public void onMenuClosed(FloatingActionMenu menu) {
+                // Rotate the icon of rightLowerButton 45 degrees counter-clockwise
+                mFloatingActionButton.setRotation(45);
+                PropertyValuesHolder pvhR = PropertyValuesHolder.ofFloat(View.ROTATION, 0);
+                ObjectAnimator animation = ObjectAnimator.ofPropertyValuesHolder(mFloatingActionButton, pvhR);
+                animation.start();
+            }
+        });
+        */
     }
+
 
     // ----------------------------------------------------------------
     // apply rounding to image
@@ -608,7 +659,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                 openSettings();
                 break;
             case LOGOUT:
-                fragment = AlertLogoutFragment.newInstance();
+                //fragment = AlertLogoutFragment.newInstance();
                 break;
             default:
                 break;
@@ -641,7 +692,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                         openSettings();
                         break;
                     case CASE_SHOW_DOCTOR_LOGOUT:
-                        fragment = AlertLogoutFragment.newInstance();
+                        //fragment = AlertLogoutFragment.newInstance();
                         break;
                 }
                 break;
@@ -663,7 +714,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                         openSettings();
                         break;
                     case CASE_SHOW_PATIENT_LOGOUT:
-                        fragment = AlertLogoutFragment.newInstance();
+                        //fragment = AlertLogoutFragment.newInstance();
                         break;
                 }
                 break;
@@ -706,11 +757,12 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
     private void askForExit() {
         //exitFragment.show(getFragmentManager(), "exit");
-        AlertMaterialExitFragment.show(this);
+        AlertExitFragment.show(this);
+        //AlertMaterialExitFragment.show(this);
     }
     private void askForLogout() {
-        //logoutFragment.show(getFragmentManager(), "logout_dialog");
-        AlertMaterialLogoutFragment.show(this);
+        AlertLogoutFragment.show(this);
+        //AlertMaterialLogoutFragment.show(this);
     }
 
     public void doLogout() {
@@ -788,6 +840,8 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         //Toast.makeText(this,"EventBusMainThread downloadEvent: " + msgEvent + " at " + TAG,Toast.LENGTH_LONG).show();
     }
 
+    // workaround to display icon in the hidden menu items
+    // Note: a better approach would be to create a custom popmenu
     @Override
     public boolean onMenuOpened(int featureId, Menu menu)
     {
@@ -978,43 +1032,29 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     }
 
     public static class AlertLogoutFragment extends DialogFragment {
+        public static void show(final Context context) {
+            new MaterialDialog.Builder(context)
+                    .title(R.string.title_activity_main)
+                    .content(R.string.logout_question)
+                    .positiveText(R.string.alert_dialog_yes)
+                    .negativeText(R.string.alert_dialog_no)
+                    .icon(context.getResources().getDrawable(R.drawable.ic_logout))
+                    .callback(new MaterialDialog.ButtonCallback() {
+                        @Override
+                        public void onPositive(MaterialDialog dialog) {
+                            ((MainActivity)context)
+                                    .doLogout();
+                        }
 
-        public static AlertLogoutFragment newInstance() {
-            AlertLogoutFragment frag = new AlertLogoutFragment();
-            Bundle args = new Bundle();
-            //args.putInt("mTitle", mTitle);
-            //args.putString("message", message);
-            frag.setArguments(args);
-            return frag;
-        }
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            //final int mTitle = getArguments().getInt("mTitle");
-            //final String message = getArguments().getString("message");
-
-            return new AlertDialog.Builder(getActivity())
-                    .setIcon(R.drawable.ic_logout)
-                    .setMessage(getString(R.string.logout_question))
-                    .setTitle(getString(R.string.title_activity_main))
-                    .setPositiveButton(R.string.alert_dialog_yes,
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog,
-                                                    int whichButton) {
-                                    ((MainActivity) getActivity())
-                                            .doLogout();
-                                }
-                            })
-                    .setNegativeButton(R.string.alert_dialog_cancel,
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog,
-                                                    int whichButton) {
-                                    dismiss();
-                                }
-                            }).create();
+                        @Override
+                        public void onNegative(MaterialDialog dialog) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
         }
     }
-
+/*
     public static class AlertMaterialLogoutFragment extends SimpleDialogFragment {
         static String TAG = "AlertMaterialLogoutFragment";
         public static void show(FragmentActivity activity) {
@@ -1043,45 +1083,42 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             return builder;
         }
     }
+    */
 
     static boolean isConfirmedExit = true;
-    public static class AlertExitFragment extends DialogFragment {
+    public static class AlertExitFragment{
 
-        public static AlertExitFragment newInstance() {
-            AlertExitFragment frag = new AlertExitFragment();
-            Bundle args = new Bundle();
-            frag.setArguments(args);
-            return frag;
+        public static void show(final Context context) {
+            new MaterialDialog.Builder(context)
+                    .title(R.string.title_activity_main)
+                    .content(R.string.exit_question)
+                    .positiveText(R.string.alert_dialog_yes)
+                    .negativeText(R.string.alert_dialog_no)
+                    .icon(context.getResources().getDrawable(R.drawable.ic_logout))
+                    .callback(new MaterialDialog.ButtonCallback() {
+                        @Override
+                        public void onPositive(MaterialDialog dialog) {
+                            isConfirmedExit = true;
+                            ((Activity)context).finish();
+                        }
+
+                        @Override
+                        public void onNeutral(MaterialDialog dialog) {
+                            super.onNeutral(dialog);
+                        }
+
+                        @Override
+                        public void onNegative(MaterialDialog dialog) {
+                            isConfirmedExit = false;
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
         }
 
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            //final int mTitle = getArguments().getInt("mTitle");
-            //final String message = getArguments().getString("message");
-
-            return new AlertDialog.Builder(getActivity())
-                    .setIcon(R.drawable.ic_logout)
-                    .setMessage(getString(R.string.exit_question))
-                    .setTitle(getString(R.string.title_activity_main))
-                    .setPositiveButton(R.string.alert_dialog_yes,
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog,
-                                                    int whichButton) {
-                                    isConfirmedExit = true;
-                                    getActivity().finish();
-                                }
-                            })
-                    .setNegativeButton(R.string.alert_dialog_no,
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog,
-                                                    int whichButton) {
-                                    isConfirmedExit = false;
-                                    dismiss();
-                                }
-                            }).create();
-        }
     }
 
+    /*
     public static class AlertMaterialExitFragment extends SimpleDialogFragment {
         static String TAG = "AlertMaterialExitFragment";
         public static void show(FragmentActivity activity) {
@@ -1117,7 +1154,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             return builder;
         }
     }
-
+*/
     @Override
     public void onBackPressed() {
         // initialize variables

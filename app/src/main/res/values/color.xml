@@ -327,10 +327,10 @@
 <color name="Primary_Blue_Grey_700">#455A64</color>
 <color name="Primary_Blue_Grey_800">#37474F</color>
 <color name="Primary_Blue_Grey_900">#263238</color>
-
-
 <color name="Primary_Black">#000000</color>
-
-
 <color name="Primary_White">#FFFFFF</color>
+
+
+
+<color name="black_semi_transparent">#88000000</color>
 </resources>
