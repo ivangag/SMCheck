@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/SymptomCheck.iml" filepath="$PROJECT_DIR$/SymptomCheck.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/material-drawer-library-release-1.4/material-drawer-library-release-1.4.iml" filepath="$PROJECT_DIR$/material-drawer-library-release-1.4/material-drawer-library-release-1.4.iml" />
     </modules>
   </component>
 </project>

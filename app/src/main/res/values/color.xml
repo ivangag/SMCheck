@@ -16,8 +16,8 @@
 
 <resources>
 
-<color name="primary">#2196F3</color>
-<color name="primary_dark">#1976D2</color>
+<color name="primary">@color/Primary_Blue_500</color>
+<color name="primary_dark">@color/Primary_Blue_700</color>
 <color name="primary_light">#BBDEFB</color>
 <color name="accent">@color/Secondary_Light_Green_700</color>
 <color name="primary_text">#212121</color>
@@ -333,4 +333,5 @@
 
 
 <color name="black_semi_transparent">#88000000</color>
+<color name="white_transparent">#BBFFFFFF</color>
 </resources>

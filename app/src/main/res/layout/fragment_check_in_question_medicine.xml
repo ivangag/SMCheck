@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/card_foreground_activated"
+    android:background="@color/white_transparent"
     android:orientation="vertical"
     >
 
@@ -29,7 +29,7 @@
                 android:text="Medicine X Question ?"
                 style="@style/Theme.Capstone"
                 android:textColor="@android:color/white"
-                android:background="@drawable/ab_solid_capstone" />
+                android:background="@color/primary" />
         </LinearLayout>
 
         <LinearLayout
@@ -37,7 +37,7 @@
             android:layout_width="0dp"
             android:layout_gravity="center"
             android:gravity="center"
-            android:background="@drawable/ab_solid_capstone"
+            android:background="@color/primary"
             android:layout_height="match_parent">
             <ImageView
                 android:id="@+id/imageCheckInPain"

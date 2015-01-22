@@ -147,7 +147,7 @@ public class SettingsActivity extends ActionBarActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
+                onBackPressed();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -186,6 +186,10 @@ public class SettingsActivity extends ActionBarActivity {
     public void onBackPressed() {
         this.setResult(mIsSettingsModified ? RESULT_OK : RESULT_OK);
         super.onBackPressed();
+        doFinishAndAnimate();
+    }
+
+    private void doFinishAndAnimate(){
         finish();
         overridePendingTransition(R.anim.hold, R.anim.push_out_to_bottom);
     }

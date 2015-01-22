@@ -40,6 +40,7 @@ import android.widget.FilterQueryProvider;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+
 import com.activeandroid.content.ContentProvider;
 
 import org.symptomcheck.capstone.R;

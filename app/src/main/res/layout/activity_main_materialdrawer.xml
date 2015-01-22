@@ -43,6 +43,13 @@
     <!--android:layout_alignParentEnd="false"-->
     <!--/>-->
 
+    <View
+        android:id="@+id/shadowView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:background="@color/white_transparent" />
+
     <com.getbase.floatingactionbutton.FloatingActionsMenu
         android:id="@+id/fab_multiple_actions"
         android:layout_width="wrap_content"

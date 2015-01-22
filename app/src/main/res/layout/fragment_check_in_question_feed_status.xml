@@ -29,7 +29,7 @@
                 android:text="Feed Status Question ?"
                 style="@style/Theme.Capstone"
                 android:textColor="@android:color/white"
-                android:background="@drawable/ab_solid_capstone" />
+                android:background="@color/primary" />
         </LinearLayout>
 
         <LinearLayout
@@ -37,7 +37,7 @@
             android:layout_width="0dp"
             android:layout_gravity="center"
             android:gravity="center"
-            android:background="@drawable/ab_solid_capstone"
+            android:background="@color/primary"
             android:layout_height="match_parent">
             <ImageView
                 android:id="@+id/imageCheckInPain"
@@ -54,7 +54,7 @@
         android:id="@+id/viewRadioBtnFeedQuestions"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:background="@color/card_foreground_activated"
+        android:background="@color/white_transparent"
         android:orientation="vertical">
 
         <RadioGroup
@@ -64,6 +64,8 @@
             android:layout_gravity="center_vertical">
 
             <RadioButton
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
                 android:layout_marginTop="30dp"
                 android:gravity="center"
                 android:layout_width="fill_parent"
@@ -73,6 +75,8 @@
                 android:layout_gravity="center_horizontal" />
 
             <RadioButton
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
                 android:layout_marginTop="30dp"
                 android:gravity="center"
                 android:layout_width="fill_parent"
@@ -82,6 +86,8 @@
                 android:layout_gravity="center_horizontal" />
 
             <RadioButton
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
                 android:layout_marginTop="30dp"
                 android:gravity="center"
                 android:layout_width="fill_parent"

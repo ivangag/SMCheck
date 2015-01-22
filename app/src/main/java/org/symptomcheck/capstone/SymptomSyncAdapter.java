@@ -175,7 +175,7 @@ class SymptomSyncAdapter extends AbstractThreadedSyncAdapter {
     private void checkPatientsBadExperience(){
         String method = new Object(){}.getClass().getEnclosingMethod().getName();
         Log.i(TAG, method + "Verify the presence of Bad Experiences...");
-        List<PatientExperience> patientExperiences = PatientExperience.computeBadExperiences();
+        List<PatientExperience> patientExperiences = PatientExperience.checkBadExperiences();
         Log.i(TAG, "BadExperienceFound:" + patientExperiences.size());
         patientExperiences = PatientExperience.getAllNotNotified();
         final int count = patientExperiences.size();

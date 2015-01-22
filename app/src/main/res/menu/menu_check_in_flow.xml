@@ -4,6 +4,7 @@
 
 
     <item android:id="@+id/action_submit_checkin"
+        android:visible="false"
         android:icon="@drawable/ic_action_accept"
         android:title="@string/action_accept_checkin"
         android:orderInCategory="110"

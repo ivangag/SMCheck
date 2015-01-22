@@ -16,9 +16,16 @@
         <item name="android:windowAllowReturnTransitionOverlap">true</item>
         <item name="android:windowSharedElementEnterTransition">@android:transition/move</item>
         <item name="android:windowSharedElementExitTransition">@android:transition/move</item>
+        <item name="android:listSeparatorTextViewStyle">@style/PreferenceListHeader</item>
     </style>
 
 
+    <style name="OverflowMenu" parent="Widget.AppCompat.PopupMenu.Overflow">
+        <!-- Required for pre-Lollipop. -->
+        <item name="overlapAnchor">false</item>
+        <!-- Required for Lollipop. -->
+        <item name="android:overlapAnchor">false</item>
+    </style>
     <!--<style name="AppTheme.Fab" parent="FloatingActionButton">-->
         <!--<item name="floatingActionButtonColor">@color/accent</item>-->
     <!--</style>-->

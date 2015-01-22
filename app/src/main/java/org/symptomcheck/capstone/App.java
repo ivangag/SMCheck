@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.app.job.JobScheduler;
 import android.content.Context;
+import android.support.multidex.MultiDexApplication;
 import android.view.inputmethod.InputMethodManager;
 
 import com.activeandroid.ActiveAndroid;
@@ -13,7 +14,7 @@ import org.symptomcheck.capstone.model.ExperienceType;
 /**
  * Created by Ivan on 22/10/2014.
  */
-public class App extends Application {
+public class App extends MultiDexApplication {
 
     private static Context mContext;
     @Override

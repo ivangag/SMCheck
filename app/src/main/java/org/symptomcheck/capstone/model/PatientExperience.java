@@ -212,7 +212,7 @@ public class PatientExperience extends Model implements IModelBuilder{
      * Scan all Patients' CheckIns and update local database with Bad Patient Experience
      * @return New Bad Experience(s) not handled yet by Doctor
      */
-    public static List<PatientExperience> computeBadExperiences() { //TODO#FDAR_13 Here we compute Patient Bad Experiences
+    public static List<PatientExperience> checkBadExperiences() { //TODO#FDAR_13 Here we compute Patient Bad Experiences
         HashMap<Patient, List<CheckIn>> painLevelModerateOrSevereWarningCheck = new HashMap<Patient, List<CheckIn>>();
         HashMap<Patient, List<CheckIn>> feedStatusWarningCheck = new HashMap<Patient, List<CheckIn>>();
         List<CheckIn> painPartialLevelSecondaryWarningList = Lists.newArrayList();
