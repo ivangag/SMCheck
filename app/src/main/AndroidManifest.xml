@@ -226,6 +226,8 @@
 
         <activity
             android:name=".ui.SamplePagerSlidingActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:exported="true"
             android:label="@string/title_activity_sample_pager_sliding" >
         </activity>
     </application>

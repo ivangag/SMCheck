@@ -166,9 +166,7 @@ public class CheckInFlowActivity extends ActionBarActivity  {
             });
 
             //TODO#BPR_7 here we handle through the swiping the visibility of buttons
-            // When swiping between different sections, select the corresponding
-            // tab. We can also use ActionBar.Tab#select() to do this if we have
-            // a reference to the Tab.
+            // When swiping between different sections, select the corresponding tab
             mPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
                 @Override
                 public void onPageSelected(int position) {

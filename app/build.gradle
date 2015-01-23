@@ -91,4 +91,6 @@ dependencies {
 
 
     compile 'com.jakewharton:butterknife:6.0.0'
+
+    compile 'com.github.navasmdc:MaterialDesign:1.+@aar'
 }

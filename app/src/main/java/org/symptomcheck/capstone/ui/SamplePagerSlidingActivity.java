@@ -1,14 +1,14 @@
 package org.symptomcheck.capstone.ui;
 
+import android.app.Activity;
 import android.app.Dialog;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.TransitionDrawable;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
@@ -21,9 +21,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RadioButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -48,6 +52,7 @@ import java.util.TimeZone;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import hirondelle.date4j.DateTime;
+import it.gmariotti.cardslib.library.view.CardListView;
 
 
 public class SamplePagerSlidingActivity extends ActionBarActivity {
@@ -78,13 +83,6 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        adapter = new MyPagerAdapter(getSupportFragmentManager());
-        pager.setAdapter(adapter);
-        tabs.setViewPager(pager);
-        final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources()
-                .getDisplayMetrics());
-        pager.setPageMargin(pageMargin);
-
         mUser = DAOManager.get().getUser();
 
         mMedicines = PainMedication.getAll(mUser.getUserIdentification());
@@ -92,6 +90,15 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
             mReportMedicationsResponse.put(medication.getMedicationName(), Constants.STRINGS.EMPTY);
             mReportMedicationsTakingTime.put(medication.getMedicationName(), Constants.STRINGS.EMPTY);
         }
+
+
+        adapter = new MyPagerAdapter(getSupportFragmentManager());
+        pager.setAdapter(adapter);
+        tabs.setViewPager(pager);
+        final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources()
+                .getDisplayMetrics());
+        pager.setPageMargin(pageMargin);
+
 
         tabs.setOnTabReselectedListener(new PagerSlidingTabStrip.OnTabReselectedListener() {
             @Override
@@ -152,6 +159,7 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
 
         @Override
         public Fragment getItem(int position) {
+            /*
             final int totalItem = getCount();
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
@@ -162,19 +170,27 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
             } else {  //TODO#FDAR_6 Instantiate different Screen showing separate Question for each Medication
                 return CheckInQuestionFragment.newInstance(position + 1, FragmentType.FRAGMENT_TYPE_MEDICINES);
             }
+            */
+            if (position == 0) {
+                return CheckInQuestionFragment.newInstance(position + 1, FragmentType.FRAGMENT_TYPE_PAIN_LEVEL);
+            }else{
+                return MedicationQuestionFragment.newInstance(mMedicines);
+            }
         }
 
         @Override
         public int getCount() {
             // Show 3 total pages.
             final int totalMedicines = mMedicines.size();
-            return 1 + totalMedicines + 1;
+            //return 1 + totalMedicines + 1;
+            return 2;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
             Locale l = Locale.getDefault();
             String title = null;
+            /*
             if (position == 0) {
                 title = getString(R.string.pain_status).toUpperCase(l);
             } else if (position == getCount() - 1) {
@@ -183,6 +199,12 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
                 if (mMedicines.size() > 0) {
                     title = mMedicines.get(position - 1).getMedicationName();
                 }
+            }
+            */
+            if(position == 0){
+                title = getString(R.string.pain_status);
+            }else {
+                title = getString(R.string.medicines_header);
             }
             return title;
         }
@@ -346,7 +368,7 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
             super.onResume();
         }
 
-        //TODO#FDAR_7 Interactive used by Patient to enter the Date & Time he/shee took the specified medicine
+        //TODO#FDAR_7 Interactive used by Patient to enter the Date & Time he/she took the specified medicine
         private void showTimePickerDialog(View v, String mMedicineName) {
             final Dialog dialog = new Dialog(getActivity());
 
@@ -429,6 +451,139 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
             ViewCompat.setElevation(rootView, 50);
             //textView.setText("CARD "+position);
             return rootView;
+        }
+    }
+
+    public static class MedicationQuestionFragment extends Fragment {
+
+        View rootView;
+        List<PainMedication> mPainMedication;
+        MedicationQuestionAdapter mMedicationsAdapter;
+        ListView mListView;
+
+        public static MedicationQuestionFragment newInstance(List<PainMedication> medications) {
+            MedicationQuestionFragment fragment = new MedicationQuestionFragment();
+            fragment.setPainMedications(medications);
+            return fragment;
+        }
+        public void setPainMedications(List<PainMedication> painMedications) {
+            this.mPainMedication = painMedications;
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            //return super.onCreateView(inflater, container, savedInstanceState);
+            rootView = inflater.inflate(R.layout.fragment_checkin_questions, container, false);
+            return rootView;
+        }
+
+        @Override
+        public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+
+            if(null == mMedicationsAdapter){
+                List<MedicationQuestionItem> items = Lists.newArrayList();
+                for (PainMedication medication : mPainMedication){
+                    MedicationQuestionItem item = new MedicationQuestionItem();
+                    item.setMedicationName(medication.getMedicationName());
+                    items.add(item);
+                }
+                mMedicationsAdapter = new MedicationQuestionAdapter(getActivity(),items);
+            }
+            mListView = (ListView) rootView.findViewById(R.id.list_questions);
+
+            if (mListView != null) {
+                mListView.setAdapter(mMedicationsAdapter);
+            }
+        }
+    }
+
+    static class MedicationQuestionItem {
+        private String medicationName;
+        private String medicationTakingTime;
+        private String medicationTaken;
+
+        public String getMedicationName() {
+            return medicationName;
+        }
+
+        public void setMedicationName(String medicationName) {
+            this.medicationName = medicationName;
+        }
+
+        public String getMedicationTakingTime() {
+            return medicationTakingTime;
+        }
+
+        public void setMedicationTakingTime(String medicationTakingTime) {
+            this.medicationTakingTime = medicationTakingTime;
+        }
+
+        public String getMedicationTaken() {
+            return medicationTaken;
+        }
+
+        public void setMedicationTaken(String medicationTaken) {
+            this.medicationTaken = medicationTaken;
+        }
+
+    }
+
+    static class MedicationQuestionAdapter extends BaseAdapter{
+        private final Context mContext;
+        private List<MedicationQuestionItem> mMedications;
+
+        MedicationQuestionAdapter(Context mContext, List<MedicationQuestionItem> medications) {
+            this.mContext = mContext;
+            this.mMedications = medications;
+        }
+
+        @Override
+        public int getCount() {
+            return mMedications.size();
+        }
+
+        @Override
+        public MedicationQuestionItem getItem(int position) {
+            return mMedications.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return mMedications.get(position).hashCode();
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder holder;
+
+            if (convertView == null) {
+                LayoutInflater inflater = ((Activity) parent.getContext()).getLayoutInflater();
+                convertView = inflater.inflate(R.layout.drawer_list_adapter_item, parent,false);
+                holder = new ViewHolder();
+                holder.text = (TextView) convertView.findViewById(R.id.txtview_drawer_item);
+                holder.question_switch = (Switch) convertView.findViewById(R.id.switch_question);
+                holder.imageView = (ImageView) convertView.findViewById(R.id.image_drawer_item);
+
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+            holder.position = position;
+            MedicationQuestionItem item = getItem(position);
+            //holder.question_switch.setText(item.getMedicationName());
+            holder.text.setText("Did you take " + item.getMedicationName() + "?");
+            holder.imageView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_medicine));
+            //holder.imageView.setImageDrawable(mContext.getResources().getDrawable(item.getDrawableResource()));
+            return  convertView;
+        }
+
+
+        static class ViewHolder {
+            Switch question_switch;
+            TextView text;
+            ImageView imageView;
+            int position;
         }
     }
 }
