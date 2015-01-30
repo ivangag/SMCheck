@@ -500,7 +500,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             });
         }
 
-    /* Alternative and Circular FAB Menu (but without text)
+    /* Alternative and Circular FAB Menu (but without txtMedicineName)
         SubActionButton.Builder itemBuilder = new SubActionButton.Builder(this);
         // repeat many times:
         ImageView itemIcon = new ImageView(this);

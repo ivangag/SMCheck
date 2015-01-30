@@ -65,8 +65,11 @@ public class SymptomAlarmRequest {
         switch (alarmRequestedType){
             case ALARM_CHECK_IN_REMINDER:
                 //TODO#BPR_1
-                if(DAOManager.get().getUser().getUserType().equals(UserType.PATIENT))
-                    setReminderAlarm(ctx,afterDismission);
+                final UserInfo user = DAOManager.get().getUser();
+                if((null != user) &&
+                    (user.getUserType().equals(UserType.PATIENT))) {
+                    setReminderAlarm(ctx, afterDismission);
+                }
                 break;
             case ALARM_CHECK_ALERTS:
                 break;

@@ -13,7 +13,7 @@ public class CheckinDismissingReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         // an Intent broadcast.
-        Log.d("CheckinDismissingReceiver","Re-scheduling of dismissed Check-In...");
+        Log.d("CheckinDismissReceiver","Re-scheduling of dismissed Check-In");
         SymptomAlarmRequest.get().setAlarm(context, SymptomAlarmRequest.AlarmRequestedType.ALARM_CHECK_IN_REMINDER,true);
     }
 }

@@ -1,0 +1,147 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/white_transparent">
+
+ <android.support.v7.widget.CardView
+        android:id="@+id/gcardview_medicines"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        card_view:cardBackgroundColor="@color/white_transparent"
+        card_view:cardCornerRadius="8dp">
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_gravity="start"
+                android:id="@+id/textViewTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:textColor="@color/primary_text"
+                android:textSize="18sp"
+                android:text="Medications" />
+            <TextView
+                android:id="@+id/textViewSubTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:padding="4dp"
+                android:textSize="16sp"
+                android:text="Did you take your medications?" />
+
+            <ListView
+                android:visibility="visible"
+                android:id="@+id/list_questions"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:divider="@color/accent"
+                android:dividerHeight="0.3dp"
+                android:background="@color/white_transparent"/>
+
+            <View
+                android:layout_margin="6dp"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:background="@color/accent"
+                >
+            </View>
+        <TextView
+            android:layout_gravity="start"
+            android:id="@+id/textViewTitle_pain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:textColor="@color/primary_text"
+            android:textSize="18sp"
+            android:text="How bad is your mouth pain/sore throat?" />
+        <TextView
+            android:id="@+id/textViewSubTitleGeneral"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:padding="8dp"
+            android:textSize="16sp"
+            android:text="How bad is your mouth pain/sore throat?" />
+
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Well"
+                android:id="@+id/radioBtnPainWellControlled" />
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Moderate"
+                android:id="@+id/radioBtnPainModerate" />
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Severe"
+                android:id="@+id/radioBtnPainSevere" />
+            </RadioGroup>
+
+            <View
+                android:layout_margin="6dp"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:background="@color/accent"
+                >
+            </View>
+            <TextView
+                android:layout_gravity="start"
+                android:id="@+id/textViewTitle_feed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:textColor="@color/primary_text"
+                android:textSize="18sp"
+                android:text="Does your pain stop you from eating/drinking?" />
+            <TextView
+                android:id="@+id/textViewSubTitle_feed"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:padding="8dp"
+                android:textSize="16sp"
+                android:text="How bad is your mouth pain/sore throat?" />
+
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No"
+                android:id="@+id/radioBtnFeedNo" />
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sometime"
+                android:id="@+id/radioBtnFeedSome" />
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Yes"
+                android:id="@+id/radioBtnFeedCannotEat" />
+        </RadioGroup>
+
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+
+
+</ScrollView>

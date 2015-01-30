@@ -26,6 +26,7 @@ import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.ui.LoginActivity;
@@ -167,16 +168,17 @@ public class DownloadHelper {
     }
 
     public synchronized void handleRetrofitError(Context context, RetrofitError error){
-        // unauthorized client
+        // unauthorized client => the session could be expired
+        // Note: at the moment i didn't found the way to "extend" session timeout on GAE!! :-(
         Log.i(TAG,String.format("handleRetrofitError. Status:%d", error.getResponse().getStatus()));
-        if(error.getResponse().getStatus() == 401){
+        if(error.getResponse().getStatus() == Constants.HTTP_STATUS_CODES.UNAUTHORIZED){
             UserInfo user = DAOManager.get().getUser();
             if (user != null)
                 user.delete();
             UserPreferencesManager.get().setLogged(context,false);
             UserPreferencesManager.get().setBearerToken(context, "");
             NotificationHelper.sendNotification(context, 2,
-                    "Login", "Your session is expired. Please re-enter credential",
+                    context.getString(R.string.login_alert), context.getString(R.string.session_expired),
                     LoginActivity.class, true, Constants.STRINGS.EMPTY,null);
         }
     }

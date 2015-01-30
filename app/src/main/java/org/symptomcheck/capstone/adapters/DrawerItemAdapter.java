@@ -46,9 +46,9 @@ public class DrawerItemAdapter extends BaseAdapter {
 
         if (convertView == null) {
             LayoutInflater inflater = ((Activity) viewGroup.getContext()).getLayoutInflater();
-            convertView = inflater.inflate(R.layout.drawer_list_adapter_item, viewGroup,false);
+            convertView = inflater.inflate(R.layout.medicines_checkin_list_adapter_item, viewGroup,false);
             holder = new ViewHolder();
-            holder.text = (TextView) convertView.findViewById(R.id.txtview_drawer_item);
+            holder.text = (TextView) convertView.findViewById(R.id.txtview_medicine_item);
             holder.imageView = (ImageView) convertView.findViewById(R.id.image_drawer_item);
 
             convertView.setTag(holder);

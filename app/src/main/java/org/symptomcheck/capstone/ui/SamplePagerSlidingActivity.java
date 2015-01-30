@@ -8,8 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.ListFragment;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -23,10 +21,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -41,18 +40,15 @@ import org.symptomcheck.capstone.model.FeedStatus;
 import org.symptomcheck.capstone.model.PainLevel;
 import org.symptomcheck.capstone.model.PainMedication;
 import org.symptomcheck.capstone.model.UserInfo;
+import org.symptomcheck.capstone.utils.CheckInUtils;
 import org.symptomcheck.capstone.utils.Constants;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.TimeZone;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import hirondelle.date4j.DateTime;
-import it.gmariotti.cardslib.library.view.CardListView;
 
 
 public class SamplePagerSlidingActivity extends ActionBarActivity {
@@ -87,8 +83,8 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
 
         mMedicines = PainMedication.getAll(mUser.getUserIdentification());
         for(PainMedication medication : mMedicines){
-            mReportMedicationsResponse.put(medication.getMedicationName(), Constants.STRINGS.EMPTY);
-            mReportMedicationsTakingTime.put(medication.getMedicationName(), Constants.STRINGS.EMPTY);
+           CheckInUtils.getInstance().ReportMedicationsResponse.put(medication.getMedicationName(), Constants.STRINGS.EMPTY);
+            CheckInUtils.getInstance().ReportMedicationsTakingTime.put(medication.getMedicationName(), Constants.STRINGS.EMPTY);
         }
 
 
@@ -110,8 +106,8 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        //getMenuInflater().inflate(R.menu.main, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -145,11 +141,6 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
     public final static String NO = "NO";
     public final static String YES = "YES";
 
-    private Map<String,String> mReportMedicationsResponse = new HashMap<String, String>(){};
-    private Map<String,String> mReportMedicationsTakingTime = new HashMap<String, String>(){};
-    private PainLevel mReportPainLevel = PainLevel.UNKNOWN;
-    private FeedStatus mReportFeedStatus = FeedStatus.UNKNOWN;
-
 
     public class MyPagerAdapter extends FragmentPagerAdapter {
 
@@ -159,20 +150,8 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
 
         @Override
         public Fragment getItem(int position) {
-            /*
-            final int totalItem = getCount();
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
             if (position == 0) {
-                return CheckInQuestionFragment.newInstance(position + 1, FragmentType.FRAGMENT_TYPE_PAIN_LEVEL);
-            } else if (position == totalItem - 1) {
-                return CheckInQuestionFragment.newInstance(position + 1, FragmentType.FRAGMENT_TYPE_FEED_STATUS);
-            } else {  //TODO#FDAR_6 Instantiate different Screen showing separate Question for each Medication
-                return CheckInQuestionFragment.newInstance(position + 1, FragmentType.FRAGMENT_TYPE_MEDICINES);
-            }
-            */
-            if (position == 0) {
-                return CheckInQuestionFragment.newInstance(position + 1, FragmentType.FRAGMENT_TYPE_PAIN_LEVEL);
+                return CheckInQuestionFragment.newInstance();
             }else{
                 return MedicationQuestionFragment.newInstance(mMedicines);
             }
@@ -180,29 +159,14 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
-            final int totalMedicines = mMedicines.size();
-            //return 1 + totalMedicines + 1;
             return 2;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            Locale l = Locale.getDefault();
-            String title = null;
-            /*
-            if (position == 0) {
-                title = getString(R.string.pain_status).toUpperCase(l);
-            } else if (position == getCount() - 1) {
-                title = getString(R.string.feed_status).toUpperCase(l);
-            } else {
-                if (mMedicines.size() > 0) {
-                    title = mMedicines.get(position - 1).getMedicationName();
-                }
-            }
-            */
+            String title;
             if(position == 0){
-                title = getString(R.string.pain_status);
+                title = getString(R.string.health_status);
             }else {
                 title = getString(R.string.medicines_header);
             }
@@ -214,29 +178,12 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
     public static class CheckInQuestionFragment extends Fragment {
 
         View rootView;
-        View painQuestionsView;
-        View feedQuestionsView;
         View medicinesQuestionsView;
         TextView txtMedicineTakingTime;
         FragmentType mFragmentType;
-        int mPageFragment;
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-        private static String ARG_FRAGMENT_TYPE = "frg_tpe";
         String mMedicineName;
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static CheckInQuestionFragment newInstance(int sectionNumber,FragmentType fragmentType) {
+        public static CheckInQuestionFragment newInstance() {
             CheckInQuestionFragment fragment = new CheckInQuestionFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            args.putString(ARG_FRAGMENT_TYPE,fragmentType.toString());
-            fragment.setArguments(args);
             return fragment;
         }
 
@@ -247,20 +194,7 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-
-            mFragmentType = FragmentType.valueOf(getArguments().getString(ARG_FRAGMENT_TYPE));
-            switch (mFragmentType){
-                case FRAGMENT_TYPE_PAIN_LEVEL:
-                    rootView = inflater.inflate(R.layout.fragment_check_in_question_pain, container, false);
-                    break;
-                case FRAGMENT_TYPE_FEED_STATUS:
-                    rootView = inflater.inflate(R.layout.fragment_check_in_question_feed_status, container, false);
-                    break;
-                case FRAGMENT_TYPE_MEDICINES:
-                    rootView = inflater.inflate(R.layout.fragment_check_in_question_medicine, container, false);
-                    break;
-            }
-
+            rootView = inflater.inflate(R.layout.fragment_checkin_feed_pain_questions, container, false);
             return rootView;
         }
 
@@ -271,9 +205,46 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
             TextView title = (TextView) rootView.findViewById(R.id.txt_check_in_header_question);
             txtMedicineTakingTime = (TextView)rootView.findViewById(R.id.txt_check_in_medicine_take_time);
 
-            final SamplePagerSlidingActivity parentActivity = ((SamplePagerSlidingActivity)getActivity());
-            mPageFragment = getArguments().getInt(ARG_SECTION_NUMBER);
 
+            rootView.findViewById(R.id.radioBtnPainModerate).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CheckInUtils.getInstance().ReportPainLevel = PainLevel.MODERATE;
+                }
+            });
+            rootView.findViewById(R.id.radioBtnPainSevere).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CheckInUtils.getInstance().ReportPainLevel = PainLevel.SEVERE;
+                }
+            });
+            rootView.findViewById(R.id.radioBtnPainWellControlled).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CheckInUtils.getInstance().ReportPainLevel = PainLevel.WELL_CONTROLLED;
+                }
+            });
+
+            rootView.findViewById(R.id.radioBtnFeedNo).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CheckInUtils.getInstance().ReportFeedStatus = FeedStatus.NO;
+                }
+            });
+            rootView.findViewById(R.id.radioBtnFeedSome).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CheckInUtils.getInstance().ReportFeedStatus = FeedStatus.SOME;
+                }
+            });
+            rootView.findViewById(R.id.radioBtnFeedCannotEat).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CheckInUtils.getInstance().ReportFeedStatus = FeedStatus.CANNOT_EAT;
+                }
+            });
+
+            /*
             switch (mFragmentType){
                 case FRAGMENT_TYPE_PAIN_LEVEL:
                     //TODO#FDAR_4 CHECK-IN INCLUDES THE QUESTION, “HOW BAD IS YOUR MOUTH PAIN/SORE THROAT?” TO WHICH A PATIENT CAN RESPOND, “WELL-CONTROLLED,” “MODERATE,” OR “SEVERE.
@@ -352,12 +323,14 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
                     });
                     break;
             }
+            */
         }
 
         @Override
         public void onResume() {
+            /*
             if(mFragmentType.equals(FragmentType.FRAGMENT_TYPE_MEDICINES)){
-                String timeTaken = ((SamplePagerSlidingActivity) getActivity()).mReportMedicationsTakingTime.get(mMedicineName);
+                String timeTaken = CheckInUtils.getInstance().ReportMedicationsTakingTime.get(mMedicineName);
                 final boolean YES = ((RadioButton)medicinesQuestionsView.findViewById(R.id.radioBtnMedicineYES)).isChecked();
                 txtMedicineTakingTime.setVisibility(YES ? View.VISIBLE : View.GONE);
                 if(!timeTaken.equals(Constants.STRINGS.EMPTY)) {
@@ -365,93 +338,11 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
                 }
                 txtMedicineTakingTime.setText(timeTaken);
             }
+            */
             super.onResume();
         }
 
-        //TODO#FDAR_7 Interactive used by Patient to enter the Date & Time he/she took the specified medicine
-        private void showTimePickerDialog(View v, String mMedicineName) {
-            final Dialog dialog = new Dialog(getActivity());
 
-            dialog.setContentView(R.layout.custom_dialog_datetime);
-
-            dialog.setTitle(String.format("%s",mMedicineName));
-
-            dialog.show();
-
-            final DatePicker dp = (DatePicker)dialog.findViewById(R.id.datePicker1);
-            final TimePicker tp = (TimePicker)dialog.findViewById(R.id.timePicker1);
-
-            Button btnCancel = (Button)dialog.findViewById(R.id.btnCancelDT);
-            Button btnSet = (Button)dialog.findViewById(R.id.btnSetDT);
-
-            btnCancel.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialog.dismiss();
-                }
-            });
-
-            btnSet.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View arg0) {
-                    String am_pm = "";
-                    int m = dp.getMonth()+1;
-                    int d = dp.getDayOfMonth();
-                    int y = dp.getYear();
-
-                    int h = tp.getCurrentHour();
-                    int min = tp.getCurrentMinute();
-
-                    String strm = String.valueOf(min);
-
-                    if(strm.length()==1){
-                        strm = "0"+strm;
-                    }
-                    int hour24 = h;
-                    if(h>12){
-                        am_pm = "PM";
-                        h = h-12;
-                    }else{
-                        am_pm = "AM";
-                    }
-
-                    String date = m+"/"+d+"/"+y+" "+h+":"+strm+":00 "+am_pm;
-                    String time = h+":"+strm+" "+am_pm;
-
-                    //DateTime dateAndTime = new DateTime("2010-01-19 23:59:59");
-                    String format = String.format("%d-%02d-%02d %02d:%02d:%02d",y,m,d,hour24,min,0);
-                    DateTime dateAndTime = new DateTime(format);
-
-                    long milliFrom1970GMT = dateAndTime.getMilliseconds(TimeZone.getTimeZone("GMT+00"));
-
-                    txtMedicineTakingTime.setText(dateAndTime.toString());
-
-                    ((SamplePagerSlidingActivity)getActivity()).mReportMedicationsTakingTime.put(CheckInQuestionFragment.this.mMedicineName, String.valueOf(milliFrom1970GMT));
-
-                    Log.i("CheckInFlow", "milliFrom1970GMT= " + milliFrom1970GMT);
-                    //Toast.makeText(getActivity(), "Date: " + date + " Time: " + time, Toast.LENGTH_SHORT).show();
-
-                    dialog.dismiss();
-                }
-            });
-        }
-    }
-
-    public static class SuperAwesomeCardFragment extends  Fragment{
-
-        public static Fragment newInstance(int position) {
-            return new SuperAwesomeCardFragment();
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_check_in_flow,container,false);
-            ButterKnife.inject(this, rootView);
-            ViewCompat.setElevation(rootView, 50);
-            //textView.setText("CARD "+position);
-            return rootView;
-        }
     }
 
     public static class MedicationQuestionFragment extends Fragment {
@@ -473,7 +364,7 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             //return super.onCreateView(inflater, container, savedInstanceState);
-            rootView = inflater.inflate(R.layout.fragment_checkin_questions, container, false);
+            rootView = inflater.inflate(R.layout.fragment_checkin_medications_questions, container, false);
             return rootView;
         }
 
@@ -494,6 +385,29 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
 
             if (mListView != null) {
                 mListView.setAdapter(mMedicationsAdapter);
+                /*
+                mListView.setOnTouchListener(new ListView.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        int action = event.getAction();
+                        switch (action) {
+                            case MotionEvent.ACTION_DOWN:
+                                // Disallow ScrollView to intercept touch events.
+                                v.getParent().requestDisallowInterceptTouchEvent(true);
+                                break;
+
+                            case MotionEvent.ACTION_UP:
+                                // Allow ScrollView to intercept touch events.
+                                v.getParent().requestDisallowInterceptTouchEvent(false);
+                                break;
+                        }
+
+                        // Handle ListView touch events.
+                        v.onTouchEvent(event);
+                        return true;
+                    }
+                });
+                */
             }
         }
     }
@@ -555,33 +469,127 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
+            final ViewHolder holder;
 
             if (convertView == null) {
                 LayoutInflater inflater = ((Activity) parent.getContext()).getLayoutInflater();
-                convertView = inflater.inflate(R.layout.drawer_list_adapter_item, parent,false);
+                convertView = inflater.inflate(R.layout.medicines_checkin_list_adapter_item, parent,false);
                 holder = new ViewHolder();
-                holder.text = (TextView) convertView.findViewById(R.id.txtview_drawer_item);
-                holder.question_switch = (Switch) convertView.findViewById(R.id.switch_question);
+                holder.txtMedicineName = (TextView) convertView.findViewById(R.id.txtview_medicine_item);
+                holder.txtMedicineTime = (TextView) convertView.findViewById(R.id.txtview_medicine_time);
+                holder.checkBox_question = (CheckBox) convertView.findViewById(R.id.checkbox_medicine_taken);
+                holder.switch_question = (Switch) convertView.findViewById(R.id.switch_question);
                 holder.imageView = (ImageView) convertView.findViewById(R.id.image_drawer_item);
 
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
+
+            final MedicationQuestionItem item = getItem(position);
             holder.position = position;
-            MedicationQuestionItem item = getItem(position);
-            //holder.question_switch.setText(item.getMedicationName());
-            holder.text.setText("Did you take " + item.getMedicationName() + "?");
+            //holder.switch_question.setText(item.getMedicationName());
+            holder.txtMedicineName.setText("Did you take " + item.getMedicationName() + "?");
+
+            String timeTaken = CheckInUtils.getInstance().ReportMedicationsTakingTime.get(item.getMedicationName());
+
+            if(!timeTaken.equals(Constants.STRINGS.EMPTY)) {
+                timeTaken =  DateTime.forInstant(Long.valueOf(timeTaken), TimeZone.getTimeZone("GMT+00")).format("YYYY-MM-DD hh:mm");
+            }
+            //holder.txtMedicineTime.setText("23/01/2015 12:00");
+            holder.txtMedicineTime.setText(timeTaken);
+
             holder.imageView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_medicine));
             //holder.imageView.setImageDrawable(mContext.getResources().getDrawable(item.getDrawableResource()));
+            holder.checkBox_question.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    final boolean YES = holder.checkBox_question.isChecked();
+                    if(isChecked){
+
+                        Toast.makeText(buttonView.getContext(),"Medicine " + item.getMedicationName() + " taken",Toast.LENGTH_SHORT).show();
+                        showTimePickerDialog(buttonView.getContext(),holder,item.getMedicationName());
+                    }
+                    holder.txtMedicineTime.setVisibility(YES ? View.VISIBLE : View.GONE);
+                }
+            });
             return  convertView;
         }
 
+        //TODO#FDAR_7 Interactive used by Patient to enter the Date & Time he/she took the specified medicine
+        private void showTimePickerDialog(final Context context, final ViewHolder holder, final String medicineName) {
+            final Dialog dialog = new Dialog(context);
+
+            dialog.setContentView(R.layout.custom_dialog_datetime);
+
+            dialog.setTitle(String.format("%s",medicineName));
+
+            dialog.show();
+
+            final DatePicker dp = (DatePicker)dialog.findViewById(R.id.datePicker1);
+            final TimePicker tp = (TimePicker)dialog.findViewById(R.id.timePicker1);
+
+            Button btnCancel = (Button)dialog.findViewById(R.id.btnCancelDT);
+            Button btnSet = (Button)dialog.findViewById(R.id.btnSetDT);
+
+            btnCancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                }
+            });
+
+            btnSet.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View arg0) {
+                    String am_pm = "";
+                    int m = dp.getMonth()+1;
+                    int d = dp.getDayOfMonth();
+                    int y = dp.getYear();
+
+                    int h = tp.getCurrentHour();
+                    int min = tp.getCurrentMinute();
+
+                    String strm = String.valueOf(min);
+
+                    if(strm.length()==1){
+                        strm = "0"+strm;
+                    }
+                    int hour24 = h;
+                    if(h>12){
+                        am_pm = "PM";
+                        h = h-12;
+                    }else{
+                        am_pm = "AM";
+                    }
+
+                    String date = m+"/"+d+"/"+y+" "+h+":"+strm+":00 "+am_pm;
+                    String time = h+":"+strm+" "+am_pm;
+
+                    //DateTime dateAndTime = new DateTime("2010-01-19 23:59:59");
+                    String format = String.format("%d-%02d-%02d %02d:%02d:%02d",y,m,d,hour24,min,0);
+                    DateTime dateAndTime = new DateTime(format);
+
+                    long milliFrom1970GMT = dateAndTime.getMilliseconds(TimeZone.getTimeZone("GMT+00"));
+
+                    holder.txtMedicineTime.setText(dateAndTime.toString());
+
+                    CheckInUtils.getInstance().ReportMedicationsTakingTime.put(medicineName, String.valueOf(milliFrom1970GMT));
+
+                    Log.i("CheckInFlow", "milliFrom1970GMT= " + milliFrom1970GMT);
+                    //Toast.makeText(getActivity(), "Date: " + date + " Time: " + time, Toast.LENGTH_SHORT).show();
+
+                    dialog.dismiss();
+                }
+            });
+        }
 
         static class ViewHolder {
-            Switch question_switch;
-            TextView text;
+            CheckBox checkBox_question;
+            Switch switch_question;
+            TextView txtMedicineName;
+            TextView txtMedicineTime;
             ImageView imageView;
             int position;
         }

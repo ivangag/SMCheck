@@ -150,5 +150,8 @@
     <string name="drawer_close">close menu</string>
     <string name="title_activity_sample_pager_sliding">SamplePagerSlidingActivity</string>
     <string name="hello_world">Hello world!</string>
+    <string name="health_status">Health Status</string>
+    <string name="session_expired">Your session is expired. Please re-enter credentials.</string>
+    <string name="login_alert">Login Alert</string>
 
 </resources>

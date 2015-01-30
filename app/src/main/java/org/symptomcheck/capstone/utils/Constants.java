@@ -22,6 +22,12 @@ package org.symptomcheck.capstone.utils;
  */
 public class Constants {
 
+    public final static class HTTP_STATUS_CODES {
+        public static final int OK = 200;
+        public static final int UNAUTHORIZED = 401;
+        public static final int INTERNAL_ERROR = 500;
+    }
+
     public final static class STRINGS{
         public static final String EMPTY = "";
     }
