@@ -38,9 +38,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -254,14 +252,14 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                 if(item.isInFixedList()){
                     mDrawer.addFixedItem(new DrawerItem()
                                     .setImage(getResources().getDrawable(item.getImage()))
-                                    .setTextPrimary(item.getmTitle())
+                                    .setTextPrimary(item.getTitle())
                                     .setTextSecondary(item.getExtra_info())
                                     .setId(item.getPosition())
                     );
                 }else {
                     mDrawer.addItem(new DrawerItem()
                                     .setImage(getResources().getDrawable(item.getImage()))
-                                    .setTextPrimary(item.getmTitle())
+                                    .setTextPrimary(item.getTitle())
                                     .setTextSecondary(item.getExtra_info())
                                     .setId(item.getPosition())
                     );
@@ -1060,7 +1058,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                     .content(R.string.exit_question)
                     .positiveText(R.string.alert_dialog_yes)
                     .negativeText(R.string.alert_dialog_no)
-                    .icon(context.getResources().getDrawable(R.drawable.ic_logout))
+                    .icon(context.getResources().getDrawable(R.drawable.ic_exit_to_app_grey600_48dp))
                     .callback(new MaterialDialog.ButtonCallback() {
                         @Override
                         public void onPositive(MaterialDialog dialog) {
@@ -1119,7 +1117,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             mInFixedList = inFixedList;
         }
 
-        public String getmTitle() {
+        public String getTitle() {
             return mTitle;
         }
 

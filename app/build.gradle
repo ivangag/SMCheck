@@ -81,7 +81,7 @@ dependencies {
     //compile 'com.avast:android-styled-dialogs:2.0.1'
 
     // Material Dialogs (another!)
-    compile 'com.afollestad:material-dialogs:0.6.1.1'
+    compile 'com.afollestad:material-dialogs:0.6.2.1'
 
     // FAB with menu and label
     compile 'com.getbase:floatingactionbutton:1.6.0'

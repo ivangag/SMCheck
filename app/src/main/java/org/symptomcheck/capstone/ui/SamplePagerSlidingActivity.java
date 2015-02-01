@@ -31,6 +31,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.astuetz.PagerSlidingTabStrip;
 import com.google.common.collect.Lists;
 
@@ -82,8 +83,8 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
         mUser = DAOManager.get().getUser();
 
         mMedicines = PainMedication.getAll(mUser.getUserIdentification());
-        for(PainMedication medication : mMedicines){
-           CheckInUtils.getInstance().ReportMedicationsResponse.put(medication.getMedicationName(), Constants.STRINGS.EMPTY);
+        for(PainMedication medication : mMedicines) {
+            CheckInUtils.getInstance().ReportMedicationsResponse.put(medication.getMedicationName(), Constants.STRINGS.EMPTY);
             CheckInUtils.getInstance().ReportMedicationsTakingTime.put(medication.getMedicationName(), Constants.STRINGS.EMPTY);
         }
 
@@ -309,7 +310,7 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
                         public void onClick(View v) {
                             txtMedicineTakingTime.setVisibility(View.VISIBLE);
                             parentActivity.mReportMedicationsResponse.put(mMedicineName, YES);
-                            showTimePickerDialog(rootView,mMedicineName); //TODO#FDAR_7 DateTime Dialog is shown when Patient select YES button
+                            showDateTimePickerDialog(rootView,mMedicineName); //TODO#FDAR_7 DateTime Dialog is shown when Patient select YES button
                         }
                     });
                     final boolean YES = ((RadioButton)medicinesQuestionsView.findViewById(R.id.radioBtnMedicineYES)).isChecked();
@@ -318,7 +319,7 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
                     txtMedicineTakingTime.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            showTimePickerDialog(rootView,mMedicineName); //TODO#FDAR_7 DateTime Dialog is also shown when Patient select click over the textview allowing to modify the choice
+                            showDateTimePickerDialog(rootView,mMedicineName); //TODO#FDAR_7 DateTime Dialog is also shown when Patient select click over the textview allowing to modify the choice
                         }
                     });
                     break;
@@ -365,6 +366,12 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             //return super.onCreateView(inflater, container, savedInstanceState);
             rootView = inflater.inflate(R.layout.fragment_checkin_medications_questions, container, false);
+            ((CheckBox)rootView.findViewById(R.id.checkbox_all_medicines_taken)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    rootView.findViewById(R.id.list_medicines_question).setVisibility(isChecked ? View.VISIBLE:View.GONE);
+                }
+            });
             return rootView;
         }
 
@@ -381,7 +388,7 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
                 }
                 mMedicationsAdapter = new MedicationQuestionAdapter(getActivity(),items);
             }
-            mListView = (ListView) rootView.findViewById(R.id.list_questions);
+            mListView = (ListView) rootView.findViewById(R.id.list_medicines_question);
 
             if (mListView != null) {
                 mListView.setAdapter(mMedicationsAdapter);
@@ -489,7 +496,7 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
             final MedicationQuestionItem item = getItem(position);
             holder.position = position;
             //holder.switch_question.setText(item.getMedicationName());
-            holder.txtMedicineName.setText("Did you take " + item.getMedicationName() + "?");
+            holder.txtMedicineName.setText(item.getMedicationName());
 
             String timeTaken = CheckInUtils.getInstance().ReportMedicationsTakingTime.get(item.getMedicationName());
 
@@ -508,7 +515,8 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
                     if(isChecked){
 
                         Toast.makeText(buttonView.getContext(),"Medicine " + item.getMedicationName() + " taken",Toast.LENGTH_SHORT).show();
-                        showTimePickerDialog(buttonView.getContext(),holder,item.getMedicationName());
+                        //showDateTimePickerDialog(buttonView.getContext(), holder, item.getMedicationName());
+                        DatePickerDialogFragment.show(buttonView.getContext(),holder,item.getMedicationName());
                     }
                     holder.txtMedicineTime.setVisibility(YES ? View.VISIBLE : View.GONE);
                 }
@@ -517,7 +525,7 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
         }
 
         //TODO#FDAR_7 Interactive used by Patient to enter the Date & Time he/she took the specified medicine
-        private void showTimePickerDialog(final Context context, final ViewHolder holder, final String medicineName) {
+        private void showDateTimePickerDialog(final Context context, final ViewHolder holder, final String medicineName) {
             final Dialog dialog = new Dialog(context);
 
             dialog.setContentView(R.layout.custom_dialog_datetime);
@@ -592,6 +600,71 @@ public class SamplePagerSlidingActivity extends ActionBarActivity {
             TextView txtMedicineTime;
             ImageView imageView;
             int position;
+        }
+
+        static class TimePickerDialogFragment {
+
+            public static void show(final Context context, final ViewHolder holder, final String medicineName
+                                    ,final int day, final int month, final int year) {
+                new MaterialDialog.Builder(context)
+                        .title(String.format("%s",medicineName))
+                        //.content(R.string.exit_question)
+                        .customView(R.layout.dialog_timepicker,false)
+                        .positiveText(R.string.alert_dialog_ok)
+                        //.negativeText(R.string.alert_dialog_no)
+                        .icon(context.getResources().getDrawable(R.drawable.ic_medicine))
+                        .callback(new MaterialDialog.ButtonCallback() {
+                            @Override
+                            public void onPositive(MaterialDialog dialog) {
+                                String am_pm = "";
+                                final TimePicker tp = (TimePicker) dialog.getCustomView().findViewById(R.id.timePickerCheckIn);
+                                int h = tp.getCurrentHour();
+                                int min = tp.getCurrentMinute();
+                                int hour24 = h;
+                                if(h>12){
+                                    am_pm = "PM";
+                                    h = h-12;
+                                }else{
+                                    am_pm = "AM";
+                                }
+                                String format = String.format("%d-%02d-%02d %02d:%02d:%02d",year,month,day,hour24,min,0);
+                                DateTime dateAndTime = new DateTime(format);
+
+                                long milliFrom1970GMT = dateAndTime.getMilliseconds(TimeZone.getTimeZone("GMT+00"));
+
+                                holder.txtMedicineTime.setText(dateAndTime.toString());
+
+                                CheckInUtils.getInstance().ReportMedicationsTakingTime.put(medicineName, String.valueOf(milliFrom1970GMT));
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
+            }
+        }
+
+        static class DatePickerDialogFragment {
+
+            public static void show(final Context context, final ViewHolder holder, final String medicineName) {
+                new MaterialDialog.Builder(context)
+                        .title(String.format("%s",medicineName))
+                                //.content(R.string.exit_question)
+                        .customView(R.layout.dialog_datepicker,false)
+                        .positiveText(R.string.alert_dialog_ok)
+                                //.negativeText(R.string.alert_dialog_no)
+                        .icon(context.getResources().getDrawable(R.drawable.ic_medicine))
+                        .callback(new MaterialDialog.ButtonCallback() {
+                            @Override
+                            public void onPositive(MaterialDialog dialog) {
+                                dialog.dismiss();
+                                final DatePicker dp = (DatePicker) dialog.getCustomView().findViewById(R.id.datePickerCheckIn);
+                                int month = dp.getMonth()+1;
+                                int day = dp.getDayOfMonth();
+                                int year = dp.getYear();
+                                TimePickerDialogFragment.show(context,holder,medicineName,day,month,year);
+                            }
+                        })
+                        .show();
+            }
         }
     }
 }

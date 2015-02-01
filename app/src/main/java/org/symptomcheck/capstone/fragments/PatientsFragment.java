@@ -399,7 +399,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
             card.setOnClickListener(new Card.OnCardClickListener() {
                 @Override
                 public void onClick(Card card, View view) {
-                    //Toast.makeText(getContext(), "Card id=" + card.getId() + " Title=" + card.getCardHeader().getmTitle(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getContext(), "Card id=" + card.getId() + " Title=" + card.getCardHeader().getTitle(), Toast.LENGTH_SHORT).show();
                 }
             });
 

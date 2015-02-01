@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_time_picker_dialog"
+    android:layout_width="fill_parent"
+    android:layout_gravity="center"
+    android:layout_height="fill_parent" >
+
+    <DatePicker
+        android:layout_gravity="center"
+        android:id="@+id/datePickerCheckIn"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:calendarViewShown="false" > <!-- style="@style/date_picker_style" -->
+    </DatePicker>
+</FrameLayout>
