@@ -307,7 +307,7 @@ public class CheckInFlowActivity extends ActionBarActivity  {
 
         if (check) {
             // Save Check-In and trigger local => cloud sync
-            mCheckInFromUserChoices = buildCheckInFromUserChoices();
+            mCheckInFromUserChoices = buildCheckInFromUserChoices(mMedicines);
             showDialog();
         } else {
             //Toast.makeText(this, msgError, Toast.LENGTH_LONG).show();
@@ -352,10 +352,10 @@ public class CheckInFlowActivity extends ActionBarActivity  {
     }
 
 
-    private CheckIn buildCheckInFromUserChoices(){
+    private CheckIn buildCheckInFromUserChoices(List<PainMedication> Medicines){
         Map<PainMedication, String> meds = new HashMap<PainMedication, String>();
-        for(int idx = 0; idx < mMedicines.size();idx++) {
-            final String medication = mMedicines.get(idx).getMedicationName();
+        for(int idx = 0; idx < Medicines.size();idx++) {
+            final String medication = Medicines.get(idx).getMedicationName();
             final String time = mReportMedicationsTakingTime.get(medication);
             meds.put(new PainMedication(medication, time), mReportMedicationsResponse.get(medication));
         }
