@@ -9,7 +9,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 21
         versionCode 0
-        versionName "1.1"
+        versionName "1.2"
 
         // Enabling multidex support.
         multiDexEnabled true
