@@ -12,6 +12,7 @@ import java.util.Map;
 public class CheckInUtils {
     private static CheckInUtils ourInstance = new CheckInUtils();
 
+
     public static CheckInUtils getInstance() {
         return ourInstance;
     }
@@ -19,6 +20,7 @@ public class CheckInUtils {
     private CheckInUtils() {
     }
 
+    public boolean IsGeneralMedicinesQuestionChecked;
     public Map<String,String> ReportMedicationsResponse = new HashMap<String, String>(){};
     public Map<String,String> ReportMedicationsTakingTime = new HashMap<String, String>(){};
     public PainLevel ReportPainLevel = PainLevel.UNKNOWN;

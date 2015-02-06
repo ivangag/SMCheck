@@ -1,6 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="org.symptomcheck.capstone.ui.CheckInFlowActivity">
+    tools:context="org.symptomcheck.capstone.ui.CheckInFlowActivityOld">
 
 
     <item android:id="@+id/action_submit_checkin"

@@ -30,6 +30,8 @@ public class Constants {
 
     public final static class STRINGS{
         public static final String EMPTY = "";
+        public static final String YES = "YES";
+        public static final String NO = "NO";
     }
 
     public final static class TIME {

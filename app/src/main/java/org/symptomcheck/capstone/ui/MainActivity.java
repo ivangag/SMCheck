@@ -477,6 +477,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             mFabWriteMessage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    mFabActionsMenu.collapse();
                     Toast.makeText(getApplicationContext(),"Clicked Write a Message FAB",Toast.LENGTH_SHORT).show();
                 }
             });
@@ -485,7 +486,9 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             mFabSubmitCheckin.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    mFabActionsMenu.collapse();
                     Toast.makeText(getApplicationContext(),"Clicked Submit CheckIn  FAB",Toast.LENGTH_SHORT).show();
+                    startActivity(CheckInFlowActivity.makeIntentStartActivity(getApplicationContext()));
                 }
             });
         }
@@ -493,6 +496,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             mFabTakePicture.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    mFabActionsMenu.collapse();
                     Toast.makeText(getApplicationContext(),"Clicked Take a Picture FAB",Toast.LENGTH_SHORT).show();
                 }
             });
@@ -927,7 +931,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
         if (id == R.id.action_test) {
 
-            Intent intent = new Intent(this,SamplePagerSlidingActivity.class);
+            Intent intent = new Intent(this,CheckInFlowActivity.class);
             startActivity(intent);
 
             NotificationHelper.raiseCheckinReminderNotification(this, 1, getString(R.string.checkin_reminder_text));

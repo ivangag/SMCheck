@@ -44,6 +44,7 @@ import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
+import org.symptomcheck.capstone.App;
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.alarms.SymptomAlarmRequest;
@@ -197,6 +198,7 @@ public class LoginActivity extends ActionBarActivity { //TODO#BPR_3
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
+            App.hideSoftKeyboard(LoginActivity.this);
             showProgress(true, false);
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null); //TODO#FDAR_1
@@ -280,6 +282,7 @@ public class LoginActivity extends ActionBarActivity { //TODO#BPR_3
             mEmail = email;
             mPassword = password;
         }
+
 
         @Override
         protected ErrorLogin doInBackground(Void... params) {

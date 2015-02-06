@@ -75,13 +75,13 @@ dependencies {
     //compile 'it.neokree:MaterialNavigationDrawer:1.2.9'
 
     //Material Navigation Drawer
-    compile 'com.heinrichreimersoftware.materialdrawer:library:1.4.1'
+    compile 'com.heinrichreimersoftware.materialdrawer:library:1.4.2'
     //compile project(":material-drawer-library-release-1.4")
     // Material Material StyledDialogs
     //compile 'com.avast:android-styled-dialogs:2.0.1'
 
     // Material Dialogs (another!)
-    compile 'com.afollestad:material-dialogs:0.6.2.1'
+    compile 'com.afollestad:material-dialogs:0.6.2.3'
 
     // FAB with menu and label
     compile 'com.getbase:floatingactionbutton:1.6.0'

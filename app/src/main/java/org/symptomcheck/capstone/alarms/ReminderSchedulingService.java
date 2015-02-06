@@ -29,7 +29,6 @@ import android.util.Log;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.ui.CheckInFlowActivity;
-import org.symptomcheck.capstone.ui.LoginActivity;
 
 //TODO#BPR_3 Intent Service used for raising Check-In Alert Notification
 public class ReminderSchedulingService extends IntentService {
