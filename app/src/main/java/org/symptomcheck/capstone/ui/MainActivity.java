@@ -28,6 +28,7 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -60,6 +61,7 @@ import org.symptomcheck.capstone.alarms.SymptomAlarmRequest;
 import org.symptomcheck.capstone.bus.DownloadEvent;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.fragments.CheckInFragment;
+import org.symptomcheck.capstone.fragments.CheckInFragmentRecyclerCardView;
 import org.symptomcheck.capstone.fragments.CheckInOnlineFragment;
 import org.symptomcheck.capstone.fragments.DoctorFragment;
 import org.symptomcheck.capstone.fragments.ExperiencesFragment;
@@ -73,6 +75,7 @@ import org.symptomcheck.capstone.model.PatientExperience;
 import org.symptomcheck.capstone.model.UserInfo;
 import org.symptomcheck.capstone.model.UserType;
 import org.symptomcheck.capstone.preference.UserPreferencesManager;
+import org.symptomcheck.capstone.utils.BuildInfo;
 import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
 import org.symptomcheck.capstone.utils.NotificationHelper;
@@ -104,6 +107,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     private Fragment mPreviousFragment;
     private int mSelectedFragmentPosition = -1;
     private ShowFragmentType mSelectedFragmentType;
+    private boolean mDoubleBackToExitPressedOnce;
 
 
     public enum ShowFragmentType {
@@ -127,6 +131,8 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     private static final int CASE_SHOW_PATIENT_MEDICINES = 2;
     private static final int CASE_SHOW_PATIENT_SETTINGS = 3;
     private static final int CASE_SHOW_PATIENT_LOGOUT = 4;
+
+    private static final int CASE_SHOW_APP_VERSION = 5;
 
     private UserInfo mUser;
 
@@ -308,11 +314,14 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                     askForLogout();
                 }
                 else {
-                    selectDrawerItem(id);
-                }
+                    if(id != CASE_SHOW_APP_VERSION) {
+                        selectDrawerItem(id);
+                    }}
 
                 if((id != CASE_SHOW_PATIENT_SETTINGS)
-                    && (id != CASE_SHOW_PATIENT_LOGOUT)){
+                    && (id != CASE_SHOW_PATIENT_LOGOUT)
+                    && (id != CASE_SHOW_APP_VERSION)
+                        ){
                     mDrawer.selectFixedItemById(id);
                 }
                 //Toast.makeText(getApplicationContext(), "Clicked item #" + position + " id #" + id, Toast.LENGTH_SHORT).show();
@@ -399,7 +408,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             //TODO#BPR_1
             //TODO#BPR_2
             if (userType.equals(UserType.DOCTOR)) {
-
+                mFabSubmitCheckin.setVisibility(View.GONE);
                 mDrawerItemTitles.add(
                         new DrawerItemHelper (getResources().getString(R.string.patients_header),
                                 getResources().getString(R.string.patients_header_info),
@@ -410,11 +419,11 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                                 getResources().getString(R.string.title_bad_experience_notification_info),
                                 R.drawable.ic_poll_grey600_48dp,
                                 CASE_SHOW_DOCTOR_PATIENTS_EXPERIENCES,false,false));
-                mDrawerItemTitles.add(
+/*                mDrawerItemTitles.add(
                         new DrawerItemHelper (getResources().getString(R.string.title_search_checkin_online),
                                 getResources().getString(R.string.title_search_checkin_online_info),
                                 R.drawable.ic_search_grey600_48dp,
-                                CASE_SHOW_DOCTOR_PATIENTS_ONLINE_CHECKINS,false,false));
+                                CASE_SHOW_DOCTOR_PATIENTS_ONLINE_CHECKINS,false,false));*/
 
                 mDrawerItemTitles.add(
                         new DrawerItemHelper (getResources().getString(R.string.action_settings),
@@ -429,7 +438,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
                 detailUser += "\nID " + Doctor.getByDoctorNumber(mUser.getUserIdentification()).getUniqueDoctorId();
             } else if (userType.equals(UserType.PATIENT)) { //TODO#FDAR_1 show details of Patient on the a view in front of the main activity
-
+                mFabSubmitCheckin.setVisibility(View.VISIBLE);
                 mDrawerItemTitles.add(
                         new DrawerItemHelper (getResources().getString(R.string.doctors_header),
                                 getResources().getString(R.string.doctors_header_info),
@@ -440,11 +449,11 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                                 getResources().getString(R.string.checkins_header_info),
                                 R.drawable.ic_poll_grey600_48dp,
                                 CASE_SHOW_PATIENT_CHECKINS,false,false));
-                mDrawerItemTitles.add(
+/*                mDrawerItemTitles.add(
                         new DrawerItemHelper (getResources().getString(R.string.medicines_header),
                                 getResources().getString(R.string.medicines_header_info),
                                 R.drawable.ic_list_grey600_48dp,
-                                CASE_SHOW_DOCTOR_PATIENTS_ONLINE_CHECKINS,false,false));
+                                CASE_SHOW_DOCTOR_PATIENTS_ONLINE_CHECKINS,false,false));*/
 
                 mDrawerItemTitles.add(
                         new DrawerItemHelper (getResources().getString(R.string.action_settings),
@@ -461,6 +470,12 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                                 + "\nMedical Number " + mUser.getUserIdentification()
                 ;
             }
+            mDrawerItemTitles.add(
+                    new DrawerItemHelper (BuildInfo.get().getAppVersion(this),
+                            Constants.STRINGS.EMPTY,
+                            R.drawable.ic_info_outline_grey600_18dp,
+                            CASE_SHOW_APP_VERSION,false,true));
+
         } catch (Exception e) {
             Toast.makeText(this, "Picasso error:" + e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
         }
@@ -626,9 +641,6 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     public boolean onPrepareOptionsMenu(Menu menu) {
         // If the nav mDrawer is open, hide action getItemsQuestion related to the content view
         //boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
-
-        MenuItem menuCheckInTest = menu.findItem(R.id.action_test);
-        menuCheckInTest.setVisible(true);
         return super.onPrepareOptionsMenu(menu);
 
     }
@@ -643,7 +655,8 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                 fragment = new PatientsFragment();
                 break;
             case PATIENT_CHECKINS: //TODO#FDAR_10
-                fragment = CheckInFragment.newInstance(ownerId);
+                //fragment = CheckInFragment.newInstance(ownerId);
+                fragment = CheckInFragmentRecyclerCardView.newInstance(ownerId);
                 break;
             case PATIENT_ONLINE_CHECKINS:
                 fragment = CheckInOnlineFragment.newInstance();
@@ -758,9 +771,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     }
 
     private void askForExit() {
-        //exitFragment.show(getFragmentManager(), "exit");
         AlertExitFragment.show(this);
-        //AlertMaterialExitFragment.show(this);
     }
     private void askForLogout() {
         AlertLogoutFragment.show(this);
@@ -1088,17 +1099,36 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
     @Override
     public void onBackPressed() {
-        // initialize variables
-        FragmentManager fm = getFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
 
-        // check to see if stack is empty
-        if (fm.getBackStackEntryCount() > 0) {
-            fm.popBackStack();
-            ft.commit();
-        }
-        else {
-            askForExit();
+        if(mFabActionsMenu.isExpanded()){
+            mFabActionsMenu.collapse();
+        }else {
+            // initialize variables
+            FragmentManager fm = getFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+
+            // check to see if stack is empty
+            if (fm.getBackStackEntryCount() > 0) {
+                fm.popBackStack();
+                ft.commit();
+//            } else {
+//                askForExit();
+            }  else {
+                if(mDoubleBackToExitPressedOnce) {
+                    super.onBackPressed();
+                    return;
+                }
+                this.mDoubleBackToExitPressedOnce = true;
+                Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+                new Handler().postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        mDoubleBackToExitPressedOnce=false;
+                    }
+                }, 2000);
+            }
         }
     }
 

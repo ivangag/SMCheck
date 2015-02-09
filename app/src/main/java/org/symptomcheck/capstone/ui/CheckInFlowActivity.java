@@ -63,6 +63,8 @@ public class CheckInFlowActivity extends ActionBarActivity {
 
     @InjectView(R.id.app_bar)
     Toolbar toolbar;
+    @InjectView(R.id.txt_toolbar_title)
+    TextView toolbarTitle;
     @InjectView(R.id.tabs)
     PagerSlidingTabStrip tabs;
     @InjectView(R.id.pager)
@@ -91,6 +93,8 @@ public class CheckInFlowActivity extends ActionBarActivity {
         mUser = DAOManager.get().getUser();
 
         progressBarHandler = new Handler();
+
+        toolbarTitle.setText(String.format("%s %s Check-In",mUser.getFirstName(),mUser.getLastName()));
         mMedicines = PainMedication.getAll(mUser.getUserIdentification());
         for(PainMedication medication : mMedicines) {
             CheckInUtils.getInstance().ReportMedicationsResponse.put(medication.getMedicationName(), Constants.STRINGS.NO);
@@ -517,8 +521,8 @@ public class CheckInFlowActivity extends ActionBarActivity {
                 LayoutInflater inflater = ((Activity) parent.getContext()).getLayoutInflater();
                 convertView = inflater.inflate(R.layout.medicines_checkin_list_adapter_item, parent,false);
                 holder = new ViewHolder();
-                holder.txtMedicineName = (TextView) convertView.findViewById(R.id.txtview_medicine_item);
-                holder.txtMedicineTime = (TextView) convertView.findViewById(R.id.txtview_medicine_time);
+                holder.txtMedicineName = (TextView) convertView.findViewById(R.id.txtView_medicine_item);
+                holder.txtMedicineTime = (TextView) convertView.findViewById(R.id.txtView_medicine_time);
                 holder.checkBox_question = (CheckBox) convertView.findViewById(R.id.checkbox_medicine_taken);
                 holder.switch_question = (Switch) convertView.findViewById(R.id.switch_question);
                 holder.imageView = (ImageView) convertView.findViewById(R.id.image_drawer_item);
@@ -574,7 +578,7 @@ public class CheckInFlowActivity extends ActionBarActivity {
             public static void show(final Context context, final ViewHolder holder, final String medicineName
                                     ,final int day, final int month, final int year) {
                 new MaterialDialog.Builder(context)
-                        .title(String.format("%s",medicineName))
+                        .title(String.format("%s - Set Time",medicineName))
                         //.content(R.string.exit_question)
                         .customView(R.layout.dialog_timepicker,false)
                         .positiveText(R.string.alert_dialog_ok)
@@ -613,7 +617,7 @@ public class CheckInFlowActivity extends ActionBarActivity {
 
             public static void show(final Context context, final ViewHolder holder, final String medicineName) {
                 new MaterialDialog.Builder(context)
-                        .title(String.format("%s",medicineName))
+                        .title(String.format("%s - Set Date",medicineName))
                                 //.content(R.string.exit_question)
                         .customView(R.layout.dialog_datepicker,false)
                         .positiveText(R.string.alert_dialog_ok)

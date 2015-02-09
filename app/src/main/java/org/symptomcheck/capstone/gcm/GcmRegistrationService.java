@@ -105,7 +105,7 @@ public class GcmRegistrationService extends IntentService {
                 // Persist the regID - no need to register again.
                 UserPreferencesManager.get().setGcmRegId(getApplicationContext(), regid);
                 UserPreferencesManager.get().setAppVers(getApplicationContext(),
-                        BuildInfo.get().getAppVersion(getApplicationContext()));
+                        BuildInfo.get().getAppVersionCode(getApplicationContext()));
                 Log.i(TAG,msg);
             }catch (Exception exc){
                 Log.e(TAG,"registerInBackground error: " + exc.getMessage());
@@ -163,7 +163,7 @@ public class GcmRegistrationService extends IntentService {
         // since the existing regID is not guaranteed to work with the new
         // app version.
         int registeredVersion = UserPreferencesManager.get().getAppVers(this);
-        int currentVersion = BuildInfo.get().getAppVersion(context);
+        int currentVersion = BuildInfo.get().getAppVersionCode(context);
         if (registeredVersion != currentVersion) {
             Log.i(TAG, "App version changed.");
             return "";

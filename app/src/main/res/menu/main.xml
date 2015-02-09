@@ -13,7 +13,7 @@
         android:title="@string/action_accept_checkin"
         android:icon="@drawable/ic_timer_white_24dp"
         android:orderInCategory="120"
-        android:visible="true"
+        android:visible="false"
         android:showAsAction="ifRoom" />
     <item android:id="@+id/action_search"
         android:title="@string/action_search"

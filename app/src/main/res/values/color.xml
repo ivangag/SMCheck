@@ -24,6 +24,7 @@
 <color name="secondary_text">#727272</color>
 <color name="icons">#FFFFFF</color>
 <color name="divider">#B6B6B6</color>
+<color name="fab_pressed">@color/Secondary_Green_400</color>
 
 <!--<color name="card_text_color_header">#990066</color> -->
 <color name="card_text_color_header">@color/primary_text</color>

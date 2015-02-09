@@ -58,13 +58,12 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         fab:fab_addButtonColorNormal="@color/accent"
-        fab:fab_addButtonColorPressed="@color/Secondary_Green_400"
+        fab:fab_addButtonColorPressed="@color/fab_pressed"
         fab:fab_addButtonPlusIconColor="@color/icons"
         fab:fab_labelStyle="@style/menu_labels_style"
         android:layout_marginBottom="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginEnd="16dp">
-
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_submit_checkin"
@@ -74,7 +73,7 @@
             app:fab_size="mini"
             fab:fab_colorNormal="@color/accent"
             fab:fab_title="Submit Checkin"
-            fab:fab_colorPressed="@color/Secondary_Green_400"/>
+            fab:fab_colorPressed="@color/fab_pressed"/>
 
 
         <com.getbase.floatingactionbutton.FloatingActionButton
@@ -85,7 +84,7 @@
             app:fab_size="mini"
             fab:fab_colorNormal="@color/accent"
             fab:fab_title="Take a Picture"
-            fab:fab_colorPressed="@color/Secondary_Green_400"/>
+            fab:fab_colorPressed="@color/fab_pressed"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_write_message"
@@ -95,7 +94,7 @@
             app:fab_size="mini"
             fab:fab_colorNormal="@color/accent"
             fab:fab_title="Write a Message"
-            fab:fab_colorPressed="@color/Secondary_Green_400"/>
+            fab:fab_colorPressed="@color/fab_pressed"/>
 
 
 

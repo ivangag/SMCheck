@@ -146,7 +146,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
 
         if(mPatientOwner != null){
             title =// mPatientOwner.getFirstName() + " " +
-                    mPatientOwner.getLastName() + "'s " + getString(R.string.doctor_header);
+                    mPatientOwner.getLastName() + "'s " + getString(R.string.doctors_header);
         }
         return title;
     }

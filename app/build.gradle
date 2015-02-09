@@ -8,7 +8,7 @@ android {
         applicationId "org.symptomcheck.capstone"
         minSdkVersion 15
         targetSdkVersion 21
-        versionCode 0
+        versionCode 1
         versionName "1.2"
 
         // Enabling multidex support.
@@ -84,7 +84,7 @@ dependencies {
     compile 'com.afollestad:material-dialogs:0.6.2.3'
 
     // FAB with menu and label
-    compile 'com.getbase:floatingactionbutton:1.6.0'
+    compile 'com.getbase:floatingactionbutton:1.7.0'
 
     // Android PagerSlidingTabStrip (default Material Design)
     compile 'com.jpardogo.materialtabstrip:library:1.0.8'
