@@ -121,16 +121,16 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         LOGOUT,
     }
 
-    private static final int CASE_SHOW_DOCTOR_PATIENTS = 0;
-    private static final int CASE_SHOW_DOCTOR_PATIENTS_EXPERIENCES = 1;
-    private static final int CASE_SHOW_DOCTOR_PATIENTS_ONLINE_CHECKINS = 2;
-    private static final int CASE_SHOW_DOCTOR_SETTINGS = 3;
-    private static final int CASE_SHOW_DOCTOR_LOGOUT = 4;
-    private static final int CASE_SHOW_PATIENT_DOCTORS = 0;
-    private static final int CASE_SHOW_PATIENT_CHECKINS = 1;
-    private static final int CASE_SHOW_PATIENT_MEDICINES = 2;
-    private static final int CASE_SHOW_PATIENT_SETTINGS = 3;
-    private static final int CASE_SHOW_PATIENT_LOGOUT = 4;
+    private static final long CASE_SHOW_DOCTOR_PATIENTS = 0;
+    private static final long CASE_SHOW_DOCTOR_PATIENTS_EXPERIENCES = 1;
+    private static final long CASE_SHOW_DOCTOR_PATIENTS_ONLINE_CHECKINS = 2;
+    private static final long CASE_SHOW_DOCTOR_SETTINGS = 3;
+    private static final long CASE_SHOW_DOCTOR_LOGOUT = 4;
+    private static final long CASE_SHOW_PATIENT_DOCTORS = 0;
+    private static final long CASE_SHOW_PATIENT_CHECKINS = 1;
+    private static final long CASE_SHOW_PATIENT_MEDICINES = 2;
+    private static final long CASE_SHOW_PATIENT_SETTINGS = 3;
+    private static final long CASE_SHOW_PATIENT_LOGOUT = 4;
 
     private static final int CASE_SHOW_APP_VERSION = 5;
 
@@ -281,31 +281,40 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         }
         Drawable background = getResources().getDrawable(R.drawable.mat2);
 
-        mDrawer.setProfile(new DrawerProfile()
+        mDrawer.addProfile(new DrawerProfile()
                         .setAvatar(avatar)
                         .setBackground(background)
                         .setName(mUser.getFirstName() + " " + mUser.getLastName())
                         .setDescription(mUser.getUserIdentification())
                         .setOnProfileClickListener(new DrawerProfile.OnProfileClickListener() {
                             @Override
-                            public void onClick(DrawerProfile drawerProfile) {
+                            public void onClick(DrawerProfile drawerProfile, long l) {
                                 Toast.makeText(getApplicationContext(),drawerProfile.getName() + "-" +drawerProfile.getDescription(),Toast.LENGTH_SHORT).show();
                             }
                         })
         );
 
-        mDrawer.setOnItemClickListener(new DrawerItem.OnItemClickListener() {
+        mDrawer.setOnItemClickListener(
+                new DrawerItem.OnItemClickListener() {
+                    @Override
+                    public void onClick(DrawerItem drawerItem, long l, int i) {
+                        selectDrawerItem((int)l);
+                        mDrawer.selectItem(i);
+                    }
+                });
+                /*
+                new DrawerItem.OnItemClickListener() {
             @Override
             public void onClick(DrawerItem item, int id, int position) {
                 selectDrawerItem(id);
                 mDrawer.selectItem(position);
                 //Toast.makeText(getApplicationContext(), "Clicked item #" + position + " id #" + id, Toast.LENGTH_SHORT).show();
-            }
-        });
+            }*/
+        //});
 
         mDrawer.setOnFixedItemClickListener(new DrawerItem.OnItemClickListener() {
             @Override
-            public void onClick(DrawerItem item, int id, int position) {
+            public void onClick(DrawerItem item, long id, int position) {
                 if((id == CASE_SHOW_PATIENT_SETTINGS)
                         || (id == CASE_SHOW_DOCTOR_SETTINGS)){
                     openSettings();
@@ -315,7 +324,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                 }
                 else {
                     if(id != CASE_SHOW_APP_VERSION) {
-                        selectDrawerItem(id);
+                        selectDrawerItem((int)id);
                     }}
 
                 if((id != CASE_SHOW_PATIENT_SETTINGS)
@@ -375,14 +384,14 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
         Drawable background = getResources().getDrawable(R.drawable.mat2);
 
-        mDrawer.setProfile(new DrawerProfile()
+        mDrawer.addProfile(new DrawerProfile()
                         .setAvatar(avatar)
                         .setBackground(background)
                         .setName(mUser.getFirstName() + " " + mUser.getLastName())
                         .setDescription(mUser.getUserIdentification())
-                        .setOnProfileClickListener(new DrawerProfile.OnProfileClickListener() {
+                        .setOnProfileClickListener( new DrawerProfile.OnProfileClickListener() {
                             @Override
-                            public void onClick(DrawerProfile drawerProfile) {
+                            public void onClick(DrawerProfile drawerProfile, long l) {
                                 Toast.makeText(getApplicationContext(), drawerProfile.getName() + "-" + drawerProfile.getDescription(), Toast.LENGTH_SHORT).show();
                             }
                         })
@@ -391,7 +400,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         mDrawer.selectItem(1);
         mDrawer.setOnItemClickListener(new com.heinrichreimersoftware.materialdrawer.structure.DrawerItem.OnItemClickListener() {
             @Override
-            public void onClick(com.heinrichreimersoftware.materialdrawer.structure.DrawerItem item, int id, int position) {
+            public void onClick(com.heinrichreimersoftware.materialdrawer.structure.DrawerItem item, long id, int position) {
                 mDrawer.selectItem(position);
                 Toast.makeText(getApplicationContext(), "Clicked item #" + position, Toast.LENGTH_SHORT).show();
             }
@@ -449,11 +458,11 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                                 getResources().getString(R.string.checkins_header_info),
                                 R.drawable.ic_poll_grey600_48dp,
                                 CASE_SHOW_PATIENT_CHECKINS,false,false));
-/*                mDrawerItemTitles.add(
+                mDrawerItemTitles.add(
                         new DrawerItemHelper (getResources().getString(R.string.medicines_header),
                                 getResources().getString(R.string.medicines_header_info),
                                 R.drawable.ic_list_grey600_48dp,
-                                CASE_SHOW_DOCTOR_PATIENTS_ONLINE_CHECKINS,false,false));*/
+                                CASE_SHOW_PATIENT_MEDICINES,false,false));
 
                 mDrawerItemTitles.add(
                         new DrawerItemHelper (getResources().getString(R.string.action_settings),
@@ -682,7 +691,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         return fragment;
     }
 
-    private Fragment selectFragment(int position) {
+    private Fragment selectFragment(long position) {
 
 
         Fragment fragment = null;
@@ -690,30 +699,26 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         //TODO#BPR_2
         switch (mUser.getUserType()) {
             case DOCTOR:
-                switch (position) {
-                    case CASE_SHOW_DOCTOR_PATIENTS:
+                    if(CASE_SHOW_DOCTOR_PATIENTS == position)
                         //fragment = new PatientsFragment();
                         fragment = selectFragment(ShowFragmentType.DOCTOR_PATIENTS, mUser.getUserIdentification());
-                        break;
-                    case CASE_SHOW_DOCTOR_PATIENTS_EXPERIENCES:
+                    else if(CASE_SHOW_DOCTOR_PATIENTS_EXPERIENCES == position)
                         //fragment = new PatientsFragment();
                         fragment = selectFragment(ShowFragmentType.DOCTOR_PATIENTS_EXPERIENCES, mUser.getUserIdentification());
-                        break;
-                    case CASE_SHOW_DOCTOR_PATIENTS_ONLINE_CHECKINS:
+                    else if(CASE_SHOW_DOCTOR_PATIENTS_ONLINE_CHECKINS == position)
                         //fragment = new PatientsFragment();
                         fragment = selectFragment(ShowFragmentType.PATIENT_ONLINE_CHECKINS, mUser.getUserIdentification());
-                        break;
-                    case CASE_SHOW_DOCTOR_SETTINGS:
+                    else if(CASE_SHOW_DOCTOR_SETTINGS == position)
                         openSettings();
-                        break;
-                    case CASE_SHOW_DOCTOR_LOGOUT:
-                        //fragment = AlertLogoutFragment.newInstance();
-                        break;
-                }
+                    //else if(CASE_SHOW_DOCTOR_LOGOUT == position)
+                    else {
+
+                    }
+
                 break;
             case PATIENT:
-                switch (position) {
-                    case CASE_SHOW_PATIENT_CHECKINS:
+               // switch (position) {
+                    if(CASE_SHOW_PATIENT_CHECKINS == position)
                         //fragment = CheckInFragment.newInstance(ownerId);
                         fragment = selectFragment(ShowFragmentType.PATIENT_CHECKINS, mUser.getUserIdentification());
                         break;
@@ -731,7 +736,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                     case CASE_SHOW_PATIENT_LOGOUT:
                         //fragment = AlertLogoutFragment.newInstance();
                         break;
-                }
+                //}
                 break;
             case ADMIN:
                 break;
@@ -1002,7 +1007,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     /**
      * Swaps fragments in the main content view
      */
-    private void selectDrawerItem(int position) {
+    private void selectDrawerItem(long position) {
         if (mSelectedFragmentPosition != position) {
             mPreviousFragment = mCurrentFragment;
             mCurrentFragment = selectFragment(position);

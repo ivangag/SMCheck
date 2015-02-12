@@ -75,7 +75,7 @@ dependencies {
     //compile 'it.neokree:MaterialNavigationDrawer:1.2.9'
 
     //Material Navigation Drawer
-    compile 'com.heinrichreimersoftware.materialdrawer:library:1.4.2'
+    compile 'com.heinrichreimersoftware.materialdrawer:library:2.0'
     //compile project(":material-drawer-library-release-1.4")
     // Material Material StyledDialogs
     //compile 'com.avast:android-styled-dialogs:2.0.1'

@@ -49,6 +49,7 @@ import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.interfaces.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.github.mikephil.charting.utils.Legend;
 
@@ -58,6 +59,7 @@ import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.adapters.CheckInRecyclerCursorAdapter;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
 import org.symptomcheck.capstone.model.CheckIn;
+import org.symptomcheck.capstone.model.PainLevel;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.utils.Constants;
@@ -141,7 +143,7 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
         mChart.setDescriptionTextSize(10f);
 
         // radius of the center hole in percent of maximum radius
-        mChart.setHoleRadius(45f);
+        mChart.setHoleRadius(25f);
         mChart.setTransparentCircleRadius(50f);
 
         // enable / disable drawing of x- and y-values
@@ -149,7 +151,17 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
 //        mChart.setDrawXValues(false);
 
         mChart.setData(generatePiePainStatusData());
+        mChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry entry, int i) {
 
+            }
+
+            @Override
+            public void onNothingSelected() {
+
+            }
+        });
         Legend l = mChart.getLegend();
         l.setPosition(Legend.LegendPosition.RIGHT_OF_CHART);
     }
@@ -166,9 +178,9 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
         ArrayList<Entry> entries1 = new ArrayList<Entry>();
         ArrayList<String> xVals = new ArrayList<String>();
 
-        xVals.add("WELL");
-        xVals.add("MODERATE");
-        xVals.add("SEVERE");
+        xVals.add(PainLevel.WELL_CONTROLLED.toString());
+        xVals.add(PainLevel.MODERATE.toString());
+        xVals.add(PainLevel.SEVERE.toString());
         //xVals.add("Quarter 4");
 
         for(int i = 0; i < count; i++) {
