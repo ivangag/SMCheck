@@ -28,6 +28,8 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.content.SyncStatusObserver;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -43,6 +45,12 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.activeandroid.content.ContentProvider;
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.utils.ColorTemplate;
+import com.github.mikephil.charting.utils.Legend;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
@@ -54,6 +62,8 @@ import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
+
+import java.util.ArrayList;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
@@ -104,15 +114,85 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
     }
+    private PieChart mChart;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root= inflater.inflate(R.layout.fragment_card_checkins_list_recycler, container, false);
 
+
+        
+        
         setupListFragment(root);
         setHasOptionsMenu(true);
         return root;
     }
 
+    private void generateHeaderGraphic(View root) {
+        mChart = (PieChart) root.findViewById(R.id.pieChartCheckInPain);
+        mChart.setDescription("");
+
+        Typeface tf = Typeface.createFromAsset(getActivity().getAssets(), "OpenSans-Regular.ttf");
+
+        //mChart.setValueTypeface(tf);
+        //mChart.setCenterTextTypeface(Typeface.createFromAsset(getActivity().getAssets(), "OpenSans-Light.ttf"));
+        mChart.setUsePercentValues(true);
+        mChart.setCenterText(mPatientOwner.getLastName());
+        mChart.setCenterTextSize(16f);
+        mChart.setDescriptionTextSize(10f);
+
+        // radius of the center hole in percent of maximum radius
+        mChart.setHoleRadius(45f);
+        mChart.setTransparentCircleRadius(50f);
+
+        // enable / disable drawing of x- and y-values
+//        mChart.setDrawYValues(false);
+//        mChart.setDrawXValues(false);
+
+        mChart.setData(generatePiePainStatusData());
+
+        Legend l = mChart.getLegend();
+        l.setPosition(Legend.LegendPosition.RIGHT_OF_CHART);
+    }
+
+    int PAIN_STATUS_OPTIONS = 3;
+    /**
+     * generates less data (1 DataSet, 4 values)
+     * @return
+     */
+    protected PieData generatePiePainStatusData() {
+
+        int count = PAIN_STATUS_OPTIONS;
+
+        ArrayList<Entry> entries1 = new ArrayList<Entry>();
+        ArrayList<String> xVals = new ArrayList<String>();
+
+        xVals.add("WELL");
+        xVals.add("MODERATE");
+        xVals.add("SEVERE");
+        //xVals.add("Quarter 4");
+
+        for(int i = 0; i < count; i++) {
+            xVals.add("entry" + (i+1));
+
+            entries1.add(new Entry((float) (Math.random() * 60) + 40, i));
+        }
+
+        PieDataSet ds1 = new PieDataSet(entries1, mPatientOwner.getLastName() + "'s Pain Status");
+        ds1.setColors(SM_CHECKIN_COLORS);
+        ds1.setSliceSpace(2f);
+
+        PieData d = new PieData(xVals, ds1);
+        return d;
+    }
+
+     /*public static final int[] SM_CHECKIN_COLORS = {
+            R.color.Secondary_Red_700, R.color.Secondary_Green_700, R.color.Secondary_Amber_700
+     };*/
+
+    public static final int[] SM_CHECKIN_COLORS = {
+            Color.rgb(0, 200, 83)/*green_700*/, Color.rgb(255, 171, 0)/*amber_700*/,Color.rgb(213, 0, 0)/*red_700*/
+    };
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -142,6 +222,7 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         init();
+        generateHeaderGraphic(this.getView());
         super.onActivityCreated(savedInstanceState);
         hideList(false);
     }
@@ -250,8 +331,7 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
         if (getActivity() == null) {
             return;
         }
-        //mAdapter.swapCursor(data);
-        mAdapter.notifyDataSetChanged();
+        mAdapter.swapCursor(data);
 
         displayList(data.getCount() <= 0);
 

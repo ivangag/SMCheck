@@ -181,14 +181,7 @@
             android:exported="true"
             android:label="@string/title_check_in_flow"
             android:parentActivityName=".ui.MainActivity" >
-
-            <!--
-            android:uiOptions="none"
-            >
-            meta-data
-            -->
-            <!-- android:name="android.support.UI_OPTIONS" -->
-            <!-- android:value="none" /> -->
+            <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.MainActivity" />

@@ -86,7 +86,7 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_google_cardview_checkins, parent, false);
         // set the view's size, margins, paddings and layout parameters
-
+        v.setClickable(true);
         return new ViewHolder(v);
     }
 }
