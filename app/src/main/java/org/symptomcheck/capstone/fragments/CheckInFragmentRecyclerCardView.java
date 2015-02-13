@@ -43,15 +43,19 @@ import android.view.ViewGroup;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.activeandroid.content.ContentProvider;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.interfaces.OnChartGestureListener;
 import com.github.mikephil.charting.interfaces.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.github.mikephil.charting.utils.Legend;
+import com.github.mikephil.charting.utils.XLabels;
+import com.google.common.collect.Lists;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
@@ -62,6 +66,7 @@ import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.PainLevel;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.provider.ActiveContract;
+import org.symptomcheck.capstone.utils.CheckInUtils;
 import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
 
@@ -129,7 +134,7 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
         return root;
     }
 
-    private void generateHeaderGraphic(View root) {
+    private void generateHeaderGraphic(final View root) {
         mChart = (PieChart) root.findViewById(R.id.pieChartCheckInPain);
         mChart.setDescription("");
 
@@ -138,28 +143,42 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
         //mChart.setValueTypeface(tf);
         //mChart.setCenterTextTypeface(Typeface.createFromAsset(getActivity().getAssets(), "OpenSans-Light.ttf"));
         mChart.setUsePercentValues(true);
-        mChart.setCenterText(mPatientOwner.getLastName());
-        mChart.setCenterTextSize(16f);
+        mChart.setCenterText(mPatientOwner.getLastName() + "'s \n" + "Check-Ins");
+        mChart.setCenterTextSize(14f);
         mChart.setDescriptionTextSize(10f);
-
+        
         // radius of the center hole in percent of maximum radius
-        mChart.setHoleRadius(25f);
-        mChart.setTransparentCircleRadius(50f);
+        mChart.setHoleRadius(45f);
+        mChart.setTransparentCircleRadius(55f);
 
         // enable / disable drawing of x- and y-values
-//        mChart.setDrawYValues(false);
-//        mChart.setDrawXValues(false);
+        //mChart.setDrawYValues(false);
+        mChart.setDrawXValues(false);
 
+
+        /*
+        mChart.setClickable(true);
+        mChart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CheckInFragmentRecyclerCardView.this.OnFilterData(Constants.STRINGS.EMPTY);
+            }
+        });
+        */
+        mChart.animateXY(3000, 3000);
         mChart.setData(generatePiePainStatusData());
+        
         mChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @Override
             public void onValueSelected(Entry entry, int i) {
-
+                //Toast.makeText(root.getContext(),"Value selected " + entry.toString() + "-" + i,Toast.LENGTH_SHORT).show();
+                CheckInFragmentRecyclerCardView.this.OnFilterData(PAIN_LEVELS[entry.getXIndex()].toString());
             }
 
             @Override
             public void onNothingSelected() {
-
+                //Toast.makeText(root.getContext(),"onNothingSelected",Toast.LENGTH_SHORT).show();
+                CheckInFragmentRecyclerCardView.this.OnFilterData(Constants.STRINGS.EMPTY);
             }
         });
         Legend l = mChart.getLegend();
@@ -167,6 +186,10 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
     }
 
     int PAIN_STATUS_OPTIONS = 3;
+
+    static final PainLevel[] PAIN_LEVELS = {
+            PainLevel.WELL_CONTROLLED, PainLevel.MODERATE,PainLevel.SEVERE
+    };
     /**
      * generates less data (1 DataSet, 4 values)
      * @return
@@ -178,22 +201,26 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
         ArrayList<Entry> entries1 = new ArrayList<Entry>();
         ArrayList<String> xVals = new ArrayList<String>();
 
-        xVals.add(PainLevel.WELL_CONTROLLED.toString());
-        xVals.add(PainLevel.MODERATE.toString());
-        xVals.add(PainLevel.SEVERE.toString());
-        //xVals.add("Quarter 4");
+        //xVals.add(PainLevel.WELL_CONTROLLED.toString());
+        //xVals.add(PainLevel.MODERATE.toString());
+        //xVals.add(PainLevel.SEVERE.toString());
 
+        //CheckIn.getAllByPatientAndPainStatus(mPatientOwner,PainLevel.WELL_CONTROLLED);
         for(int i = 0; i < count; i++) {
-            xVals.add("entry" + (i+1));
-
-            entries1.add(new Entry((float) (Math.random() * 60) + 40, i));
+            final PainLevel p = PAIN_LEVELS[i];
+            //xVals.add("entry" + (i+1));
+            xVals.add(p.toString());
+            final int val = CheckIn.getAllByPatientAndPainStatus(mPatientOwner,p).size();
+            //entries1.add(new Entry((float) (Math.random() * 60) + 40, i));
+            entries1.add(new Entry((float)val, i));
         }
 
         PieDataSet ds1 = new PieDataSet(entries1, mPatientOwner.getLastName() + "'s Pain Status");
-        ds1.setColors(SM_CHECKIN_COLORS);
+        ds1.setColors(CheckInUtils.SM_CHECKIN_COLORS);
         ds1.setSliceSpace(2f);
 
         PieData d = new PieData(xVals, ds1);
+
         return d;
     }
 
@@ -201,9 +228,7 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
             R.color.Secondary_Red_700, R.color.Secondary_Green_700, R.color.Secondary_Amber_700
      };*/
 
-    public static final int[] SM_CHECKIN_COLORS = {
-            Color.rgb(0, 200, 83)/*green_700*/, Color.rgb(255, 171, 0)/*amber_700*/,Color.rgb(213, 0, 0)/*red_700*/
-    };
+
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

@@ -9,8 +9,10 @@ import android.widget.TextView;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.model.CheckIn;
-import org.symptomcheck.capstone.model.Patient;
+import org.symptomcheck.capstone.model.FeedStatus;
+import org.symptomcheck.capstone.model.PainLevel;
 import org.symptomcheck.capstone.provider.ActiveContract;
+import org.symptomcheck.capstone.utils.CheckInUtils;
 import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
 
@@ -29,12 +31,12 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
     // you provide access to all the views for a data item in a view holder
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
-        protected TextView vName;
-        protected TextView vSurname;
+        protected TextView vCheckInStatus;
+        protected TextView vCheckInTime;
         public ViewHolder(View v) {
             super(v);
-            vName =  (TextView) v.findViewById(R.id.txtName);
-            vSurname = (TextView)  v.findViewById(R.id.txtSurname);
+            vCheckInStatus =  (TextView) v.findViewById(R.id.txtViewCheckInStatus);
+            vCheckInTime = (TextView)  v.findViewById(R.id.txtViewCheckInTime);
         }
     }
 
@@ -44,11 +46,11 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
         final CheckIn checkIn = CheckIn.getByUnitId(cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.UNIT_ID)));
         //final int checkInId = cursor.getInt(ID_COLUMN);
         //card.setId(""+ checkInId);
-        holder.vName.setText(cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL))
-                + " - " + cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS)))
-        ;
+        final PainLevel painLevel = Enum.valueOf(PainLevel.class,cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL)));
+        final FeedStatus feedStatus =  Enum.valueOf(FeedStatus.class, cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS)));
+        holder.vCheckInStatus.setText(painLevel + " - " + feedStatus);
         if(checkIn != null) {
-            holder.vSurname.setText("Submitted on " + DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT));
+            holder.vCheckInTime.setText("Submitted on " + DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT));
 
             /*
             final Patient patient = Patient.getByMedicalNumber(mPatientOwner.getMedicalRecordNumber());
@@ -74,6 +76,22 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
         }else{
             //card.resourceIdAlertIcon = R.drawable.ic_alert_green;
         }
+        switch(painLevel)
+        {
+            case MODERATE:
+                holder.vCheckInStatus.setTextColor(CheckInUtils.SM_CHECKIN_COLORS[1]);
+                break;
+            case SEVERE:
+                holder.vCheckInStatus.setTextColor(CheckInUtils.SM_CHECKIN_COLORS[2]);
+                break;
+            case WELL_CONTROLLED:
+                holder.vCheckInStatus.setTextColor(CheckInUtils.SM_CHECKIN_COLORS[0]);
+            case UNKNOWN:
+                break;
+        }
+            
+            
+        
         //card.resourceIdThumb=R.drawable.ic_check_in;
     }
 

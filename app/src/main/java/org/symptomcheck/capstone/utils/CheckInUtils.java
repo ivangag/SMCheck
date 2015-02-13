@@ -1,5 +1,7 @@
 package org.symptomcheck.capstone.utils;
 
+import android.graphics.Color;
+
 import org.symptomcheck.capstone.model.FeedStatus;
 import org.symptomcheck.capstone.model.PainLevel;
 
@@ -25,4 +27,9 @@ public class CheckInUtils {
     public Map<String,String> ReportMedicationsTakingTime = new HashMap<String, String>(){};
     public PainLevel ReportPainLevel = PainLevel.UNKNOWN;
     public FeedStatus ReportFeedStatus = FeedStatus.UNKNOWN;
+
+
+    public static final int[] SM_CHECKIN_COLORS = {
+            Color.rgb(0, 200, 83)/*green_700*/, Color.rgb(255, 171, 0)/*amber_700*/,Color.rgb(213, 0, 0)/*red_700*/
+    };
 }

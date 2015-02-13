@@ -230,6 +230,15 @@ public class CheckIn extends Model implements IModelBuilder {
                 .execute();
     }
 
+    public static List<CheckIn> getAllByPatientAndPainStatus(Patient patient,PainLevel painLevel) {
+        // This is how you execute a query
+        return new Select()
+                .from(CheckIn.class)
+                .where("Patient = ? AND issuePainLevel = ?", patient.getId(),painLevel.toString())
+                //.orderBy("issueDateTime DESC")
+                .execute();
+    }
+
     public static int getCountAllFromDate(String time){
         return new Select()
                 .from(CheckIn.class)
