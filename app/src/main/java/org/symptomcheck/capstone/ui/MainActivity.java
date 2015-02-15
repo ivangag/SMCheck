@@ -25,7 +25,10 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -137,6 +140,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
     private static int mFragmentBackStackCount = 0;
 
+    String mDetailUser = "";
     private Toolbar toolbar;
     private TextView toolbarTitle;
     NavigationDrawerFragment mDrawerFragment;
@@ -279,16 +283,21 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
             avatar = getResources().getDrawable(R.drawable.ic_patient);
         }
         Drawable background = getResources().getDrawable(R.drawable.mat2);
+        final Bitmap roundedAvatar = BitmapFactory.decodeResource(getResources(),
+                (mUser.getUserType().equals(UserType.DOCTOR) ? R.drawable.ic_doctor : R.drawable.ic_patient));
 
         mDrawer.addProfile(new DrawerProfile()
                         .setAvatar(avatar)
+                        .setRoundedAvatar((BitmapDrawable)avatar)
                         .setBackground(background)
                         .setName(mUser.getFirstName() + " " + mUser.getLastName())
-                        .setDescription(mUser.getUserIdentification())
+                                //.setDescription(mUser.getUserIdentification())
+                        .setDescription(mDetailUser)
+                        //.removeAvatar()
                         .setOnProfileClickListener(new DrawerProfile.OnProfileClickListener() {
                             @Override
                             public void onClick(DrawerProfile drawerProfile, long l) {
-                                Toast.makeText(getApplicationContext(),drawerProfile.getName() + "-" +drawerProfile.getDescription(),Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), drawerProfile.getName() + "-" + drawerProfile.getDescription(), Toast.LENGTH_SHORT).show();
                             }
                         })
         );
@@ -309,7 +318,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                         || (id == CASE_SHOW_DOCTOR_SETTINGS)){
                     openSettings();
                 }else if((id == CASE_SHOW_PATIENT_LOGOUT)
-                        || (id == CASE_SHOW_DOCTOR_SETTINGS)){
+                        || (id == CASE_SHOW_DOCTOR_LOGOUT)){
                     askForLogout();
                 }
                 else {
@@ -320,6 +329,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                 if((id != CASE_SHOW_PATIENT_SETTINGS)
                     && (id != CASE_SHOW_PATIENT_LOGOUT)
                     && (id != CASE_SHOW_APP_VERSION)
+                    && (id != CASE_SHOW_DOCTOR_LOGOUT)
                         ){
                     mDrawer.selectFixedItemById(id);
                 }
@@ -329,80 +339,10 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         });
     }
 
-
-    public void updateDrawerTest() {
-        mDrawer.clearItems();
-
-        mDrawer.addItem(new com.heinrichreimersoftware.materialdrawer.structure.DrawerItem()
-                        .setTextPrimary(getString(R.string.app_name))
-                        .setTextSecondary(getString(R.string.item_1))
-        );
-
-        Drawable icon1 = getResources().getDrawable(R.drawable.ic_doctor);
-        mDrawer.addItem(new com.heinrichreimersoftware.materialdrawer.structure.DrawerItem()
-                        .setImage(icon1)
-                        .setTextPrimary(getString(R.string.app_name))
-                        .setTextSecondary(getString(R.string.item_1))
-        );
-
-        mDrawer.addDivider();
-
-        Drawable icon2;
-        if (Math.random() >= .5) {
-            icon2 = getResources().getDrawable(R.drawable.ic_patient);
-        } else {
-            icon2 = getResources().getDrawable(R.drawable.ic_doctor);
-        }
-        mDrawer.addItem(new com.heinrichreimersoftware.materialdrawer.structure.DrawerItem()
-                        .setImage(icon2, com.heinrichreimersoftware.materialdrawer.structure.DrawerItem.AVATAR)
-                        .setTextPrimary(getString(R.string.app_name))
-                        .setTextSecondary(getString(R.string.item_1))
-        );
-
-        Drawable icon3;
-        if (Math.random() >= .5) {
-            icon3 = getResources().getDrawable(R.drawable.ic_patient);
-        } else {
-            icon3 = getResources().getDrawable(R.drawable.ic_doctor);
-        }
-        mDrawer.addItem(new com.heinrichreimersoftware.materialdrawer.structure.DrawerItem()
-                        .setImage(icon3)
-                        .setTextPrimary(getString(R.string.app_name))
-                        .setTextSecondary(getString(R.string.item_1), com.heinrichreimersoftware.materialdrawer.structure.DrawerItem.THREE_LINE)
-        );
-        Drawable avatar = getResources().getDrawable(R.drawable.ic_patient);
-
-        Drawable background = getResources().getDrawable(R.drawable.mat2);
-
-        mDrawer.addProfile(new DrawerProfile()
-                        .setAvatar(avatar)
-                        .setBackground(background)
-                        .setName(mUser.getFirstName() + " " + mUser.getLastName())
-                        .setDescription(mUser.getUserIdentification())
-                        .setOnProfileClickListener( new DrawerProfile.OnProfileClickListener() {
-                            @Override
-                            public void onClick(DrawerProfile drawerProfile, long l) {
-                                Toast.makeText(getApplicationContext(), drawerProfile.getName() + "-" + drawerProfile.getDescription(), Toast.LENGTH_SHORT).show();
-                            }
-                        })
-        );
-
-        mDrawer.selectItem(1);
-        mDrawer.setOnItemClickListener(new com.heinrichreimersoftware.materialdrawer.structure.DrawerItem.OnItemClickListener() {
-            @Override
-            public void onClick(com.heinrichreimersoftware.materialdrawer.structure.DrawerItem item, long id, int position) {
-                mDrawer.selectItem(position);
-                Toast.makeText(getApplicationContext(), "Clicked item #" + position, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-    }
-
     private void initUserResource() {
         final UserType userType = mUser.getUserType();
-        String detailUser = "";
-        detailUser = mUser.getFirstName()
-                + " " + mUser.getLastName();
+        //mDetailUser = mUser.getFirstName()
+        //       + " " + mUser.getLastName();
         try {
             //TODO#BPR_1
             //TODO#BPR_2
@@ -435,7 +375,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                                 R.drawable.ic_exit_to_app_grey600_48dp,
                                 CASE_SHOW_DOCTOR_LOGOUT,false,true));
 
-                detailUser += "\nID " + Doctor.getByDoctorNumber(mUser.getUserIdentification()).getUniqueDoctorId();
+                mDetailUser += "ID " + Doctor.getByDoctorNumber(mUser.getUserIdentification()).getUniqueDoctorId();
             } else if (userType.equals(UserType.PATIENT)) { //TODO#FDAR_1 show details of Patient on the a view in front of the main activity
                 mFabSubmitCheckin.setVisibility(View.VISIBLE);
                 mDrawerItemTitles.add(
@@ -464,8 +404,8 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                                 getResources().getString(R.string.action_logout_info),
                                 R.drawable.ic_exit_to_app_grey600_48dp,
                                 CASE_SHOW_PATIENT_LOGOUT,false,true));
-                detailUser +=
-                        "\nBorn on " + DateTimeUtils.convertEpochToHumanTime(Patient.getByMedicalNumber(mUser.getUserIdentification()).getBirthDate(), "DD/MM/YYYY")
+                mDetailUser +=
+                        "Born on " + DateTimeUtils.convertEpochToHumanTime(Patient.getByMedicalNumber(mUser.getUserIdentification()).getBirthDate(), "DD/MM/YYYY")
                                 + "\nMedical Number " + mUser.getUserIdentification()
                 ;
             }
@@ -606,7 +546,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         */
     }
 
-    //--- FloatinActionMenu events ---//
+    //--- FloatingActionMenu events ---//
     @Override
     public void onMenuExpanded() {
         mShadowView.setVisibility(View.VISIBLE);

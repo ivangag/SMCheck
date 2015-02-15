@@ -38,6 +38,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FilterQueryProvider;
@@ -126,9 +127,13 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root= inflater.inflate(R.layout.fragment_card_checkins_list_recycler, container, false);
 
-
-        
-        
+        root.findViewById(R.id.google_card_view_header_checkin).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(v.getContext(),"google_card_view_header Clicked",Toast.LENGTH_SHORT).show();
+                CheckInFragmentRecyclerCardView.this.OnFilterData(Constants.STRINGS.EMPTY);
+            }
+        });
         setupListFragment(root);
         setHasOptionsMenu(true);
         return root;
@@ -156,28 +161,54 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
         mChart.setDrawXValues(false);
 
 
-        /*
+
+
         mChart.setClickable(true);
         mChart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Toast.makeText(v.getContext(),"mChart Clicked",Toast.LENGTH_SHORT).show();
                 CheckInFragmentRecyclerCardView.this.OnFilterData(Constants.STRINGS.EMPTY);
             }
         });
-        */
+
+
+        mChart.setOnChartGestureListener(new OnChartGestureListener() {
+            @Override
+            public void onChartLongPressed(MotionEvent motionEvent) {
+                Toast.makeText(CheckInFragmentRecyclerCardView.this.getActivity(),"mChart onChartLongPressed",Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onChartDoubleTapped(MotionEvent motionEvent) {
+                Toast.makeText(CheckInFragmentRecyclerCardView.this.getActivity(),"mChart onChartDoubleTapped",Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onChartSingleTapped(MotionEvent motionEvent) {
+                //if(mChart.isSelected())
+                Toast.makeText(CheckInFragmentRecyclerCardView.this.getActivity(),"mChart onChartSingleTapped",Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onChartFling(MotionEvent motionEvent, MotionEvent motionEvent2, float v, float v2) {
+                Toast.makeText(CheckInFragmentRecyclerCardView.this.getActivity(),"mChart onChartFling",Toast.LENGTH_SHORT).show();
+            }
+        });
+
         mChart.animateXY(3000, 3000);
         mChart.setData(generatePiePainStatusData());
-        
+
         mChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @Override
             public void onValueSelected(Entry entry, int i) {
-                //Toast.makeText(root.getContext(),"Value selected " + entry.toString() + "-" + i,Toast.LENGTH_SHORT).show();
+                Toast.makeText(root.getContext(),"Value selected " + entry.toString() + "-" + i,Toast.LENGTH_SHORT).show();
                 CheckInFragmentRecyclerCardView.this.OnFilterData(PAIN_LEVELS[entry.getXIndex()].toString());
             }
 
             @Override
             public void onNothingSelected() {
-                //Toast.makeText(root.getContext(),"onNothingSelected",Toast.LENGTH_SHORT).show();
+                Toast.makeText(root.getContext(),"onNothingSelected",Toast.LENGTH_SHORT).show();
                 CheckInFragmentRecyclerCardView.this.OnFilterData(Constants.STRINGS.EMPTY);
             }
         });
@@ -235,6 +266,7 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
         switch (item.getItemId()) {
             // If the user clicks the "Refresh" button.
             case R.id.menu_refresh:
+                mChart.highlightValues(null);
                 SyncUtils.TriggerRefreshPartialLocal(ActiveContract.SYNC_CHECK_IN);
                 return true;
         }

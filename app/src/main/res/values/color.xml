@@ -16,15 +16,36 @@
 
 <resources>
 
-<color name="primary">@color/Primary_Blue_500</color>
+<!--<color name="primary">@color/Primary_Blue_500</color>
 <color name="primary_dark">@color/Primary_Blue_700</color>
 <color name="primary_light">#BBDEFB</color>
 <color name="accent">@color/Secondary_Light_Green_700</color>
 <color name="primary_text">#212121</color>
 <color name="secondary_text">#727272</color>
 <color name="icons">#FFFFFF</color>
+<color name="divider">#B6B6B6</color>-->
+
+<!--colors_blue_grey_lime.xml-->
+<color name="primary">#607D8B</color>
+<color name="primary_dark">#455A64</color>
+<color name="primary_light">#CFD8DC</color>
+<color name="accent">#CDDC39</color>
+<color name="primary_text">#212121</color>
+<color name="secondary_text">#727272</color>
+<color name="icons">#FFFFFF</color>
 <color name="divider">#B6B6B6</color>
-<color name="fab_pressed">@color/Secondary_Green_400</color>
+
+<!--colors_brown_lime
+<color name="primary">#795548</color>
+<color name="primary_dark">#5D4037</color>
+<color name="primary_light">#D7CCC8</color>
+<color name="accent">#CDDC39</color>
+<color name="primary_text">#212121</color>
+<color name="secondary_text">#727272</color>
+<color name="icons">#FFFFFF</color>
+<color name="divider">#B6B6B6</color>-->
+
+<color name="fab_pressed">@color/Secondary_Lime_400</color>
 
 <!--<color name="card_text_color_header">#990066</color> -->
 <color name="card_text_color_header">@color/primary_text</color>
