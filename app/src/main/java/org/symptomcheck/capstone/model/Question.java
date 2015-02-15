@@ -31,7 +31,7 @@ import java.util.TimeZone;
 
 import hirondelle.date4j.DateTime;
 
-//TODO#FDAR_3 Questions Response associated to a Chec-In unit data
+//TODO#FDAR_3 Questions Response associated to a Check-In unit data
 @Table(name = "Questions", id = BaseColumns._ID)
 public class Question extends Model implements IModelBuilder{
 	

@@ -176,23 +176,25 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
         mChart.setOnChartGestureListener(new OnChartGestureListener() {
             @Override
             public void onChartLongPressed(MotionEvent motionEvent) {
-                Toast.makeText(CheckInFragmentRecyclerCardView.this.getActivity(),"mChart onChartLongPressed",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(CheckInFragmentRecyclerCardView.this.getActivity(),"mChart onChartLongPressed",Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onChartDoubleTapped(MotionEvent motionEvent) {
-                Toast.makeText(CheckInFragmentRecyclerCardView.this.getActivity(),"mChart onChartDoubleTapped",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(CheckInFragmentRecyclerCardView.this.getActivity(),"mChart onChartDoubleTapped",Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onChartSingleTapped(MotionEvent motionEvent) {
-                //if(mChart.isSelected())
-                Toast.makeText(CheckInFragmentRecyclerCardView.this.getActivity(),"mChart onChartSingleTapped",Toast.LENGTH_SHORT).show();
+                //if(mChart.isSelected()){
+                    CheckInFragmentRecyclerCardView.this.OnFilterData(Constants.STRINGS.EMPTY);
+                //}
+                //Toast.makeText(CheckInFragmentRecyclerCardView.this.getActivity(),"mChart onChartSingleTapped",Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onChartFling(MotionEvent motionEvent, MotionEvent motionEvent2, float v, float v2) {
-                Toast.makeText(CheckInFragmentRecyclerCardView.this.getActivity(),"mChart onChartFling",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(CheckInFragmentRecyclerCardView.this.getActivity(),"mChart onChartFling",Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -202,13 +204,13 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
         mChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @Override
             public void onValueSelected(Entry entry, int i) {
-                Toast.makeText(root.getContext(),"Value selected " + entry.toString() + "-" + i,Toast.LENGTH_SHORT).show();
+                //Toast.makeText(root.getContext(),"Value selected " + entry.toString() + "-" + i,Toast.LENGTH_SHORT).show();
                 CheckInFragmentRecyclerCardView.this.OnFilterData(PAIN_LEVELS[entry.getXIndex()].toString());
             }
 
             @Override
             public void onNothingSelected() {
-                Toast.makeText(root.getContext(),"onNothingSelected",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(root.getContext(),"onNothingSelected",Toast.LENGTH_SHORT).show();
                 CheckInFragmentRecyclerCardView.this.OnFilterData(Constants.STRINGS.EMPTY);
             }
         });

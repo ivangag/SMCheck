@@ -33,15 +33,19 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
         // each data item is just a string in this case
         protected TextView vCheckInStatus;
         protected TextView vCheckInTime;
+        protected View viewCheckInDetails;
+        protected View viewHeaderCheckInDetails;
         public ViewHolder(View v) {
             super(v);
-            vCheckInStatus =  (TextView) v.findViewById(R.id.txtViewCheckInStatus);
+            vCheckInStatus =  (TextView) v.findViewById(R.id.txtViewCheckInPainLevel);
             vCheckInTime = (TextView)  v.findViewById(R.id.txtViewCheckInTime);
+            viewCheckInDetails = (View)  v.findViewById(R.id.viewCheckInDetails);
+            viewHeaderCheckInDetails = (View)  v.findViewById(R.id.viewHeaderCheckInDetails);
         }
     }
 
     @Override
-    public void onBindViewHolderCursor(ViewHolder holder, Cursor cursor) {
+    public void onBindViewHolderCursor(final ViewHolder holder, Cursor cursor) {
 
         final CheckIn checkIn = CheckIn.getByUnitId(cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.UNIT_ID)));
         //final int checkInId = cursor.getInt(ID_COLUMN);
@@ -89,8 +93,14 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
             case UNKNOWN:
                 break;
         }
-            
-            
+
+        holder.viewHeaderCheckInDetails.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                holder.viewCheckInDetails.setVisibility(holder.viewCheckInDetails.getVisibility()
+                        == View.GONE ? View.VISIBLE :View.GONE );
+            }
+        });
         
         //card.resourceIdThumb=R.drawable.ic_check_in;
     }

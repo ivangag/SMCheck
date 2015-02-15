@@ -454,13 +454,13 @@ public class CheckInFlowActivityOld extends ActionBarActivity  {
             mFragmentType = FragmentType.valueOf(getArguments().getString(ARG_FRAGMENT_TYPE));
             switch (mFragmentType){
                 case FRAGMENT_TYPE_PAIN_LEVEL:
-                    rootView = inflater.inflate(R.layout.fragment_check_in_question_pain, container, false);
+                    rootView = inflater.inflate(R.layout.fragment_checkin_question_pain, container, false);
                     break;
                 case FRAGMENT_TYPE_FEED_STATUS:
-                    rootView = inflater.inflate(R.layout.fragment_check_in_question_feed_status, container, false);
+                    rootView = inflater.inflate(R.layout.fragment_checkin_question_feed_status, container, false);
                     break;
                 case FRAGMENT_TYPE_MEDICINES:
-                    rootView = inflater.inflate(R.layout.fragment_check_in_question_medicine, container, false);
+                    rootView = inflater.inflate(R.layout.fragment_checkin_question_medicine, container, false);
                     break;
             }
 

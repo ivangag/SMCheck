@@ -5,7 +5,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/google_card_view_checkin"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     card_view:cardBackgroundColor="@color/white_transparent"
     card_view:cardCornerRadius="4dp"
     android:foreground="?android:attr/selectableItemBackground"
@@ -13,34 +13,60 @@
     android:layout_margin="5dp">
 
     <RelativeLayout
+        android:id="@+id/viewHeaderCheckInDetails"
+        android:clickable="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/txtViewCheckInStatus"
+            android:id="@+id/txtViewCheckInPainLevel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Name"
+            android:text="Status"
             android:gravity="center_vertical"
             android:textSize="@dimen/abc_text_size_medium_material"
             android:textColor="@color/accent"
-            android:layout_marginTop="10dp"
-            android:layout_marginStart="5dp"
-            android:layout_marginLeft="5dp"/>
+            android:layout_margin="5dp"/>
 
         <TextView
             android:id="@+id/txtViewCheckInTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Surname"
+            android:text="DateTime"
             android:gravity="center_vertical"
             android:textSize="@dimen/abc_text_size_small_material"
             android:textColor="@color/secondary_text"
-            android:layout_below="@id/txtViewCheckInStatus"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginStart="5dp"
+            android:layout_below="@id/txtViewCheckInPainLevel"
+            android:layout_margin="5dp"
             />
+
+        <View
+            android:id="@+id/viewDivider"
+            android:layout_margin="3dp"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/txtViewCheckInTime"
+            android:background="@color/Primary_Grey_100"
+            >
+        </View>
+
+        <RelativeLayout
+            android:id="@+id/viewCheckInDetails"
+            android:visibility="gone"
+            android:layout_margin="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/viewDivider">
+            <TextView
+                android:id="@+id/txtViewCheckInFeedStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Feed"
+                android:gravity="center_vertical"
+                android:textSize="@dimen/abc_text_size_medium_material"
+                android:textColor="@color/accent"
+                android:layout_margin="5dp"/>
+            </RelativeLayout>
     </RelativeLayout>
 
 
