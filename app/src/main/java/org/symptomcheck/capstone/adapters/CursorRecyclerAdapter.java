@@ -62,6 +62,7 @@ public abstract class CursorRecyclerAdapter<VH
     private CursorFilter mCursorFilter;
     private FilterQueryProvider mFilterQueryProvider;
 
+
     public CursorRecyclerAdapter( Cursor cursor) {
         init(cursor);
     }

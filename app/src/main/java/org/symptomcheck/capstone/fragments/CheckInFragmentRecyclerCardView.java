@@ -58,10 +58,12 @@ import com.github.mikephil.charting.utils.Legend;
 import com.github.mikephil.charting.utils.XLabels;
 import com.google.common.collect.Lists;
 
+import org.symptomcheck.capstone.App;
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.adapters.CheckInRecyclerCursorAdapter;
+import org.symptomcheck.capstone.adapters.MedicationQuestionItem;
 import org.symptomcheck.capstone.cardsui.CustomExpandCard;
 import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.PainLevel;
@@ -83,7 +85,8 @@ import it.gmariotti.cardslib.library.view.CardListView;
 
 //TODO#BPR_6 Check-In Data Fragment Interface Screen
 //TODO#FDAR_10
-public class CheckInFragmentRecyclerCardView extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>, IFragmentListener {
+public class CheckInFragmentRecyclerCardView extends BaseFragment 
+        implements LoaderManager.LoaderCallbacks<Cursor>, IFragmentListener, CheckInRecyclerCursorAdapter.IRecyclerItemToggleListener {
 
     CheckInRecyclerCursorAdapter mAdapter;
     CardListView mListView;
@@ -102,6 +105,9 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
 
+    
+    
+    
     /**
      * Returns a new instance of this fragment for the given section
      * number.
@@ -358,7 +364,7 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
             mListView.setAdapter(mAdapter);
         }
         */
-        mAdapter = new CheckInRecyclerCursorAdapter(null);
+        mAdapter = new CheckInRecyclerCursorAdapter(null, App.getContext());
         mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
             public Cursor runQuery(CharSequence charSequence) {
@@ -366,7 +372,7 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
             }
         });
 
-
+        mAdapter.addEventListener(this);
 
         mRecyclerView = (RecyclerView) getActivity().findViewById(R.id.checkin_recycler_view);
 
@@ -490,6 +496,12 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment implements Loa
     @Override
     public void OnSearchOnLine(String textToSearch) {
 
+    }
+
+    @Override
+    public void onItemToggled(int position) {
+        int pos = mLayoutManager.findFirstVisibleItemPosition();
+        mRecyclerView.scrollToPosition(position);
     }
 
     //-------------------------------------------------------------------------------------------------------------

@@ -17,6 +17,11 @@ import org.symptomcheck.capstone.model.ExperienceType;
 public class App extends MultiDexApplication {
 
     private static Context mContext;
+
+    public static Context getContext() {
+        return mContext;
+    }
+
     @Override
     public void onTerminate() {
         super.onTerminate();

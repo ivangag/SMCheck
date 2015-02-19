@@ -980,7 +980,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                     .content(R.string.logout_question)
                     .positiveText(R.string.alert_dialog_yes)
                     .negativeText(R.string.alert_dialog_no)
-                    .icon(context.getResources().getDrawable(R.drawable.ic_logout))
+                    .icon(context.getResources().getDrawable(R.drawable.ic_exit_to_app_grey600_48dp))
                     .callback(new MaterialDialog.ButtonCallback() {
                         @Override
                         public void onPositive(MaterialDialog dialog) {

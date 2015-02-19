@@ -5,19 +5,29 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/google_card_view_checkin"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     card_view:cardBackgroundColor="@color/white_transparent"
     card_view:cardCornerRadius="4dp"
-    android:foreground="?android:attr/selectableItemBackground"
-    android:clickable="true"
-    android:layout_margin="5dp">
+    android:clickable="false"
+    android:layout_margin="3dp">
 
-    <RelativeLayout
-        android:id="@+id/viewHeaderCheckInDetails"
-        android:clickable="true"
+    <LinearLayout
+        android:id="@+id/viewParentCheckinDetails"
+        android:background="@color/icons"
+        android:orientation="vertical"
+        android:clickable="false"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <LinearLayout
+            android:id="@+id/viewHeaderCheckInDetails"
+            android:clickable="true"
+            android:orientation="vertical"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
         <TextView
             android:id="@+id/txtViewCheckInPainLevel"
             android:layout_width="wrap_content"
@@ -36,38 +46,48 @@
             android:gravity="center_vertical"
             android:textSize="@dimen/abc_text_size_small_material"
             android:textColor="@color/secondary_text"
-            android:layout_below="@id/txtViewCheckInPainLevel"
             android:layout_margin="5dp"
+            />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnCheckInDetailsInfo"
+            android:layout_marginBottom="2dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/ic_info_outline_grey600_48dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end"
             />
 
         <View
             android:id="@+id/viewDivider"
             android:layout_margin="3dp"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_below="@id/txtViewCheckInTime"
+            android:layout_height="3dp"
+            android:layout_below="@id/btnCheckInDetailsInfo"
             android:background="@color/Primary_Grey_100"
             >
         </View>
 
-        <RelativeLayout
-            android:id="@+id/viewCheckInDetails"
-            android:visibility="gone"
-            android:layout_margin="5dp"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/viewDivider">
-            <TextView
-                android:id="@+id/txtViewCheckInFeedStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Feed"
-                android:gravity="center_vertical"
-                android:textSize="@dimen/abc_text_size_medium_material"
-                android:textColor="@color/accent"
-                android:layout_margin="5dp"/>
-            </RelativeLayout>
-    </RelativeLayout>
+        <!--<FrameLayout-->
+            <!--android:id="@+id/viewCheckInDetails"-->
+            <!--android:visibility="visible"-->
+            <!--android:layout_margin="5dp"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_below="@id/viewDivider">-->
+            <ListView
+                android:visibility="visible"
+                android:id="@+id/list_medicines_question"
+                android:layout_width="match_parent"
+                android:layout_height="260dp"
+                android:divider="@color/accent"
+                android:dividerHeight="0.2dp"
+                android:background="@color/white_transparent"/>
+            <!--</FrameLayout>-->
+    </LinearLayout>
 
 
 

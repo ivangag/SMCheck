@@ -1,10 +1,16 @@
 package org.symptomcheck.capstone.adapters;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import org.symptomcheck.capstone.R;
@@ -21,10 +27,31 @@ import org.symptomcheck.capstone.utils.DateTimeUtils;
  */
 public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInRecyclerCursorAdapter.ViewHolder> {
 
-    public CheckInRecyclerCursorAdapter(Cursor cursor) {
+    IRecyclerItemToggleListener mListener;
+
+    public static interface IRecyclerItemToggleListener{
+        void onItemToggled(int position);
+    }
+    
+    public void addEventListener(IRecyclerItemToggleListener listener){
+        mListener = listener;
+    }
+    
+    private final Context mContext;
+
+    public CheckInRecyclerCursorAdapter(Cursor cursor, Context context) {
         super(cursor);
+        this.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                lastPosition = -1;
+            }
+        });
+        mContext = context;
     }
 
+    
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -35,18 +62,37 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
         protected TextView vCheckInTime;
         protected View viewCheckInDetails;
         protected View viewHeaderCheckInDetails;
+        protected ListView mListView;
+        protected ImageButton mBtnCheckInDetailsInfo;
+        protected boolean isShown = true;
         public ViewHolder(View v) {
             super(v);
             vCheckInStatus =  (TextView) v.findViewById(R.id.txtViewCheckInPainLevel);
             vCheckInTime = (TextView)  v.findViewById(R.id.txtViewCheckInTime);
-            viewCheckInDetails = (View)  v.findViewById(R.id.viewCheckInDetails);
+            //viewCheckInDetails = (View)  v.findViewById(R.id.viewCheckInDetails);
             viewHeaderCheckInDetails = (View)  v.findViewById(R.id.viewHeaderCheckInDetails);
+            mListView = (ListView)  v.findViewById(R.id.list_medicines_question);
+            mBtnCheckInDetailsInfo = (ImageButton)  v.findViewById(R.id.btnCheckInDetailsInfo);
         }
+        
     }
 
+
+//    @Override
+//    public void onContentChanged(){
+//        super.onContentChanged();
+//        lastPosition = -1;
+//    }
+    
+    private int lastPosition = -1;
     @Override
     public void onBindViewHolderCursor(final ViewHolder holder, Cursor cursor) {
 
+        Animation slide = AnimationUtils.loadAnimation(mContext, (cursor.getPosition() > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);
+        //Animation animation = AnimationUtils.loadAnimation(getContext(), (position > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);        
+        //holder.itemView.startAnimation(slide);
+
+        lastPosition = cursor.getPosition();
         final CheckIn checkIn = CheckIn.getByUnitId(cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.UNIT_ID)));
         //final int checkInId = cursor.getInt(ID_COLUMN);
         //card.setId(""+ checkInId);
@@ -54,6 +100,9 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
         final FeedStatus feedStatus =  Enum.valueOf(FeedStatus.class, cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS)));
         holder.vCheckInStatus.setText(painLevel + " - " + feedStatus);
         if(checkIn != null) {
+            //if(holder.mListView != null) {
+                holder.mListView.setAdapter(new MedicationQuestionAdapter(mContext, MedicationQuestionItem.makeItemByCheckinQuestions(checkIn.getItemsQuestion()), false));
+            //}
             holder.vCheckInTime.setText("Submitted on " + DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT));
 
             /*
@@ -94,14 +143,28 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
                 break;
         }
 
-        holder.viewHeaderCheckInDetails.setOnClickListener(new View.OnClickListener() {
+        holder.mBtnCheckInDetailsInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                holder.viewCheckInDetails.setVisibility(holder.viewCheckInDetails.getVisibility()
+//                ViewGroup.LayoutParams p = holder.itemView.getLayoutParams();
+//                if(holder.isShown){
+//                    p.height -= 260;
+//
+//                }else{
+//                    p.height += 260;
+//                }
+//                holder.itemView.requestLayout();
+//                holder.isShown = !holder.isShown;
+                //holder.viewCheckInDetails.setVisibility(holder.viewCheckInDetails.getVisibility()
+                holder.mListView.setVisibility(holder.mListView.getVisibility()
                         == View.GONE ? View.VISIBLE :View.GONE );
+
+//                if(mListener != null
+                        //&& holder.viewCheckInDetails.getVisibility() == View.VISIBLE){
+                    //mListener.onItemToggled(holder.getPosition());
+//                }
             }
         });
-        
         //card.resourceIdThumb=R.drawable.ic_check_in;
     }
 
@@ -111,9 +174,8 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
     public CheckInRecyclerCursorAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                    int viewType) {
         // create a new view
-        View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_google_cardview_checkins, parent, false);
-        // set the view's size, margins, paddings and layout parameters
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_google_cardview_checkins, parent, false);
+        // set the view's size, margins, paddings and layout parameters        
         v.setClickable(true);
         return new ViewHolder(v);
     }

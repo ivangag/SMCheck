@@ -38,6 +38,8 @@ import com.google.common.collect.Lists;
 
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
+import org.symptomcheck.capstone.adapters.MedicationQuestionAdapter;
+import org.symptomcheck.capstone.adapters.MedicationQuestionItem;
 import org.symptomcheck.capstone.alarms.SymptomAlarmRequest;
 import org.symptomcheck.capstone.dao.DAOManager;
 import org.symptomcheck.capstone.model.CheckIn;
@@ -427,12 +429,12 @@ public class CheckInFlowActivity extends ActionBarActivity {
                     item.setMedicationName(medication.getMedicationName());
                     items.add(item);
                 }
-                mMedicationsAdapter = new MedicationQuestionAdapter(getActivity(),items);
+                mMedicationsAdapter = new MedicationQuestionAdapter(getActivity(),items,true);
             }
             mListView = (ListView) rootView.findViewById(R.id.list_medicines_question);
 
             if (mListView != null) {
-                mListView.setAdapter(mMedicationsAdapter);
+                    mListView.setAdapter(mMedicationsAdapter);
                 /*
                 mListView.setOnTouchListener(new ListView.OnTouchListener() {
                     @Override
@@ -456,187 +458,6 @@ public class CheckInFlowActivity extends ActionBarActivity {
                     }
                 });
                 */
-            }
-        }
-    }
-
-    static class MedicationQuestionItem {
-        private String medicationName;
-        private String medicationTakingTime;
-        private String medicationTaken;
-
-        public String getMedicationName() {
-            return medicationName;
-        }
-
-        public void setMedicationName(String medicationName) {
-            this.medicationName = medicationName;
-        }
-
-        public String getMedicationTakingTime() {
-            return medicationTakingTime;
-        }
-
-        public void setMedicationTakingTime(String medicationTakingTime) {
-            this.medicationTakingTime = medicationTakingTime;
-        }
-
-        public String getMedicationTaken() {
-            return medicationTaken;
-        }
-
-        public void setMedicationTaken(String medicationTaken) {
-            this.medicationTaken = medicationTaken;
-        }
-
-    }
-
-    static class MedicationQuestionAdapter extends BaseAdapter{
-        private final Context mContext;
-        private List<MedicationQuestionItem> mMedications;
-
-        MedicationQuestionAdapter(Context mContext, List<MedicationQuestionItem> medications) {
-            this.mContext = mContext;
-            this.mMedications = medications;
-        }
-
-        @Override
-        public int getCount() {
-            return mMedications.size();
-        }
-
-        @Override
-        public MedicationQuestionItem getItem(int position) {
-            return mMedications.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return mMedications.get(position).hashCode();
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            final ViewHolder holder;
-
-            if (convertView == null) {
-                LayoutInflater inflater = ((Activity) parent.getContext()).getLayoutInflater();
-                convertView = inflater.inflate(R.layout.medicines_checkin_list_adapter_item, parent,false);
-                holder = new ViewHolder();
-                holder.txtMedicineName = (TextView) convertView.findViewById(R.id.txtView_medicine_item);
-                holder.txtMedicineTime = (TextView) convertView.findViewById(R.id.txtView_medicine_time);
-                holder.checkBox_question = (CheckBox) convertView.findViewById(R.id.checkbox_medicine_taken);
-                holder.switch_question = (Switch) convertView.findViewById(R.id.switch_question);
-                holder.imageView = (ImageView) convertView.findViewById(R.id.image_drawer_item);
-
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
-            }
-
-            final MedicationQuestionItem item = getItem(position);
-            holder.position = position;
-            //holder.switch_question.setText(item.getMedicationName());
-            holder.txtMedicineName.setText(item.getMedicationName());
-
-            String timeTaken = CheckInUtils.getInstance().ReportMedicationsTakingTime.get(item.getMedicationName());
-
-            if(!timeTaken.equals(Constants.STRINGS.EMPTY)) {
-                timeTaken =  DateTime.forInstant(Long.valueOf(timeTaken), TimeZone.getTimeZone("GMT+00")).format("YYYY-MM-DD hh:mm");
-            }
-            //holder.txtMedicineTime.setText("23/01/2015 12:00");
-            holder.txtMedicineTime.setText(timeTaken);
-
-            holder.imageView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_medicine));
-            //holder.imageView.setImageDrawable(mContext.getResources().getDrawable(item.getDrawableResource()));
-            holder.checkBox_question.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    final boolean YES = holder.checkBox_question.isChecked();
-                    if(isChecked){
-                        CheckInUtils.getInstance().ReportMedicationsResponse.put(item.getMedicationName(), Constants.STRINGS.YES);
-                        Toast.makeText(buttonView.getContext(),"Medicine " + item.getMedicationName() + " taken",Toast.LENGTH_SHORT).show();
-                        //showDateTimePickerDialog(buttonView.getContext(), holder, item.getMedicationName());
-                        DatePickerDialogFragment.show(buttonView.getContext(),holder,item.getMedicationName());
-                    }
-                    holder.txtMedicineTime.setVisibility(YES ? View.VISIBLE : View.GONE);
-                }
-            });
-            return  convertView;
-        }
-
-
-        static class ViewHolder {
-            CheckBox checkBox_question;
-            Switch switch_question;
-            TextView txtMedicineName;
-            TextView txtMedicineTime;
-            ImageView imageView;
-            int position;
-        }
-        //TODO#FDAR_7 Interactive used by Patient to enter the Date & Time he/she took the specified medicine
-        static class TimePickerDialogFragment {
-
-            public static void show(final Context context, final ViewHolder holder, final String medicineName
-                                    ,final int day, final int month, final int year) {
-                new MaterialDialog.Builder(context)
-                        .title(String.format("%s - Set Time",medicineName))
-                        //.content(R.string.exit_question)
-                        .customView(R.layout.dialog_timepicker,false)
-                        .positiveText(R.string.alert_dialog_ok)
-                        //.negativeText(R.string.alert_dialog_no)
-                        .icon(context.getResources().getDrawable(R.drawable.ic_medicine))
-                        .callback(new MaterialDialog.ButtonCallback() {
-                            @Override
-                            public void onPositive(MaterialDialog dialog) {
-                                String am_pm = "";
-                                final TimePicker tp = (TimePicker) dialog.getCustomView().findViewById(R.id.timePickerCheckIn);
-                                int h = tp.getCurrentHour();
-                                int min = tp.getCurrentMinute();
-                                int hour24 = h;
-                                if(h>12){
-                                    am_pm = "PM";
-                                    h = h-12;
-                                }else{
-                                    am_pm = "AM";
-                                }
-                                String format = String.format("%d-%02d-%02d %02d:%02d:%02d",year,month,day,hour24,min,0);
-                                DateTime dateAndTime = new DateTime(format);
-
-                                long milliFrom1970GMT = dateAndTime.getMilliseconds(TimeZone.getTimeZone("GMT+00"));
-
-                                holder.txtMedicineTime.setText(dateAndTime.toString());
-
-                                CheckInUtils.getInstance().ReportMedicationsTakingTime.put(medicineName, String.valueOf(milliFrom1970GMT));
-                                dialog.dismiss();
-                            }
-                        })
-                        .show();
-            }
-        }
-
-        static class DatePickerDialogFragment {
-
-            public static void show(final Context context, final ViewHolder holder, final String medicineName) {
-                new MaterialDialog.Builder(context)
-                        .title(String.format("%s - Set Date",medicineName))
-                                //.content(R.string.exit_question)
-                        .customView(R.layout.dialog_datepicker,false)
-                        .positiveText(R.string.alert_dialog_ok)
-                                //.negativeText(R.string.alert_dialog_no)
-                        .icon(context.getResources().getDrawable(R.drawable.ic_medicine))
-                        .callback(new MaterialDialog.ButtonCallback() {
-                            @Override
-                            public void onPositive(MaterialDialog dialog) {
-                                dialog.dismiss();
-                                final DatePicker dp = (DatePicker) dialog.getCustomView().findViewById(R.id.datePickerCheckIn);
-                                int month = dp.getMonth()+1;
-                                int day = dp.getDayOfMonth();
-                                int year = dp.getYear();
-                                TimePickerDialogFragment.show(context,holder,medicineName,day,month,year);
-                            }
-                        })
-                        .show();
             }
         }
     }

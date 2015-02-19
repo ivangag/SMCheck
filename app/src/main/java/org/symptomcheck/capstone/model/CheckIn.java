@@ -150,10 +150,11 @@ public class CheckIn extends Model implements IModelBuilder {
         CheckIn checkIn = new CheckIn(timestamp.toString(), painLevel, feedStatus);
         checkIn.setUnitId(UUID.randomUUID().toString());
         for (PainMedication medication : Medications.keySet()) {
-            Question question = new Question(String.format("Did you Take %s ?",
-                    medication.getMedicationName()),
-                    Medications.get(medication),
-                    QuestionType.Medication, medication.getLastTakingDateTime());
+            Question question = 
+                    //new Question(String.format("Did you Take %s ?",medication.getMedicationName()),
+                    new Question(String.format("%s", medication.getMedicationName()),
+                        Medications.get(medication),
+                        QuestionType.Medication, medication.getLastTakingDateTime());
             checkIn.addQuestions(question);
         }
         return checkIn;
