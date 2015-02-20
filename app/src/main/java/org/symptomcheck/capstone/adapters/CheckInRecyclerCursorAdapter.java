@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -28,6 +27,7 @@ import org.symptomcheck.capstone.utils.DateTimeUtils;
 public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInRecyclerCursorAdapter.ViewHolder> {
 
     IRecyclerItemToggleListener mListener;
+    private int lastPosition = -1;
 
     public static interface IRecyclerItemToggleListener{
         void onItemToggled(int position);
@@ -64,12 +64,14 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
         protected View viewHeaderCheckInDetails;
         protected ListView mListView;
         protected ImageButton mBtnCheckInDetailsInfo;
-        protected boolean isShown = true;
+        protected boolean isBottomToBeShown = true;
+        protected int originalLayoutBottomHeight;
+        protected boolean isFirstToggle = true;
         public ViewHolder(View v) {
             super(v);
             vCheckInStatus =  (TextView) v.findViewById(R.id.txtViewCheckInPainLevel);
             vCheckInTime = (TextView)  v.findViewById(R.id.txtViewCheckInTime);
-            //viewCheckInDetails = (View)  v.findViewById(R.id.viewCheckInDetails);
+            viewCheckInDetails = (View)  v.findViewById(R.id.viewCheckInDetails);
             viewHeaderCheckInDetails = (View)  v.findViewById(R.id.viewHeaderCheckInDetails);
             mListView = (ListView)  v.findViewById(R.id.list_medicines_question);
             mBtnCheckInDetailsInfo = (ImageButton)  v.findViewById(R.id.btnCheckInDetailsInfo);
@@ -77,17 +79,11 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
         
     }
 
-
-//    @Override
-//    public void onContentChanged(){
-//        super.onContentChanged();
-//        lastPosition = -1;
-//    }
     
-    private int lastPosition = -1;
     @Override
     public void onBindViewHolderCursor(final ViewHolder holder, Cursor cursor) {
 
+       
         Animation slide = AnimationUtils.loadAnimation(mContext, (cursor.getPosition() > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);
         //Animation animation = AnimationUtils.loadAnimation(getContext(), (position > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);        
         //holder.itemView.startAnimation(slide);
@@ -95,7 +91,7 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
         lastPosition = cursor.getPosition();
         final CheckIn checkIn = CheckIn.getByUnitId(cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.UNIT_ID)));
         //final int checkInId = cursor.getInt(ID_COLUMN);
-        //card.setId(""+ checkInId);
+    
         final PainLevel painLevel = Enum.valueOf(PainLevel.class,cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL)));
         final FeedStatus feedStatus =  Enum.valueOf(FeedStatus.class, cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS)));
         holder.vCheckInStatus.setText(painLevel + " - " + feedStatus);
@@ -146,26 +142,30 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
         holder.mBtnCheckInDetailsInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                ViewGroup.LayoutParams p = holder.itemView.getLayoutParams();
-//                if(holder.isShown){
-//                    p.height -= 260;
-//
-//                }else{
-//                    p.height += 260;
-//                }
-//                holder.itemView.requestLayout();
-//                holder.isShown = !holder.isShown;
+                holder.isBottomToBeShown = !holder.isBottomToBeShown;
+                updateBottomLayout(holder,holder.isBottomToBeShown);
                 //holder.viewCheckInDetails.setVisibility(holder.viewCheckInDetails.getVisibility()
-                holder.mListView.setVisibility(holder.mListView.getVisibility()
-                        == View.GONE ? View.VISIBLE :View.GONE );
+                //holder.mListView.setVisibility(holder.mListView.getVisibility()
+                //        == View.GONE ? View.VISIBLE :View.GONE );
 
-//                if(mListener != null
-                        //&& holder.viewCheckInDetails.getVisibility() == View.VISIBLE){
-                    //mListener.onItemToggled(holder.getPosition());
-//                }
             }
         });
         //card.resourceIdThumb=R.drawable.ic_check_in;
+    }
+    private void updateBottomLayout(ViewHolder holder, boolean requiredBottomToBeShown) {
+        ViewGroup.LayoutParams p = holder.itemView.getLayoutParams();
+        final int actualHeight = holder.itemView.getMeasuredHeight();
+        if(holder.isFirstToggle){
+            holder.originalLayoutBottomHeight = holder.viewCheckInDetails.getMeasuredHeight() + ((ViewGroup.MarginLayoutParams)holder.viewCheckInDetails.getLayoutParams()).topMargin;
+            holder.isFirstToggle = false;
+        }
+        if(requiredBottomToBeShown){
+            p.height = actualHeight + holder.originalLayoutBottomHeight;
+
+        }else{
+            p.height = actualHeight - holder.originalLayoutBottomHeight;
+        }
+        holder.itemView.requestLayout();
     }
 
 

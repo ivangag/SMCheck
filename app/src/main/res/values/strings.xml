@@ -153,5 +153,6 @@
     <string name="health_status">Health Status</string>
     <string name="session_expired">Your session is expired. Please re-enter credentials.</string>
     <string name="login_alert">Login Alert</string>
+    <string name="text_click_more_info_checkin">Click to have more information about Check-In</string>
 
 </resources>
