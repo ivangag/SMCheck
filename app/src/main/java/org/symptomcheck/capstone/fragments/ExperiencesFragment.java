@@ -343,7 +343,7 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
             //Create a CardHeader
             CardHeader header = new CardHeader(getActivity());
 
-            //Set visible the expand/collapse button
+            //Set visible the IsExpanded/collapse button
             //header.setButtonExpandVisible(true);
 
             //Set the header title
@@ -377,13 +377,13 @@ public class ExperiencesFragment extends BaseFragment implements LoaderManager.L
                 }
             });
 
-            //This provides a simple (and useless) expand area
+            //This provides a simple (and useless) IsExpanded area
             String detailedExperienceInfo  = "";
             if(patientExperience != null) {
                 detailedExperienceInfo = PatientExperience.getDetailedInfo(patientExperience);
             }
             CustomExpandCard expand = new CustomExpandCard(super.getContext(), detailedExperienceInfo);
-            //expand.setTitle("Check-In Details");
+            //IsExpanded.setTitle("Check-In Details");
             //Add Expand Area to Card
             card.addCardExpand(expand);
 

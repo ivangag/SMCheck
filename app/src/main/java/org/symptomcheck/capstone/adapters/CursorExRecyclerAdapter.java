@@ -1,29 +1,39 @@
 package org.symptomcheck.capstone.adapters;
 
 /*
- * The MIT License (MIT)
+ * Copyright (C) 2013 The Android Open Source Project
  *
- * Copyright (c) 2014 Matthieu HarlÃ©
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
+/*
+ * Copyright (C) 2014 flzyup@ligux.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.DataSetObserver;
@@ -34,84 +44,125 @@ import android.widget.FilterQueryProvider;
 import android.widget.Filterable;
 
 /**
- * Provide a {@link android.support.v7.widget.RecyclerView.Adapter} implementation with cursor
- * support.
+ * Version 1.0
  *
- * Child classes only need to implement {@link #onCreateViewHolder(android.view.ViewGroup, int)} and
- * {@link #onBindViewHolderCursor(android.support.v7.widget.RecyclerView.ViewHolder, android.database.Cursor)}.
+ * Date: 2014-07-07 19:53
+ * Author: flzyup@ligux.com
  *
- * This class does not implement deprecated fields and methods from CursorAdapter! Incidentally,
- * only {@link android.widget.CursorAdapter#FLAG_REGISTER_CONTENT_OBSERVER} is available, so the
- * flag is implied, and only the Adapter behavior using this flag has been ported.
+ * Copyright © 2009-2014 LiGux.com.
  *
- * @param <VH> {@inheritDoc}
- *
- * @see android.support.v7.widget.RecyclerView.Adapter
- * @see android.widget.CursorAdapter
- * @see android.widget.Filterable
- //* @see fr.shywim.tools.adapter.CursorFilter.CursorFilterClient
  */
-public abstract class CursorRecyclerAdapter<VH
-        extends android.support.v7.widget.RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH>
-        implements Filterable, CursorFilter.CursorFilterClient {
-    private boolean mDataValid;
-    private int mRowIDColumn;
-    private Cursor mCursor;
-    private ChangeObserver mChangeObserver;
-    private DataSetObserver mDataSetObserver;
-    private CursorFilter mCursorFilter;
-    private FilterQueryProvider mFilterQueryProvider;
+public abstract class CursorExRecyclerAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH>  implements Filterable,
+        CursorFilter.CursorFilterClient {
 
+    /**
+     * Call when bind view with the cursor
+     * @param holder
+     * @param cursor
+     */
+    public abstract void onBindViewHolder(VH holder, Cursor cursor);
 
-    public CursorRecyclerAdapter( Cursor cursor) {
-        init(cursor);
+    /**
+     * This field should be made private, so it is hidden from the SDK.
+     * {@hide}
+     */
+    protected boolean mDataValid;
+
+    /**
+     * The current cursor
+     */
+    protected Cursor mCursor;
+
+    /**
+     * This field should be made private, so it is hidden from the SDK.
+     * {@hide}
+     */
+    protected Context mContext;
+
+    /**
+     * The row id column
+     */
+    protected int mRowIDColumn;
+
+    /**
+     * This field should be made private, so it is hidden from the SDK.
+     * {@hide}
+     */
+    protected ChangeObserver mChangeObserver;
+    /**
+     * This field should be made private, so it is hidden from the SDK.
+     * {@hide}
+     */
+    protected DataSetObserver mDataSetObserver;
+
+    /**
+     * This field should be made private, so it is hidden from the SDK.
+     * {@hide}
+     */
+    protected CursorFilter mCursorFilter;
+
+    /**
+     * This field should be made private, so it is hidden from the SDK.
+     * {@hide}
+     */
+    protected FilterQueryProvider mFilterQueryProvider;
+
+    /**
+     * If set the adapter will register a content observer on the cursor and will call
+     * {@link #onContentChanged()} when a notification comes in.  Be careful when
+     * using this flag: you will need to unset the current Cursor from the adapter
+     * to avoid leaks due to its registered observers.  This flag is not needed
+     * when using a CursorAdapter with a
+     * {@link android.content.CursorLoader}.
+     */
+    public static final int FLAG_REGISTER_CONTENT_OBSERVER = 0x02;
+
+    /**
+     * Recommended constructor.
+     *
+     * @param c The cursor from which to get the data.
+     * @param context The context
+     * @param flags Flags used to determine the behavior of the adapter;
+     *              Currently it accept {@link #FLAG_REGISTER_CONTENT_OBSERVER}.
+     */
+    public CursorExRecyclerAdapter(Context context, Cursor c, int flags) {
+        init(context, c, flags);
     }
 
-    void init(Cursor c) {
+    void init(Context context, Cursor c, int flags) {
+
         boolean cursorPresent = c != null;
         mCursor = c;
         mDataValid = cursorPresent;
+        mContext = context;
         mRowIDColumn = cursorPresent ? c.getColumnIndexOrThrow("_id") : -1;
-
-        mChangeObserver = new ChangeObserver();
-        mDataSetObserver = new MyDataSetObserver();
+        if ((flags & FLAG_REGISTER_CONTENT_OBSERVER) == FLAG_REGISTER_CONTENT_OBSERVER) {
+            mChangeObserver = new ChangeObserver();
+            mDataSetObserver = new MyDataSetObserver();
+        } else {
+            mChangeObserver = null;
+            mDataSetObserver = null;
+        }
 
         if (cursorPresent) {
             if (mChangeObserver != null) c.registerContentObserver(mChangeObserver);
             if (mDataSetObserver != null) c.registerDataSetObserver(mDataSetObserver);
         }
+        setHasStableIds(true);
     }
 
     /**
-     * This method will move the Cursor to the correct position and call
-     * {@link #onBindViewHolderCursor(android.support.v7.widget.RecyclerView.ViewHolder,
-     * android.database.Cursor)}.
-     *
-     * @param holder {@inheritDoc}
-     * @param i {@inheritDoc}
+     * Returns the cursor.
+     * @return the cursor.
      */
     @Override
-    public void onBindViewHolder(VH holder, int i){
-        if (!mDataValid) {
-            throw new IllegalStateException("this should only be called when the cursor is valid");
-        }
-        if (!mCursor.moveToPosition(i)) {
-            throw new IllegalStateException("couldn't move cursor to position " + i);
-        }
-        onBindViewHolderCursor(holder, mCursor);
+    public Cursor getCursor() {
+        return mCursor;
     }
 
     /**
-     * See {@link android.widget.CursorAdapter#bindView(android.view.View, android.content.Context,
-     * android.database.Cursor)},
-     * {@link #onBindViewHolder(android.support.v7.widget.RecyclerView.ViewHolder, int)}
-     *
-     * @param holder View holder.
-     * @param cursor The cursor from which to get the data. The cursor is already
-     * moved to the correct position.
+     * @see android.support.v7.widget.RecyclerView.Adapter#getItemCount()
      */
-    public abstract void onBindViewHolderCursor(VH holder, Cursor cursor);
-
     @Override
     public int getItemCount() {
         if (mDataValid && mCursor != null) {
@@ -122,7 +173,10 @@ public abstract class CursorRecyclerAdapter<VH
     }
 
     /**
-     * @see android.widget.ListAdapter#getItemId(int)
+     * @see android.support.v7.widget.RecyclerView.Adapter#getItemId(int)
+     *
+     * @param position Adapter position to query
+     * @return
      */
     @Override
     public long getItemId(int position) {
@@ -137,8 +191,15 @@ public abstract class CursorRecyclerAdapter<VH
         }
     }
 
-    public Cursor getCursor(){
-        return mCursor;
+    @Override
+    public void onBindViewHolder(VH holder, int position) {
+        if (!mDataValid) {
+            throw new IllegalStateException("this should only be called when the cursor is valid");
+        }
+        if (!mCursor.moveToPosition(position)) {
+            throw new IllegalStateException("couldn't move cursor to position " + position);
+        }
+        onBindViewHolder(holder, mCursor);
     }
 
     /**
@@ -185,8 +246,8 @@ public abstract class CursorRecyclerAdapter<VH
             mRowIDColumn = -1;
             mDataValid = false;
             // notify the observers about the lack of a data set
-            // notifyDataSetInvalidated();
-            notifyItemRangeRemoved(0, getItemCount());
+            notifyDataSetChanged();
+//            notifyDataSetInvalidated();
         }
         return oldCursor;
     }
@@ -275,13 +336,12 @@ public abstract class CursorRecyclerAdapter<VH
 
     /**
      * Called when the {@link ContentObserver} on the cursor receives a change notification.
-     * Can be implemented by sub-class.
+     * The default implementation provides the auto-requery logic, but may be overridden by
+     * sub classes.
      *
      * @see ContentObserver#onChange(boolean)
      */
-    protected void onContentChanged() {
-
-    }
+    protected abstract void onContentChanged();
 
     private class ChangeObserver extends ContentObserver {
         public ChangeObserver() {
@@ -300,8 +360,6 @@ public abstract class CursorRecyclerAdapter<VH
     }
 
     private class MyDataSetObserver extends DataSetObserver {
-        
-
         @Override
         public void onChanged() {
             mDataValid = true;
@@ -311,61 +369,8 @@ public abstract class CursorRecyclerAdapter<VH
         @Override
         public void onInvalidated() {
             mDataValid = false;
-            // notifyDataSetInvalidated();
-            notifyItemRangeRemoved(0, getItemCount());
-        }
-    }
-
-    /**
-     * <p>The CursorFilter delegates most of the work to the CursorAdapter.
-     * Subclasses should override these delegate methods to run the queries
-     * and convert the results into String that can be used by auto-completion
-     * widgets.</p>
-     */
-
-}
-
-class CursorFilter extends Filter {
-
-    CursorFilterClient mClient;
-
-    interface CursorFilterClient {
-        CharSequence convertToString(Cursor cursor);
-        Cursor runQueryOnBackgroundThread(CharSequence constraint);
-        Cursor getCursor();
-        void changeCursor(Cursor cursor);
-    }
-
-    CursorFilter(CursorFilterClient client) {
-        mClient = client;
-    }
-
-    @Override
-    public CharSequence convertResultToString(Object resultValue) {
-        return mClient.convertToString((Cursor) resultValue);
-    }
-
-    @Override
-    protected FilterResults performFiltering(CharSequence constraint) {
-        Cursor cursor = mClient.runQueryOnBackgroundThread(constraint);
-
-        FilterResults results = new FilterResults();
-        if (cursor != null) {
-            results.count = cursor.getCount();
-            results.values = cursor;
-        } else {
-            results.count = 0;
-            results.values = null;
-        }
-        return results;
-    }
-
-    @Override
-    protected void publishResults(CharSequence constraint, FilterResults results) {
-        Cursor oldCursor = mClient.getCursor();
-
-        if (results.values != null && results.values != oldCursor) {
-            mClient.changeCursor((Cursor) results.values);
+            notifyDataSetChanged();
+//            notifyDataSetInvalidated();
         }
     }
 }

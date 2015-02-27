@@ -601,7 +601,7 @@ public class MedicinesFragment extends BaseFragment implements LoaderManager.Loa
             thumb.setDrawableResource(card.resourceIdThumb);
             card.addCardThumbnail(thumb);
 
-            //This provides a simple (and useless) expand area
+            //This provides a simple (and useless) IsExpanded area
             String detailedMedicineInfo  = "";
             if(painMedication != null) {
                 detailedMedicineInfo = PainMedication.getDetailedInfo(painMedication);

@@ -337,7 +337,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
             //Create a CardHeader
             CardHeader header = new CardHeader(getActivity());
 
-            //Set visible the expand/collapse button
+            //Set visible the IsExpanded/collapse button
             //header.setButtonExpandVisible(true);
 
             //Set the header title
@@ -399,13 +399,13 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
                 }
             });
 
-            //This provides a simple (and useless) expand area
+            //This provides a simple (and useless) IsExpanded area
             String detailedInfo = "";
             if(doctor != null) {
                 detailedInfo = Doctor.getDetailedInfo(doctor);
             }
             CustomExpandCard expand = new CustomExpandCard(super.getContext(), detailedInfo);
-            //expand.setTitle("Doctor Details");
+            //IsExpanded.setTitle("Doctor Details");
             //Add Expand Area to Card
             card.addCardExpand(expand);
 
@@ -424,7 +424,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
             card.mainHeader = getString(R.string.doctor_header);
             card.resourceIdThumb = R.drawable.ic_doctor;
 
-            //build detailed info to be shown in expand area
+            //build detailed info to be shown in IsExpanded area
             mDetailedInfo = "";
         }
     }
@@ -439,7 +439,7 @@ public class DoctorFragment extends BaseFragment implements LoaderManager.Loader
                         CardCursorContract.CardCursor.KeyColumns.KEY_ID + " = ? ",
         new String[]{card.getId()});
 
-        //mAdapter.notifyDataSetChanged();*/
+        //mRecyclerCursorAdapter.notifyDataSetChanged();*/
 
     }
 

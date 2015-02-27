@@ -404,13 +404,13 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
             });
 
 
-            //This provides a simple (and useless) expand area
+            //This provides a simple (and useless) IsExpanded area
             String detailedInfo = "";
             if(patient != null) {
                 detailedInfo = Patient.getDetailedInfo(patient);
             }
             CustomExpandCard expand = new CustomExpandCard(super.getContext(), detailedInfo);
-            //expand.setTitle("Patient Details");
+            //IsExpanded.setTitle("Patient Details");
             //Add Expand Area to Card
             card.addCardExpand(expand);
 
@@ -441,7 +441,7 @@ public class PatientsFragment extends BaseFragment implements LoaderManager.Load
                         CardCursorContract.CardCursor.KeyColumns.KEY_ID + " = ? ",
         new String[]{card.getId()});
 
-        mAdapter.notifyDataSetChanged();
+        mRecyclerCursorAdapter.notifyDataSetChanged();
 */
     }
 

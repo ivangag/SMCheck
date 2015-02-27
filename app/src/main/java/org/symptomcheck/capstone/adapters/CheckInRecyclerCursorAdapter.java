@@ -3,6 +3,7 @@ package org.symptomcheck.capstone.adapters;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,8 +25,9 @@ import org.symptomcheck.capstone.utils.DateTimeUtils;
 /**
  * Created by igaglioti on 09/02/2015.
  */
-public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInRecyclerCursorAdapter.ViewHolder> {
+public class CheckInRecyclerCursorAdapter extends CursorExRecyclerAdapter<CheckInRecyclerCursorAdapter.ViewHolder> {
 
+    private static String TAG = "CheckInRecyclerCursorAdapter";
     IRecyclerItemToggleListener mListener;
     private int lastPosition = -1;
 
@@ -33,15 +35,28 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
         void onItemToggled(int position);
     }
     
+    
     public void addEventListener(IRecyclerItemToggleListener listener){
         mListener = listener;
     }
     
     private final Context mContext;
 
+    @Override
+    protected void onContentChanged() {
+        lastPosition = -1;
+    }
+    
     public CheckInRecyclerCursorAdapter(Cursor cursor, Context context) {
-        super(cursor);
+        super(context,cursor,FLAG_REGISTER_CONTENT_OBSERVER);
         this.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+
+            @Override
+            public void onItemRangeChanged(int positionStart, int itemCount) {
+                super.onItemRangeChanged(positionStart, itemCount);
+                
+            }
+
             @Override
             public void onChanged() {
                 super.onChanged();
@@ -56,7 +71,7 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder /*implements OnClickListener*/ {
         // each data item is just a string in this case
         protected TextView vCheckInStatus;
         protected TextView vCheckInTime;
@@ -64,34 +79,45 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
         protected View viewHeaderCheckInDetails;
         protected ListView mListView;
         protected ImageButton mBtnCheckInDetailsInfo;
-        protected boolean isBottomToBeShown = true;
+        protected boolean IsExpanded = true;
         protected int originalLayoutBottomHeight;
+        protected int originalItemViewHeight;
         protected boolean isFirstToggle = true;
+        protected boolean isExpandCollapsingRequested = false;
         public ViewHolder(View v) {
             super(v);
             vCheckInStatus =  (TextView) v.findViewById(R.id.txtViewCheckInPainLevel);
             vCheckInTime = (TextView)  v.findViewById(R.id.txtViewCheckInTime);
-            viewCheckInDetails = (View)  v.findViewById(R.id.viewCheckInDetails);
-            viewHeaderCheckInDetails = (View)  v.findViewById(R.id.viewHeaderCheckInDetails);
+            viewCheckInDetails =  v.findViewById(R.id.viewCheckInDetails);
+            viewHeaderCheckInDetails =  v.findViewById(R.id.viewHeaderCheckInDetails);
             mListView = (ListView)  v.findViewById(R.id.list_medicines_question);
             mBtnCheckInDetailsInfo = (ImageButton)  v.findViewById(R.id.btnCheckInDetailsInfo);
+            //v.setOnClickListener(this);
+            mBtnCheckInDetailsInfo.setTag(this);
         }
         
     }
 
     
+    
     @Override
-    public void onBindViewHolderCursor(final ViewHolder holder, Cursor cursor) {
+    public void onViewRecycled(ViewHolder holder) {
+        super.onViewRecycled(holder);
+        Log.d(TAG,String.format("onViewRecycled=> CurrentPosition:%d. ExpandedStatus:%s",
+                holder.getPosition(),holder.IsExpanded));
+    }
 
+    @Override
+    public void onBindViewHolder(final ViewHolder holder, Cursor cursor) {
        
         Animation slide = AnimationUtils.loadAnimation(mContext, (cursor.getPosition() > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);
         //Animation animation = AnimationUtils.loadAnimation(getContext(), (position > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);        
         //holder.itemView.startAnimation(slide);
-
         lastPosition = cursor.getPosition();
+        handleItemViewExpanding(holder);
+        //handleItemExpanding(holder);
         final CheckIn checkIn = CheckIn.getByUnitId(cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.UNIT_ID)));
-        //final int checkInId = cursor.getInt(ID_COLUMN);
-    
+
         final PainLevel painLevel = Enum.valueOf(PainLevel.class,cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL)));
         final FeedStatus feedStatus =  Enum.valueOf(FeedStatus.class, cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS)));
         holder.vCheckInStatus.setText(painLevel + " - " + feedStatus);
@@ -138,34 +164,62 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
             case UNKNOWN:
                 break;
         }
+        Log.d(TAG,String.format("onBindViewHolderCursor=> CheckInID:%d. CursorPosition:%d. CurrentPosition:%d. ExpandedStatus:%s",
+               checkIn.getId(), lastPosition,holder.getPosition(),holder.IsExpanded));
+        
 
-        holder.mBtnCheckInDetailsInfo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                holder.isBottomToBeShown = !holder.isBottomToBeShown;
-                updateBottomLayout(holder,holder.isBottomToBeShown);
-                //holder.viewCheckInDetails.setVisibility(holder.viewCheckInDetails.getVisibility()
-                //holder.mListView.setVisibility(holder.mListView.getVisibility()
-                //        == View.GONE ? View.VISIBLE :View.GONE );
-
-            }
-        });
         //card.resourceIdThumb=R.drawable.ic_check_in;
     }
-    private void updateBottomLayout(ViewHolder holder, boolean requiredBottomToBeShown) {
-        ViewGroup.LayoutParams p = holder.itemView.getLayoutParams();
+
+
+    private void handleItemExpandingRequest(ViewHolder holder){
+        
+        
+        
+    }
+
+    private void handleItemExpanding(ViewHolder holder) {
+
+        ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
         final int actualHeight = holder.itemView.getMeasuredHeight();
-        if(holder.isFirstToggle){
-            holder.originalLayoutBottomHeight = holder.viewCheckInDetails.getMeasuredHeight() + ((ViewGroup.MarginLayoutParams)holder.viewCheckInDetails.getLayoutParams()).topMargin;
+        if (holder.isFirstToggle) {
+            holder.originalLayoutBottomHeight = holder.viewCheckInDetails.getMeasuredHeight() + ((ViewGroup.MarginLayoutParams) holder.viewCheckInDetails.getLayoutParams()).topMargin;
+            holder.originalItemViewHeight = actualHeight;
             holder.isFirstToggle = false;
         }
-        if(requiredBottomToBeShown){
-            p.height = actualHeight + holder.originalLayoutBottomHeight;
-
-        }else{
-            p.height = actualHeight - holder.originalLayoutBottomHeight;
+        if (holder.IsExpanded) {
+            layoutParams.height = holder.originalItemViewHeight;
+        } else {
+            layoutParams.height = holder.originalItemViewHeight - holder.originalLayoutBottomHeight;
         }
-        holder.itemView.requestLayout();
+        holder.itemView.setLayoutParams(layoutParams);
+
+    }
+    private void handleItemViewExpanding(ViewHolder holder) {
+
+        if(holder.isExpandCollapsingRequested){
+            holder.isExpandCollapsingRequested = false;
+            ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
+            final int actualHeight = holder.itemView.getMeasuredHeight();
+            
+            if(holder.isFirstToggle) {
+                holder.originalLayoutBottomHeight = holder.viewCheckInDetails.getMeasuredHeight() + ((ViewGroup.MarginLayoutParams) holder.viewCheckInDetails.getLayoutParams()).topMargin;
+                holder.originalItemViewHeight = actualHeight;
+                holder.isFirstToggle = false;
+            }
+
+            if(!holder.IsExpanded){ // expanding item
+                layoutParams.height = holder.originalItemViewHeight;
+            }else{ // collapsing item
+                layoutParams.height =  holder.originalItemViewHeight - holder.originalLayoutBottomHeight;
+            }
+            holder.IsExpanded = !holder.IsExpanded;
+
+            //layoutParams.height = holder.IsExpanded ? actualHeight + holder.originalLayoutBottomHeight : actualHeight - holder.originalLayoutBottomHeight;
+            holder.itemView.setLayoutParams(layoutParams);
+        }        
+        
+        //holder.itemView.requestLayout();
     }
 
 
@@ -174,9 +228,24 @@ public class CheckInRecyclerCursorAdapter extends CursorRecyclerAdapter<CheckInR
     public CheckInRecyclerCursorAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                    int viewType) {
         // create a new view
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_google_cardview_checkins, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_google_cardview_checkins, parent, false);
         // set the view's size, margins, paddings and layout parameters        
         v.setClickable(true);
-        return new ViewHolder(v);
+        final ViewHolder vh = new ViewHolder(v);
+        vh.mBtnCheckInDetailsInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                //vh.IsExpanded = !vh.IsExpanded;
+                vh.isExpandCollapsingRequested = true;
+                //handleItemExpanding(vh);
+                //holder.viewCheckInDetails.setVisibility(holder.viewCheckInDetails.getVisibility()
+                //holder.mListView.setVisibility(holder.mListView.getVisibility()
+                //        == View.GONE ? View.VISIBLE :View.GONE );
+
+                notifyItemChanged(vh.getPosition());
+            }
+        });
+        return vh;
     }
 }

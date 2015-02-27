@@ -28,7 +28,7 @@ import org.symptomcheck.capstone.R;
 import it.gmariotti.cardslib.library.internal.CardExpand;
 
 /**
- * This class provides an example of custom expand/collapse area.
+ * This class provides an example of custom IsExpanded/collapse area.
  * It uses carddemo_example_inner_expand layout.
  * <p/>
  * You have to override the {@link #setupInnerViewElements(android.view.ViewGroup, android.view.View)});

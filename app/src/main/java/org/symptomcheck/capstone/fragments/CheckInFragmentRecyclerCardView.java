@@ -23,12 +23,10 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.content.SyncStatusObserver;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
@@ -42,8 +40,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FilterQueryProvider;
-import android.widget.ImageButton;
-import android.widget.TextView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.activeandroid.content.ContentProvider;
@@ -53,34 +50,22 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.interfaces.OnChartGestureListener;
 import com.github.mikephil.charting.interfaces.OnChartValueSelectedListener;
-import com.github.mikephil.charting.utils.ColorTemplate;
 import com.github.mikephil.charting.utils.Legend;
-import com.github.mikephil.charting.utils.XLabels;
-import com.google.common.collect.Lists;
 
 import org.symptomcheck.capstone.App;
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.SyncUtils;
 import org.symptomcheck.capstone.accounts.GenericAccountService;
 import org.symptomcheck.capstone.adapters.CheckInRecyclerCursorAdapter;
-import org.symptomcheck.capstone.adapters.MedicationQuestionItem;
-import org.symptomcheck.capstone.cardsui.CustomExpandCard;
+import org.symptomcheck.capstone.adapters.CheckInSimpleCursorAdapter;
 import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.PainLevel;
 import org.symptomcheck.capstone.model.Patient;
 import org.symptomcheck.capstone.provider.ActiveContract;
 import org.symptomcheck.capstone.utils.CheckInUtils;
 import org.symptomcheck.capstone.utils.Constants;
-import org.symptomcheck.capstone.utils.DateTimeUtils;
 
 import java.util.ArrayList;
-
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
-import it.gmariotti.cardslib.library.internal.CardHeader;
-import it.gmariotti.cardslib.library.internal.CardThumbnail;
-import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
-import it.gmariotti.cardslib.library.view.CardListView;
 
 
 //TODO#BPR_6 Check-In Data Fragment Interface Screen
@@ -88,8 +73,10 @@ import it.gmariotti.cardslib.library.view.CardListView;
 public class CheckInFragmentRecyclerCardView extends BaseFragment 
         implements LoaderManager.LoaderCallbacks<Cursor>, IFragmentListener, CheckInRecyclerCursorAdapter.IRecyclerItemToggleListener {
 
-    CheckInRecyclerCursorAdapter mAdapter;
-    CardListView mListView;
+    public static boolean USE_RECYCLER_VIEW = true;
+    CheckInRecyclerCursorAdapter mRecyclerCursorAdapter;
+    CheckInSimpleCursorAdapter mStandardCursorAdapter;
+    //CardListView mListView;
     /**
      * Handle to a SyncObserver. The ProgressBar element is visible until the SyncObserver reports
      * that the sync is complete.
@@ -103,6 +90,7 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment
     private static final String ARG_PATIENT_ID = "patient_id";
     String mMedicineName;
     private RecyclerView mRecyclerView;
+    private ListView mListView;
     private LinearLayoutManager mLayoutManager;
 
     
@@ -131,7 +119,11 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment
     private PieChart mChart;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root= inflater.inflate(R.layout.fragment_card_checkins_list_recycler, container, false);
+        View root = null;
+        if(USE_RECYCLER_VIEW)
+            root= inflater.inflate(R.layout.fragment_card_checkins_list_recycler, container, false);
+        else
+            root= inflater.inflate(R.layout.fragment_card_checkins_list_listview, container, false);
 
         root.findViewById(R.id.google_card_view_header_checkin).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -296,9 +288,10 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment
         //SyncUtils.CreateSyncAccount(activity);
     }
 
+    
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        init();
+        init(USE_RECYCLER_VIEW);
         generateHeaderGraphic(this.getView());
         super.onActivityCreated(savedInstanceState);
         hideList(false);
@@ -347,7 +340,7 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment
 
     String mSelectionQuery = null;
     Patient mPatientOwner = null;
-    private void init() {
+    private void init(boolean useRecyclerView) {
 
         final String patientMedicalNumber = getArguments().getString(ARG_PATIENT_ID, Constants.STRINGS.EMPTY);
         if(!patientMedicalNumber.isEmpty()) {
@@ -358,35 +351,48 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment
         }
 
         /*
-        mAdapter = new CheckinCursorCardAdapter(getActivity());
+        mRecyclerCursorAdapter = new CheckinCursorCardAdapter(getActivity());
         mListView = (CardListView) getActivity().findViewById(R.id.card_checkins_list_cursor);
         if (mListView != null) {
-            mListView.setAdapter(mAdapter);
+            mListView.setAdapter(mRecyclerCursorAdapter);
         }
         */
-        mAdapter = new CheckInRecyclerCursorAdapter(null, App.getContext());
-        mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
-            @Override
-            public Cursor runQuery(CharSequence charSequence) {
-                return queryAllField(charSequence.toString(), mSelectionQuery);
-            }
-        });
+        
+        if(useRecyclerView) {
+            mRecyclerCursorAdapter = new CheckInRecyclerCursorAdapter(null, App.getContext());
+            mRecyclerCursorAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+                @Override
+                public Cursor runQuery(CharSequence charSequence) {
+                    return queryAllField(charSequence.toString(), mSelectionQuery);
+                }
+            });
 
-        mAdapter.addEventListener(this);
+            mRecyclerCursorAdapter.addEventListener(this);
 
-        mRecyclerView = (RecyclerView) getActivity().findViewById(R.id.checkin_recycler_view);
+            mRecyclerView = (RecyclerView) getActivity().findViewById(R.id.checkin_recycler_view);
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        mRecyclerView.setHasFixedSize(false);
+            // use this setting to improve performance if you know that changes
+            // in content do not change the layout size of the RecyclerView
+            mRecyclerView.setHasFixedSize(false);
 
-        // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(mLayoutManager);
+            // use a linear layout manager
+            mLayoutManager = new LinearLayoutManager(getActivity());
+            mRecyclerView.setLayoutManager(mLayoutManager);
 
-        // specify an adapter (see also next example)
-        //mAdapter = new MyAdapter(myDataset);
-        mRecyclerView.setAdapter(mAdapter);
+            // specify an adapter (see also next example)
+            //mRecyclerCursorAdapter = new MyAdapter(myDataset);
+            mRecyclerView.setAdapter(mRecyclerCursorAdapter);
+        }else{
+            mListView = (ListView) getActivity().findViewById(R.id.checkin_list_view);
+            mStandardCursorAdapter = new CheckInSimpleCursorAdapter(App.getContext(),null,R.layout.row_google_cardview_checkins);
+            mStandardCursorAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+                @Override
+                public Cursor runQuery(CharSequence charSequence) {
+                    return queryAllField(charSequence.toString(), mSelectionQuery);
+                }
+            });
+            mListView.setAdapter(mStandardCursorAdapter);
+        }
 
         // Force start background query to load sessions
         getLoaderManager().restartLoader(0, null, this);
@@ -408,7 +414,10 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment
         if (getActivity() == null) {
             return;
         }
-        mAdapter.swapCursor(data);
+        if(USE_RECYCLER_VIEW)
+            mRecyclerCursorAdapter.swapCursor(data);
+        else
+            mStandardCursorAdapter.swapCursor(data);
 
         displayList(data.getCount() <= 0);
 
@@ -416,7 +425,10 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment
     }
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
+        if(USE_RECYCLER_VIEW)
+            mRecyclerCursorAdapter.swapCursor(null);
+        else
+            mStandardCursorAdapter.swapCursor(null);
     }
     /**
      * Create a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
@@ -479,9 +491,6 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment
         }
     }
 
-    public static final int ID_COLUMN = 0;
-
-
     @Override
     public int getFragmentType() {
         return BaseFragment.FRAGMENT_TYPE_CHECKIN;
@@ -489,8 +498,17 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment
 
     @Override
     public void OnFilterData(String textToSearch) {
-        if(mAdapter != null)
-            mAdapter.getFilter().filter(textToSearch);
+        if(USE_RECYCLER_VIEW) {
+            if (mRecyclerCursorAdapter != null) {
+                mRecyclerCursorAdapter.getFilter().filter(textToSearch);
+                mRecyclerCursorAdapter.notifyDataSetChanged();
+            }
+        }else {
+            if (mStandardCursorAdapter != null) {
+                mStandardCursorAdapter.getFilter().filter(textToSearch);
+                mStandardCursorAdapter.notifyDataSetChanged();
+            }
+        }
     }
 
     @Override
@@ -504,169 +522,4 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment
         mRecyclerView.scrollToPosition(position);
     }
 
-    //-------------------------------------------------------------------------------------------------------------
-    // Adapter
-    //-------------------------------------------------------------------------------------------------------------
-    public class CheckinCursorCardAdapter extends CardCursorAdapter {
-
-
-
-        public CheckinCursorCardAdapter(Context context) {
-            super(context);
-        }
-
-        @Override
-        protected Card getCardFromCursor(Cursor cursor) {
-            final CheckIn checkIn = CheckIn.getByUnitId(cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.UNIT_ID)));
-
-            CheckinCursorCard card = new CheckinCursorCard(super.getContext());
-            setCardFromCursor(card,cursor,checkIn);
-
-            //Create a CardHeader
-            CardHeader header = new CardHeader(getActivity());
-
-            //Set visible the expand/collapse button
-            //header.setButtonExpandVisible(true);
-
-            //Set the header title
-            header.setTitle(card.mainHeader);
-            /*header.setPopupMenu(R.menu.popup_checkin, new CardHeader.OnClickCardHeaderPopupMenuListener() {
-                @Override
-                public void onMenuItemClick(BaseCard card, MenuItem item) {
-                }
-            });*/
-            //Add Header to card
-            card.addCardHeader(header);
-
-
-            //Add the thumbnail
-            CardThumbnail thumb = new CardThumbnail(getActivity());
-            thumb.setDrawableResource(card.resourceIdThumb);
-            card.addCardThumbnail(thumb);
-
-            String mDetailedCheckInInfo = "";
-            if(checkIn != null) {
-                mDetailedCheckInInfo = CheckIn.getDetailedInfo(checkIn,true);
-            }
-            // Add expand card
-            CustomExpandCard expand = new CustomExpandCard(super.getContext(),mDetailedCheckInInfo);
-            card.addCardExpand(expand);
-
-            return card;
-        }
-
-        private void setCardFromCursor(CheckinCursorCard card, Cursor cursor, CheckIn checkIn) {
-            final int checkInId = cursor.getInt(ID_COLUMN);
-            card.setId(""+ checkInId);
-            card.mainTitle = cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL))
-                        + " - " + cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS))
-                            ;
-            if(checkIn != null) {
-                card.secondaryTitle = "Submitted on " + DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT);
-                final Patient patient = Patient.getByMedicalNumber(mPatientOwner.getMedicalRecordNumber());
-                card.mainHeader = patient.getFirstName() + " " + patient.getLastName() + " " + getString(R.string.checkin_header);
-
-
-                switch (checkIn.getIssuePainLevel()){
-                    case UNKNOWN:
-                    case WELL_CONTROLLED:
-                        card.resourceIdAlertIcon = R.drawable.ic_alert_green;
-                        card.resourceIdMainTextColor = getResources().getColor(R.color.card_background_green);
-                        break;
-                    case MODERATE:
-                        card.resourceIdAlertIcon = R.drawable.ic_alert_orange;
-                        card.resourceIdMainTextColor = getResources().getColor(R.color.card_background_orange);
-                        break;
-                    case SEVERE:
-                        card.resourceIdAlertIcon = R.drawable.ic_alert_red;
-                        card.resourceIdMainTextColor = getResources().getColor(R.color.card_background_red);
-                        break;
-                }
-            }else{
-                card.resourceIdAlertIcon = R.drawable.ic_alert_green;
-            }
-            card.resourceIdThumb=R.drawable.ic_check_in;
-
-
-            //retrieve image
-            //byte[] byteArray = Base64.decode("",Base64.DEFAULT);
-            //Bitmap bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-            //ImageView image = (ImageView) getActivity().findViewById(R.id.imageChartApi);
-            //image.setImageBitmap(bmp);
-            //Picasso.with(getActivity()).load(R.id.imageChartApi).resize(150,150).get();
-            //build detailed info to be shown in expand area
-            // retrieve questions from checkin
-
-        }
-    }
-
-    private void removeCard(Card card) {
-
-        //Use this code to delete getItemsQuestion on DB
-        /*
-        ContentResolver resolver = getActivity().getContentResolver();
-        long noDeleted = resolver.delete
-                (CardCursorContract.CardCursor.CONTENT_URI,
-                        CardCursorContract.CardCursor.KeyColumns.KEY_ID + " = ? ",
-        new String[]{card.getId()});
-
-        //mAdapter.notifyDataSetChanged();*/
-
-    }
-
-    //-------------------------------------------------------------------------------------------------------------
-    // Cards
-    //-------------------------------------------------------------------------------------------------------------
-    public class CheckinCursorCard extends Card {
-
-        String mainTitle;
-        String secondaryTitle;
-        String mainHeader;
-        int resourceIdThumb;
-        int resourceIdBackground;
-        int resourceIdMainTextColor;
-        int resourceIdAlertIcon;
-        private ImageButton mButtonExpandCustom;
-        private ImageButton mButtonIconIndicator;
-
-        public CheckinCursorCard(Context context) {
-            super(context, R.layout.carddemo_cursor_inner_content);
-        }
-
-        @Override
-        public void setupInnerViewElements(ViewGroup parent, View view) {
-            //Retrieve elements
-            TextView mTitleTextView = (TextView) parent.findViewById(R.id.carddemo_cursor_main_inner_title);
-            TextView mSecondaryTitleTextView = (TextView) parent.findViewById(R.id.carddemo_cursor_main_inner_subtitle);
-            mButtonExpandCustom = (ImageButton)parent.findViewById(R.id.card_rds_expand_button_info);
-            mButtonIconIndicator = (ImageButton)parent.findViewById(R.id.card_capstone_icon_indicator);
-
-            if (mTitleTextView != null) {
-                //mTitleTextView.setTextColor(getResources().getColor(R.color.card_background_orange));
-                mTitleTextView.setTextColor(resourceIdMainTextColor);
-                mTitleTextView.setText(mainTitle);
-            }
-
-            if (mSecondaryTitleTextView != null)
-                mSecondaryTitleTextView.setText(secondaryTitle);
-
-            if(mButtonIconIndicator != null) {
-                mButtonIconIndicator.setVisibility(View.VISIBLE);
-                mButtonIconIndicator.setBackgroundResource(resourceIdAlertIcon);
-            }
-
-            if(mButtonExpandCustom != null) {
-                mButtonExpandCustom.setBackgroundResource(R.drawable.card_menu_button_expand);
-
-                mButtonExpandCustom.setClickable(true);
-
-                ViewToClickToExpand extraCustomButtonExpand =
-                        ViewToClickToExpand.builder()
-                                .highlightView(false)
-                                .setupView(mButtonExpandCustom);
-
-                setViewToClickToExpand(extraCustomButtonExpand);
-            }
-        }
-    }
 }

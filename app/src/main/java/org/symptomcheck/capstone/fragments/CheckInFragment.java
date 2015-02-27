@@ -101,7 +101,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root= inflater.inflate(R.layout.fragment_card_checkins_list_cursor, container, false);
+        View root= inflater.inflate(R.layout.fragment_card_checkins_list_cards, container, false);
         setupListFragment(root);
         setHasOptionsMenu(true);
         return root;
@@ -336,7 +336,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             //Create a CardHeader
             CardHeader header = new CardHeader(getActivity());
 
-            //Set visible the expand/collapse button
+            //Set visible the IsExpanded/collapse button
             //header.setButtonExpandVisible(true);
 
             //Set the header title
@@ -359,7 +359,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             if(checkIn != null) {
                 mDetailedCheckInInfo = CheckIn.getDetailedInfo(checkIn,true);
             }
-            // Add expand card
+            // Add IsExpanded card
             CustomExpandCard expand = new CustomExpandCard(super.getContext(),mDetailedCheckInInfo);
             card.addCardExpand(expand);
 
@@ -405,7 +405,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
             //ImageView image = (ImageView) getActivity().findViewById(R.id.imageChartApi);
             //image.setImageBitmap(bmp);
             //Picasso.with(getActivity()).load(R.id.imageChartApi).resize(150,150).get();
-            //build detailed info to be shown in expand area
+            //build detailed info to be shown in IsExpanded area
             // retrieve questions from checkin
 
         }
@@ -421,7 +421,7 @@ public class CheckInFragment extends BaseFragment implements LoaderManager.Loade
                         CardCursorContract.CardCursor.KeyColumns.KEY_ID + " = ? ",
         new String[]{card.getId()});
 
-        //mAdapter.notifyDataSetChanged();*/
+        //mRecyclerCursorAdapter.notifyDataSetChanged();*/
 
     }
 

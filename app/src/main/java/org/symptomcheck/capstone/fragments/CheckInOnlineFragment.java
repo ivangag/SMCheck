@@ -327,7 +327,7 @@ public class CheckInOnlineFragment extends BaseFragment implements LoaderManager
                 card.secondaryTitle = "Submitted on " + DateTimeUtils.convertEpochToHumanTime(checkIn.getIssueDateTime(), Constants.TIME.DEFAULT_FORMAT);
                 detailedCheckInInfo = CheckInOnlineWrapper.getDetailedInfo(checkIn);
             }
-            // Add expand card
+            // Add IsExpanded card
             CustomExpandCard expand = new CustomExpandCard(super.getContext(),detailedCheckInInfo);
             card.addCardExpand(expand);
 

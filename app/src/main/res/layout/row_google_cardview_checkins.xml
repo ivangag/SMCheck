@@ -8,8 +8,9 @@
     android:layout_height="match_parent"
     card_view:cardBackgroundColor="@color/white_transparent"
     card_view:cardCornerRadius="4dp"
+    card_view:cardUseCompatPadding="true"
     android:clickable="false"
-    android:layout_margin="3dp">
+    android:layout_margin="5dp">
 
     <LinearLayout
         android:id="@+id/viewParentCheckinDetails"
@@ -81,7 +82,7 @@
                 android:visibility="visible"
                 android:id="@+id/list_medicines_question"
                 android:layout_width="match_parent"
-                android:layout_height="260dp"
+                android:layout_height="220dp"
                 android:divider="@color/accent"
                 android:dividerHeight="0.2dp"
                 android:background="@color/white_transparent"/>
