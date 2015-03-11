@@ -180,9 +180,7 @@ public class SecuredRestBuilder extends RestAdapter.Builder {
                   });
                 try {
                     future.get();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                 }
             }

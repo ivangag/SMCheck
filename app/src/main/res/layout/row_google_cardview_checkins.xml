@@ -10,13 +10,14 @@
     card_view:cardCornerRadius="4dp"
     card_view:cardUseCompatPadding="true"
     android:clickable="false"
-    android:layout_margin="5dp">
+    android:background="?android:attr/selectableItemBackground"
+    android:layout_margin="4dp">
 
     <LinearLayout
         android:id="@+id/viewParentCheckinDetails"
         android:background="@color/icons"
         android:orientation="vertical"
-        android:clickable="false"
+        android:clickable="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -28,6 +29,7 @@
             android:layout_marginRight="5dp"
             android:layout_marginLeft="5dp"
             android:layout_width="match_parent"
+            android:background="?android:attr/selectableItemBackground"
             android:layout_height="wrap_content">
         <TextView
             android:id="@+id/txtViewCheckInPainLevel"
@@ -61,6 +63,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_gravity="start"
+            android:visibility="gone"
             />
 
         <View

@@ -176,6 +176,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
         mTitle = mDrawerTitle = getTitle();
         toolbar = (Toolbar) findViewById(R.id.app_bar);
+
         setSupportActionBar(toolbar);
         toolbarTitle = (TextView) findViewById(R.id.txt_toolbar_title);
 
@@ -288,7 +289,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
         mDrawer.addProfile(new DrawerProfile()
                         .setAvatar(avatar)
-                        .setRoundedAvatar((BitmapDrawable)avatar)
+                        //.setRoundedAvatar((BitmapDrawable)avatar)
                         .setBackground(background)
                         .setName(mUser.getFirstName() + " " + mUser.getLastName())
                                 //.setDescription(mUser.getUserIdentification())
@@ -410,8 +411,8 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                 ;
             }
             mDrawerItemTitles.add(
-                    new DrawerItemHelper (BuildInfo.get().getAppVersion(this),
-                            Constants.STRINGS.EMPTY,
+                    new DrawerItemHelper (getResources().getString(R.string.app_info),
+                            "V" + BuildInfo.get().getAppVersion(this),
                             R.drawable.ic_info_outline_grey600_18dp,
                             CASE_SHOW_APP_VERSION,false,true));
 
@@ -550,11 +551,13 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
     @Override
     public void onMenuExpanded() {
         mShadowView.setVisibility(View.VISIBLE);
+        toolbar.setBackgroundColor(getResources().getColor(R.color.white_transparent));
     }
 
     @Override
     public void onMenuCollapsed() {
         mShadowView.setVisibility(View.GONE);
+        toolbar.setBackgroundColor(getResources().getColor(R.color.primary));
     }
 
 

@@ -232,7 +232,7 @@ public class CheckInRecyclerCursorAdapter extends CursorExRecyclerAdapter<CheckI
         // set the view's size, margins, paddings and layout parameters        
         v.setClickable(true);
         final ViewHolder vh = new ViewHolder(v);
-        vh.mBtnCheckInDetailsInfo.setOnClickListener(new View.OnClickListener() {
+        vh.viewHeaderCheckInDetails.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 

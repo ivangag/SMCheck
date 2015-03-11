@@ -36,6 +36,7 @@
     </style>
 
     <style name="MyCustomToolBarTheme" parent="ThemeOverlay.AppCompat.Light">
+        <item name="windowActionModeOverlay">true</item>
         <item name="android:textColorPrimary">@color/icons</item>
         <item name="android:textColorSecondary">@color/icons</item>
         <item name="android:layout_marginLeft">0dp</item>
