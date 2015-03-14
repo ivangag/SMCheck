@@ -169,10 +169,10 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
 
         //mFloatingActionButton = (View) findViewById(R.id.fab_main);
         mFabActionsMenu = (FloatingActionsMenu) findViewById(R.id.fab_multiple_actions);
-        mFabTakePicture = (View) findViewById(R.id.fab_take_picture);
-        mFabSubmitCheckin = (View) findViewById(R.id.fab_submit_checkin);
-        mFabWriteMessage = (View) findViewById(R.id.fab_write_message);
-        mShadowView = (View) findViewById(R.id.shadowView);
+        mFabTakePicture = findViewById(R.id.fab_take_picture);
+        mFabSubmitCheckin = findViewById(R.id.fab_submit_checkin);
+        mFabWriteMessage = findViewById(R.id.fab_write_message);
+        mShadowView = findViewById(R.id.shadowView);
 
         mTitle = mDrawerTitle = getTitle();
         toolbar = (Toolbar) findViewById(R.id.app_bar);
@@ -268,8 +268,9 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                     );
                 }else {
                     mDrawer.addItem(new DrawerItem()
-                                    .setImage(getResources().getDrawable(item.getImage()))
+                                    .setImage(getResources().getDrawable(item.getImage()), DrawerItem.ICON)
                                     .setTextPrimary(item.getTitle())
+                                    .setTextMode(DrawerItem.SINGLE_LINE)
                                     .setTextSecondary(item.getExtra_info())
                                     .setId(item.getPosition())
                     );
@@ -288,13 +289,13 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                 (mUser.getUserType().equals(UserType.DOCTOR) ? R.drawable.ic_doctor : R.drawable.ic_patient));
 
         mDrawer.addProfile(new DrawerProfile()
-                        .setAvatar(avatar)
-                        //.setRoundedAvatar((BitmapDrawable)avatar)
+                        //.setAvatar(avatar)
+                        .setRoundedAvatar((BitmapDrawable) avatar)
                         .setBackground(background)
                         .setName(mUser.getFirstName() + " " + mUser.getLastName())
                                 //.setDescription(mUser.getUserIdentification())
                         .setDescription(mDetailUser)
-                        //.removeAvatar()
+                                //.removeAvatar()
                         .setOnProfileClickListener(new DrawerProfile.OnProfileClickListener() {
                             @Override
                             public void onClick(DrawerProfile drawerProfile, long l) {
@@ -307,8 +308,13 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                 new DrawerItem.OnItemClickListener() {
                     @Override
                     public void onClick(DrawerItem drawerItem, long fragmentDrawerId, int position) {
-                        selectDrawerItem(fragmentDrawerId);
-                        mDrawer.selectItemById(fragmentDrawerId);
+                        if ((fragmentDrawerId == CASE_SHOW_PATIENT_LOGOUT)
+                                || (fragmentDrawerId == CASE_SHOW_DOCTOR_LOGOUT)) {
+                            askForLogout();
+                        } else if(fragmentDrawerId != CASE_SHOW_APP_VERSION){
+                            selectDrawerItem(fragmentDrawerId);
+                            mDrawer.selectItemById(fragmentDrawerId);
+                        }
                     }
                 });
 
@@ -624,7 +630,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         return fragment;
     }
 
-    private Fragment selectFragment(long fragmaentDrawerId) {
+    private Fragment selectFragment(long fragmentDrawerId) {
 
 
         Fragment fragment = null;
@@ -632,16 +638,16 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         //TODO#BPR_2
         switch (mUser.getUserType()) {
             case DOCTOR:
-                    if(CASE_SHOW_DOCTOR_PATIENTS == fragmaentDrawerId)
+                    if(CASE_SHOW_DOCTOR_PATIENTS == fragmentDrawerId)
                         //fragment = new PatientsFragment();
                         fragment = selectFragment(ShowFragmentType.DOCTOR_PATIENTS, mUser.getUserIdentification());
-                    else if(CASE_SHOW_DOCTOR_PATIENTS_EXPERIENCES == fragmaentDrawerId)
+                    else if(CASE_SHOW_DOCTOR_PATIENTS_EXPERIENCES == fragmentDrawerId)
                         //fragment = new PatientsFragment();
                         fragment = selectFragment(ShowFragmentType.DOCTOR_PATIENTS_EXPERIENCES, mUser.getUserIdentification());
-                    else if(CASE_SHOW_DOCTOR_PATIENTS_ONLINE_CHECKINS == fragmaentDrawerId)
+                    else if(CASE_SHOW_DOCTOR_PATIENTS_ONLINE_CHECKINS == fragmentDrawerId)
                         //fragment = new PatientsFragment();
                         fragment = selectFragment(ShowFragmentType.PATIENT_ONLINE_CHECKINS, mUser.getUserIdentification());
-                    else if(CASE_SHOW_DOCTOR_SETTINGS == fragmaentDrawerId)
+                    else if(CASE_SHOW_DOCTOR_SETTINGS == fragmentDrawerId)
                         openSettings();
                     //else if(CASE_SHOW_DOCTOR_LOGOUT == position)
                     else {
@@ -651,18 +657,18 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                 break;
             case PATIENT:
                // switch (position) {
-                    if(CASE_SHOW_PATIENT_CHECKINS == fragmaentDrawerId)
+                    if(CASE_SHOW_PATIENT_CHECKINS == fragmentDrawerId)
                         //fragment = CheckInFragment.newInstance(ownerId);
                         fragment = selectFragment(ShowFragmentType.PATIENT_CHECKINS, mUser.getUserIdentification());
-                    else if(CASE_SHOW_PATIENT_DOCTORS == fragmaentDrawerId)
+                    else if(CASE_SHOW_PATIENT_DOCTORS == fragmentDrawerId)
                         //fragment = new DoctorFragment();
                         fragment = selectFragment(ShowFragmentType.PATIENT_DOCTORS, mUser.getUserIdentification());
-                    else if(CASE_SHOW_PATIENT_MEDICINES == fragmaentDrawerId)
+                    else if(CASE_SHOW_PATIENT_MEDICINES == fragmentDrawerId)
                         //fragment = MedicinesFragment.newInstance(ownerId);
                         fragment = selectFragment(ShowFragmentType.PATIENT_MEDICINES, mUser.getUserIdentification());
-                    else if(CASE_SHOW_PATIENT_SETTINGS == fragmaentDrawerId)
+                    else if(CASE_SHOW_PATIENT_SETTINGS == fragmentDrawerId)
                         openSettings();
-                    else if(CASE_SHOW_PATIENT_LOGOUT == fragmaentDrawerId) {
+                    else if(CASE_SHOW_PATIENT_LOGOUT == fragmentDrawerId) {
                     }
                     else {
                     }
@@ -1108,7 +1114,8 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
         }
 
         public boolean isInFixedList(){
-            return mInFixedList;
+            return false;
+            //return mInFixedList;
         }
     }
 

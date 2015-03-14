@@ -74,6 +74,10 @@ public class CheckInFlowActivity extends ActionBarActivity {
     ViewPager mPager;
     @InjectView(R.id.btn_check_in_confirm_submission)
     ImageButton btnSubmitCheckIn;
+    @InjectView(R.id.btn_check_in_goto_next)
+    ImageButton btnNext;
+    @InjectView(R.id.btn_check_in_goto_previous)
+    ImageButton btnPrevious;
 
     private CheckInPagerAdapter adapter;
     private int currentColor;
@@ -93,6 +97,7 @@ public class CheckInFlowActivity extends ActionBarActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        CheckInUtils.getInstance().ResetValuesToDefault();
         mUser = DAOManager.get().getUser();
 
         progressBarHandler = new Handler();
@@ -112,11 +117,51 @@ public class CheckInFlowActivity extends ActionBarActivity {
                 .getDisplayMetrics());
         mPager.setPageMargin(pageMargin);
 
+        btnPrevious.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btnPrevious.setVisibility(View.GONE);
+                btnNext.setVisibility(View.VISIBLE);
+            }
+        });
+        btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btnPrevious.setVisibility(View.VISIBLE);
+                btnNext.setVisibility(View.GONE);
+            }
+        });
 
+        tabs.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                if(ViewPager.SCROLL_STATE_SETTLING == state){
+                    if(mPager.getCurrentItem() == 1) {
+                        mIsSubmitApplyFirstTime = false;
+                        btnPrevious.setVisibility(View.VISIBLE);
+                        btnNext.setVisibility(View.GONE);
+                    }else{
+                        btnPrevious.setVisibility(View.GONE);
+                        btnNext.setVisibility(View.VISIBLE);
+                    }
+                    //Toast.makeText(CheckInFlowActivity.this, "Tab Medicine Selected!",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
         tabs.setOnTabReselectedListener(new PagerSlidingTabStrip.OnTabReselectedListener() {
             @Override
             public void onTabReselected(int position) {
-                Toast.makeText(CheckInFlowActivity.this, "Tab reselected: " + position, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(CheckInFlowActivity.this, "Tab reselected: " + position, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -132,8 +177,11 @@ public class CheckInFlowActivity extends ActionBarActivity {
         return new Intent(context, CheckInFlowActivity.class);
     }
 
-
+    volatile boolean mIsSubmitApplyFirstTime = true;
+    boolean mIsErrorToShow;
     private void handleCheckInSubmissionRequest() {
+
+        mIsErrorToShow = true;
         String msgError = Constants.STRINGS.EMPTY;
         //verify check-in data consistence
         boolean check = false;
@@ -142,14 +190,17 @@ public class CheckInFlowActivity extends ActionBarActivity {
             msgError = "Pain Level not reported";
             mPager.setCurrentItem(0);
         } else {
-
             if(CheckInUtils.getInstance().IsGeneralMedicinesQuestionChecked
-                    && !CheckInUtils.getInstance().ReportMedicationsResponse.containsValue("YES")){
+                    && !CheckInUtils.getInstance().ReportMedicationsResponse.containsValue(Constants.STRINGS.YES)){
                 msgError = "You have to select at least one medicine";
                 mPager.setCurrentItem(1);
                 checkMedicines = false;
-            }
-            else {
+            }else if(!CheckInUtils.getInstance().IsGeneralMedicinesQuestionChecked && mIsSubmitApplyFirstTime){
+                mPager.setCurrentItem(1);
+                mIsSubmitApplyFirstTime = false;
+                checkMedicines = false;
+                mIsErrorToShow = false;
+            }else {
                 for (int idx = 0; idx < mMedicines.size(); idx++) {
                     final String medication = mMedicines.get(idx).getMedicationName();
                     if (CheckInUtils.getInstance().ReportMedicationsResponse.get(medication).equals(Constants.STRINGS.EMPTY)) {
@@ -181,9 +232,10 @@ public class CheckInFlowActivity extends ActionBarActivity {
             executeCheckInSaving(checkInFromUserChoices);
 //            showDialog();
         } else {
-
-            Toast.makeText(this, msgError, Toast.LENGTH_LONG).show();
+            if(mIsErrorToShow)
+                Toast.makeText(this, msgError, Toast.LENGTH_LONG).show();
         }
+
     }
 
 

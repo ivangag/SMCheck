@@ -43,6 +43,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
+            android:visibility="visible"
             android:contentDescription="Go to Previous Question">
         </ImageButton>
 
@@ -58,7 +59,7 @@
         </ImageButton>
 
         <ImageButton
-            android:visibility="gone"
+            android:visibility="visible"
             android:background="@color/primary"
             android:src="@drawable/ic_navigate_next_white_48dp"
             android:id="@+id/btn_check_in_goto_next"
