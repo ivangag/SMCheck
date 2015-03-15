@@ -238,10 +238,10 @@ public class CheckInFragmentRecyclerCardView extends BaseFragment
 
         //CheckIn.getAllByPatientAndPainStatus(mPatientOwner,PainLevel.WELL_CONTROLLED);
         for(int i = 0; i < count; i++) {
-            final PainLevel p = PAIN_LEVELS[i];
+            final PainLevel painLevel = PAIN_LEVELS[i];
             //xVals.add("entry" + (i+1));
-            xVals.add(p.toString());
-            final int val = CheckIn.getAllByPatientAndPainStatus(mPatientOwner,p).size();
+            xVals.add(painLevel.toString());
+            final int val = CheckIn.getAllByPatientAndPainStatus(mPatientOwner,painLevel).size();
             //entries1.add(new Entry((float) (Math.random() * 60) + 40, i));
             entries1.add(new Entry((float)val, i));
         }

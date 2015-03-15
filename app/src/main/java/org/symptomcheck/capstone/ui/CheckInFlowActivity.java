@@ -122,6 +122,7 @@ public class CheckInFlowActivity extends ActionBarActivity {
             public void onClick(View v) {
                 btnPrevious.setVisibility(View.GONE);
                 btnNext.setVisibility(View.VISIBLE);
+                mPager.setCurrentItem(mPager.getCurrentItem() - 1);
             }
         });
         btnNext.setOnClickListener(new View.OnClickListener() {
@@ -129,6 +130,7 @@ public class CheckInFlowActivity extends ActionBarActivity {
             public void onClick(View v) {
                 btnPrevious.setVisibility(View.VISIBLE);
                 btnNext.setVisibility(View.GONE);
+                mPager.setCurrentItem(mPager.getCurrentItem() + 1);
             }
         });
 
@@ -176,6 +178,8 @@ public class CheckInFlowActivity extends ActionBarActivity {
     public static Intent makeIntentStartActivity(Context context){
         return new Intent(context, CheckInFlowActivity.class);
     }
+
+
 
     volatile boolean mIsSubmitApplyFirstTime = true;
     boolean mIsErrorToShow;
