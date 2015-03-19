@@ -176,6 +176,17 @@
         </service>
 
         <activity
+            android:name=".ui.MainActivityDrawerPenz"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:exported="true"
+            android:label="@string/title_check_in_flow"
+            android:parentActivityName=".ui.MainActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.MainActivity" />
+        </activity>
+       <activity
             android:name=".ui.CheckInFlowActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="true"
@@ -186,6 +197,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.MainActivity" />
         </activity>
+
         <activity
             android:name=".ui.SettingsActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"

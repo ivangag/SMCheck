@@ -289,7 +289,7 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                 (mUser.getUserType().equals(UserType.DOCTOR) ? R.drawable.ic_doctor : R.drawable.ic_patient));
 
         mDrawer.addProfile(new DrawerProfile()
-                        //.setAvatar(avatar)
+                        .setAvatar(null)
                         .setRoundedAvatar((BitmapDrawable) avatar)
                         .setBackground(background)
                         .setName(mUser.getFirstName() + " " + mUser.getLastName())
@@ -440,6 +440,8 @@ public class MainActivity extends ActionBarActivity implements ICardEventListene
                 public void onClick(View v) {
                     mFabActionsMenu.collapse();
                     Toast.makeText(getApplicationContext(),"Clicked Write a Message FAB",Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(MainActivity.this, MainActivityDrawerPenz.class);
+                    startActivity(intent);
                 }
             });
         }

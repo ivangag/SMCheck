@@ -35,6 +35,17 @@
 <color name="icons">#FFFFFF</color>
 <color name="divider">#B6B6B6</color>
 
+
+<color name="material_drawer_primary">@color/primary</color>
+<color name="material_drawer_primary_dark">@color/primary_dark</color>
+<color name="material_drawer_primary_light">@color/primary_light</color>
+<color name="material_drawer_accent">@color/accent</color>
+<!-- overwrite the selected colors because the primary color is to dark -->
+<!--<color name="material_drawer_dark_selected">@color/accent</color>-->
+<color name="material_drawer_selected_text">@color/accent</color>
+<!--<color name="material_drawer_selected">@color/accent</color>-->
+<!--<color name="material_drawer_dark_selected_text">@color/accent</color>-->
+    
 <!--colors_brown_lime
 <color name="primary">#795548</color>
 <color name="primary_dark">#5D4037</color>

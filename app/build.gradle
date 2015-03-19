@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    compileSdkVersion 22
+    buildToolsVersion "22"
 
     defaultConfig {
         applicationId "org.symptomcheck.capstone"
         minSdkVersion 15
-        targetSdkVersion 21
+        targetSdkVersion 22
         versionCode 2
         versionName "1.2"
 
@@ -38,7 +38,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
     compile 'com.google.guava:guava:18.0'
-    compile 'com.android.support:appcompat-v7:21.0.3'
+    compile 'com.android.support:appcompat-v7:22.0.0'
     compile 'com.android.support:support-v13:21.0.0'
     compile 'com.squareup.picasso:picasso:2.3.4'
     compile 'de.greenrobot:eventbus:2.2.1'
@@ -81,10 +81,10 @@ dependencies {
     //compile 'com.avast:android-styled-dialogs:2.0.1'
 
     // Material Dialogs (another!)
-    compile 'com.afollestad:material-dialogs:0.6.3.0'
+    compile 'com.afollestad:material-dialogs:0.6.4.4'
 
     // FAB with menu and label
-    compile 'com.getbase:floatingactionbutton:1.8.0'
+    compile 'com.getbase:floatingactionbutton:1.9.0'
 
     // Android PagerSlidingTabStrip (default Material Design)
     compile 'com.jpardogo.materialtabstrip:library:1.0.8'
@@ -97,4 +97,9 @@ dependencies {
     //A simple charting library for Android, supporting line-, bar-, scatter-, candlestick- and piecharts,
     // as well as scaling, dragging, selecting and animations. Supporting Android 2.2 (API level 8) and upwards.
     compile 'org.quanqi:mpandroidchart:1.7.5'
+
+    //The MaterialDrawer library aims to provide the easiest possible implementation of a navigation drawer
+    compile('com.mikepenz.materialdrawer:library:2.5.3@aar') {
+        transitive = true
+    }
 }

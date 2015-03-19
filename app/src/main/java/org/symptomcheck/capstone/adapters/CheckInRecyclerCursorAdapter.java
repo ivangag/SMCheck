@@ -13,6 +13,8 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.common.collect.Lists;
+
 import org.symptomcheck.capstone.R;
 import org.symptomcheck.capstone.model.CheckIn;
 import org.symptomcheck.capstone.model.FeedStatus;
@@ -22,6 +24,8 @@ import org.symptomcheck.capstone.utils.CheckInUtils;
 import org.symptomcheck.capstone.utils.Constants;
 import org.symptomcheck.capstone.utils.DateTimeUtils;
 
+import java.util.List;
+
 /**
  * Created by igaglioti on 09/02/2015.
  */
@@ -30,6 +34,8 @@ public class CheckInRecyclerCursorAdapter extends CursorExRecyclerAdapter<CheckI
     private static String TAG = "CheckInRecyclerCursorAdapter";
     IRecyclerItemToggleListener mListener;
     private int lastPosition = -1;
+    private List<String> mExpandedPositions = Lists.newArrayList();
+    private List<String> mCollapsedPositions = Lists.newArrayList();
 
     public static interface IRecyclerItemToggleListener{
         void onItemToggled(int position);
@@ -49,6 +55,7 @@ public class CheckInRecyclerCursorAdapter extends CursorExRecyclerAdapter<CheckI
     
     public CheckInRecyclerCursorAdapter(Cursor cursor, Context context) {
         super(context,cursor,FLAG_REGISTER_CONTENT_OBSERVER);
+        /*
         this.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
 
             @Override
@@ -62,7 +69,7 @@ public class CheckInRecyclerCursorAdapter extends CursorExRecyclerAdapter<CheckI
                 super.onChanged();
                 lastPosition = -1;
             }
-        });
+        });*/
         mContext = context;
     }
 
@@ -75,8 +82,8 @@ public class CheckInRecyclerCursorAdapter extends CursorExRecyclerAdapter<CheckI
         // each data item is just a string in this case
         protected TextView vCheckInStatus;
         protected TextView vCheckInTime;
-        protected View viewCheckInDetails;
-        protected View viewHeaderCheckInDetails;
+        protected View viewCheckInExpandableArea;
+        protected View viewCheckInHeader;
         protected ListView mListView;
         protected ImageButton mBtnCheckInDetailsInfo;
         protected boolean IsExpanded = true;
@@ -88,23 +95,30 @@ public class CheckInRecyclerCursorAdapter extends CursorExRecyclerAdapter<CheckI
             super(v);
             vCheckInStatus =  (TextView) v.findViewById(R.id.txtViewCheckInPainLevel);
             vCheckInTime = (TextView)  v.findViewById(R.id.txtViewCheckInTime);
-            viewCheckInDetails =  v.findViewById(R.id.viewCheckInDetails);
-            viewHeaderCheckInDetails =  v.findViewById(R.id.viewHeaderCheckInDetails);
+            viewCheckInExpandableArea =  v.findViewById(R.id.viewCheckInDetails);
+            viewCheckInHeader =  v.findViewById(R.id.viewHeaderCheckInDetails);
             mListView = (ListView)  v.findViewById(R.id.list_medicines_question);
             mBtnCheckInDetailsInfo = (ImageButton)  v.findViewById(R.id.btnCheckInDetailsInfo);
             //v.setOnClickListener(this);
             mBtnCheckInDetailsInfo.setTag(this);
         }
-        
+
+        public void resetToDefault() {
+            viewCheckInExpandableArea.setVisibility(View.VISIBLE);
+        }
     }
 
-    
+
+    private String traceVisibility(View v){
+        return v.getVisibility() == View.VISIBLE ? "VISIBLE" : "GONE";
+    }        
     
     @Override
     public void onViewRecycled(ViewHolder holder) {
         super.onViewRecycled(holder);
-        Log.d(TAG,String.format("onViewRecycled=> CurrentPosition:%d. ExpandedStatus:%s",
-                holder.getPosition(),holder.IsExpanded));
+        holder.resetToDefault();
+        Log.d(TAG,String.format("onViewRecycled=> ItemId:%d OldPosition:%d CurrentPosition:%d. ExpandedArea:%s",
+                holder.getItemId(),holder.getOldPosition(), holder.getLayoutPosition(),traceVisibility(holder.viewCheckInExpandableArea)));
     }
 
     @Override
@@ -114,8 +128,8 @@ public class CheckInRecyclerCursorAdapter extends CursorExRecyclerAdapter<CheckI
         //Animation animation = AnimationUtils.loadAnimation(getContext(), (position > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);        
         //holder.itemView.startAnimation(slide);
         lastPosition = cursor.getPosition();
-        handleItemViewExpanding(holder);
-        //handleItemExpanding(holder);
+        //handleItemViewExpanding(holder);
+        handleToggleExpand(holder);
         final CheckIn checkIn = CheckIn.getByUnitId(cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.UNIT_ID)));
 
         final PainLevel painLevel = Enum.valueOf(PainLevel.class,cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL)));
@@ -164,36 +178,23 @@ public class CheckInRecyclerCursorAdapter extends CursorExRecyclerAdapter<CheckI
             case UNKNOWN:
                 break;
         }
-        Log.d(TAG,String.format("onBindViewHolderCursor=> CheckInID:%d. CursorPosition:%d. CurrentPosition:%d. ExpandedStatus:%s",
-               checkIn.getId(), lastPosition,holder.getPosition(),holder.IsExpanded));
+        Log.d(TAG,String.format("onBindViewHolderCursor=> CheckInID:%d. CursorPosition:%d. CurrentPosition:%d. ExpandedArea:%s",
+                checkIn == null ? -1 : checkIn.getId(), lastPosition,holder.getLayoutPosition(),traceVisibility(holder.viewCheckInExpandableArea)));
         
 
         //card.resourceIdThumb=R.drawable.ic_check_in;
     }
 
-
-    private void handleItemExpandingRequest(ViewHolder holder){
-        
-        
-        
-    }
-
-    private void handleItemExpanding(ViewHolder holder) {
-
-        ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
-        final int actualHeight = holder.itemView.getMeasuredHeight();
-        if (holder.isFirstToggle) {
-            holder.originalLayoutBottomHeight = holder.viewCheckInDetails.getMeasuredHeight() + ((ViewGroup.MarginLayoutParams) holder.viewCheckInDetails.getLayoutParams()).topMargin;
-            holder.originalItemViewHeight = actualHeight;
-            holder.isFirstToggle = false;
+    private void handleToggleExpand(ViewHolder vh) {
+        final String position = String.valueOf(vh.getLayoutPosition());
+        final boolean isExpandAreaVisible =  vh.viewCheckInExpandableArea.getVisibility() == View.VISIBLE;
+        if(mExpandedPositions.contains(position) && !isExpandAreaVisible){
+            vh.viewCheckInExpandableArea.setVisibility(View.VISIBLE);           
+        }else if(mCollapsedPositions.contains(position) && isExpandAreaVisible){
+            vh.viewCheckInExpandableArea.setVisibility(View.GONE);
         }
-        if (holder.IsExpanded) {
-            layoutParams.height = holder.originalItemViewHeight;
-        } else {
-            layoutParams.height = holder.originalItemViewHeight - holder.originalLayoutBottomHeight;
-        }
-        holder.itemView.setLayoutParams(layoutParams);
-
+        vh.itemView.requestLayout();
+        
     }
     private void handleItemViewExpanding(ViewHolder holder) {
 
@@ -203,7 +204,7 @@ public class CheckInRecyclerCursorAdapter extends CursorExRecyclerAdapter<CheckI
             final int actualHeight = holder.itemView.getMeasuredHeight();
             
             if(holder.isFirstToggle) {
-                holder.originalLayoutBottomHeight = holder.viewCheckInDetails.getMeasuredHeight() + ((ViewGroup.MarginLayoutParams) holder.viewCheckInDetails.getLayoutParams()).topMargin;
+                holder.originalLayoutBottomHeight = holder.viewCheckInExpandableArea.getMeasuredHeight() + ((ViewGroup.MarginLayoutParams) holder.viewCheckInExpandableArea.getLayoutParams()).topMargin;
                 holder.originalItemViewHeight = actualHeight;
                 holder.isFirstToggle = false;
             }
@@ -232,18 +233,41 @@ public class CheckInRecyclerCursorAdapter extends CursorExRecyclerAdapter<CheckI
         // set the view's size, margins, paddings and layout parameters        
         v.setClickable(true);
         final ViewHolder vh = new ViewHolder(v);
-        vh.viewHeaderCheckInDetails.setOnClickListener(new View.OnClickListener() {
+        vh.viewCheckInHeader.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                //vh.IsExpanded = !vh.IsExpanded;
                 vh.isExpandCollapsingRequested = true;
-                //handleItemExpanding(vh);
-                //holder.viewCheckInDetails.setVisibility(holder.viewCheckInDetails.getVisibility()
+                
+                final String position = String.valueOf(vh.getLayoutPosition());
+                final boolean isExpandAreaVisible =  vh.viewCheckInExpandableArea.getVisibility() == View.VISIBLE;
+                
+                if(isExpandAreaVisible) {
+                    if(mExpandedPositions.contains(position)) {
+                        mExpandedPositions.remove(position);
+                    }
+                    mCollapsedPositions.add(position);
+                }else {
+                    if(mCollapsedPositions.contains(position)){
+                        mCollapsedPositions.remove(position);
+                    }
+                    mExpandedPositions.add(position);
+                }
+                /*
+                if(mExpandedPositions.contains(position) && !isExpandAreaVisible){
+                    vh.viewCheckInExpandableArea.setVisibility(View.VISIBLE);
+                }else if(mCollapsedPositions.contains(position) && isExpandAreaVisible){
+                    vh.viewCheckInExpandableArea.setVisibility(View.GONE);
+                }
+                vh.itemView.requestLayout();
+                */
+                //handleToggleExpand(vh);
+                //holder.viewCheckInExpandableArea.setVisibility(holder.viewCheckInExpandableArea.getVisibility()
                 //holder.mListView.setVisibility(holder.mListView.getVisibility()
                 //        == View.GONE ? View.VISIBLE :View.GONE );
 
-                notifyItemChanged(vh.getPosition());
+                //notifyItemChanged(vh.getLayoutPosition());
+                notifyDataSetChanged();
             }
         });
         return vh;
