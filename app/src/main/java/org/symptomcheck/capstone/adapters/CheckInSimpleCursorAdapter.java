@@ -81,10 +81,10 @@ public class CheckInSimpleCursorAdapter extends CursorAdapter {
     }
     
     
-        /* Example code shows further optimization using ViewHolder Pattern with CursoAdapter
+        /* Example code shows further optimization using CheckInViewHolder Pattern with CursoAdapter
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        ViewHolder holder  =   (ViewHolder)    view.getTag();
+        CheckInViewHolder holder  =   (CheckInViewHolder)    view.getTag();
         holder.name.setText(cursor.getString(holder.nameIndex));
         holder.time.setText(cursor.getString(holder.timeIndex));
     }
@@ -93,7 +93,7 @@ public class CheckInSimpleCursorAdapter extends CursorAdapter {
             p parent) {
         View   view    =   LayoutInflater.from(context).inflate
         p (R.layout.time_row,  null);
-        ViewHolder holder  =   new ViewHolder();
+        CheckInViewHolder holder  =   new CheckInViewHolder();
         holder.name    =   (TextView)  view.findViewById(R.id.task_name);
         holder.time    =   (TextView)  view.findViewById(R.id.task_time);
         holder.nameIndex   =   cursor.getColumnIndexOrThrow
