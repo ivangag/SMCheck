@@ -57,6 +57,7 @@ import com.heinrichreimersoftware.materialdrawer.structure.DrawerProfile;
 import com.makeramen.RoundedTransformationBuilder;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.accountswitcher.AccountHeader;
+import com.mikepenz.materialdrawer.model.PrimaryDescriptionDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
@@ -265,10 +266,11 @@ public class MainActivityDrawerPenz extends ActionBarActivity implements ICardEv
 
 
         for(DrawerItemHelper item : mDrawerItemTitles) {
-            if (item.isInFixedList()) {
-                mDrawer.addDrawerItems(new PrimaryDrawerItem()
+            if (!item.isInFixedList()) {
+                mDrawer.addDrawerItems(new PrimaryDescriptionDrawerItem()
                                 .withIcon(getResources().getDrawable(item.getImage()))
                                 .withName(item.getTitle())
+                                .withDescription(item.getExtra_info())
                                 .withIdentifier((int) item.getPosition())
                                 .withSelectedIconColor(getResources().getColor(R.color.accent))
                                 .withTintSelectedIcon(true)

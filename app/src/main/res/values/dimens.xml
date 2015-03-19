@@ -15,4 +15,5 @@
 
     <dimen name="nav_drawer_width">280dp</dimen>
 
+    <dimen name="material_drawer_item_profile_text">14sp</dimen>
 </resources>

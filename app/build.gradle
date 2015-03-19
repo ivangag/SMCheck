@@ -99,7 +99,7 @@ dependencies {
     compile 'org.quanqi:mpandroidchart:1.7.5'
 
     //The MaterialDrawer library aims to provide the easiest possible implementation of a navigation drawer
-    compile('com.mikepenz.materialdrawer:library:2.5.3@aar') {
+    compile('com.mikepenz.materialdrawer:library:2.5.4@aar') {
         transitive = true
     }
 }
