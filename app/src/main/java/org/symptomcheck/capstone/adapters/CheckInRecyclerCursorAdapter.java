@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
@@ -32,39 +33,191 @@ import java.util.List;
 /**
  * Created by igaglioti on 09/02/2015.
  */
-public class CheckInRecyclerCursorAdapter extends CursorExRecyclerAdapter<CheckInRecyclerCursorAdapter.CheckInViewHolder>
-implements  View.OnClickListener{
+public class CheckInRecyclerCursorAdapter extends CursorExRecyclerAdapter<CheckInRecyclerCursorAdapter.CheckInViewHolder> {
 
     private static String TAG = "CheckInRecyclerCursorAdapter";
     IRecyclerItemToggleListener mListener;
     private int lastPosition = -1;
-    private List<String> mExpandedPositions = Lists.newArrayList();
+    private List<String>  mExpandedPositions = Lists.newArrayList();
     private List<String> mCollapsedPositions = Lists.newArrayList();
     private int mOriginalLayoutBottomHeight;
 
-    @Override
-    public void onClick(View viewExpandableArea) {
-        //vh.isExpandCollapsingRequested = true;
-        CheckInViewHolder holder = (CheckInViewHolder) viewExpandableArea.getTag();
-        holder.setIsRecyclable(false);
-        final String position = String.valueOf(holder.getLayoutPosition());
-        final boolean isExpandAreaVisible =  holder.viewCheckInExpandableArea.getVisibility() == View.VISIBLE;
-        if(isExpandAreaVisible) {
-            if(mExpandedPositions.contains(position)) {
-                mExpandedPositions.remove(position);
-            }
-            mCollapsedPositions.add(position);
-        }else {
-            if(mCollapsedPositions.contains(position)){
-                mCollapsedPositions.remove(position);
-            }
-            mExpandedPositions.add(position);
+
+    // Provide a reference to the views for each data item
+    // Complex data items may need more than one view per item, and
+    // you provide access to all the views for a data item in a view holder
+    public class CheckInViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener /*implements OnClickListener*/ {
+        // each data item is just a string in this case
+        protected TextView vCheckInStatus;
+        protected TextView vCheckInTime;
+        protected View viewCheckInExpandableArea;
+        protected View viewCheckInHeader;
+        protected ListView mListView;
+        protected ImageButton mBtnCheckInDetailsInfo;
+        protected int originalLayoutBottomHeight;
+        protected int originalHeight;
+        protected boolean isFirstToggle = true;
+        private boolean mIsViewExpanded = true;
+
+        public CheckInViewHolder(View v) {
+            super(v);
+            vCheckInStatus =  (TextView) v.findViewById(R.id.txtViewCheckInPainLevel);
+            vCheckInTime = (TextView)  v.findViewById(R.id.txtViewCheckInTime);
+            viewCheckInExpandableArea =  v.findViewById(R.id.viewCheckInDetails);
+            viewCheckInHeader =  v.findViewById(R.id.viewHeaderCheckInDetails);
+            mListView = (ListView)  v.findViewById(R.id.list_medicines_question);
+            mBtnCheckInDetailsInfo = (ImageButton)  v.findViewById(R.id.btnCheckInDetailsInfo);
+            viewCheckInHeader.setOnClickListener(this);
+            viewCheckInHeader.setTag(this);
         }
-        //notifyItemChanged(vh.getLayoutPosition());
-        notifyDataSetChanged();
+
+        public void resetToDefault() {
+            viewCheckInExpandableArea.setVisibility(View.VISIBLE);
+        }
+
+
+
+        @Override
+        public void onClick(final View view) {
+            // If the originalHeight is 0 then find the height of the View being used
+            // This would be the height of the cardview
+            //this.setIsRecyclable(false);
+            if (originalHeight == 0) {
+                originalHeight = viewCheckInExpandableArea.getHeight();
+            }
+
+            final String itemId = String.valueOf(this.getLayoutPosition());
+            final boolean isExpandAreaVisible =  viewCheckInExpandableArea.getVisibility() == View.VISIBLE;
+            Log.d(TAG, String.format("onClickViewHolder=> ItemId:%s", itemId));
+            if(isExpandAreaVisible) {
+                if(mExpandedPositions.contains(itemId)) {
+                    mExpandedPositions.remove(itemId);
+                }
+                mCollapsedPositions.add(itemId);
+            }else {
+                if(mCollapsedPositions.contains(itemId)){
+                    mCollapsedPositions.remove(itemId);
+                }
+                mExpandedPositions.add(itemId);
+            }
+            notifyDataSetChanged();
+            /*
+            final boolean animate = false;
+            // Declare a ValueAnimator object
+            if (!isExpandAreaVisible) {
+                doExpand(originalHeight, animate);
+            } else {
+                doCollapse(originalHeight, animate);
+            }*/
+        }
+
+        private void doExpand(int originalHeight, boolean animate){
+
+            viewCheckInExpandableArea.setVisibility(View.VISIBLE);
+            if(animate) {
+                final ValueAnimator valueAnimator = ValueAnimator.ofInt(0, originalHeight); // These values in this method can be changed to expand however much you like
+                doAnimate(valueAnimator);
+            }
+        }
+
+        private void doCollapse(int originalHeight, boolean animate){
+
+            if(animate){
+                final ValueAnimator valueAnimator = ValueAnimator.ofInt(originalHeight, 0);
+
+                Animation a = new AlphaAnimation(1.00f, 0.00f); // Fade out
+
+                a.setDuration(500);
+                // Set a listener to the animation and configure onAnimationEnd
+                a.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        viewCheckInExpandableArea.setVisibility(View.INVISIBLE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                // Set the animation on the custom view
+                viewCheckInExpandableArea.startAnimation(a);
+                doAnimate(valueAnimator);
+            }else {
+                viewCheckInExpandableArea.setVisibility(View.GONE);
+            }
+        }
+
+        private void doAnimate(ValueAnimator valueAnimator) {
+
+            valueAnimator.setDuration(500);
+            valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+            valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    Integer value = (Integer) animation.getAnimatedValue();
+                    viewCheckInExpandableArea.getLayoutParams().height = value;
+                    viewCheckInExpandableArea.requestLayout();
+                }
+            });
+            valueAnimator.start();
+        }
+
+        private void handleTogglingExpandedAreaHolder() {
+            final String itemId = String.valueOf(this.getLayoutPosition());
+            final boolean isExpandAreaVisible =  this.viewCheckInExpandableArea.getVisibility() == View.VISIBLE;
+
+            final boolean animate = false;
+            if(mExpandedPositions.contains(itemId) && !isExpandAreaVisible){
+                doExpand(this.originalHeight,animate);
+                Log.d(TAG, String.format("handleTogglingExpandedAreaHolder=>Expand ItemId:%s", itemId));
+                /*
+                this.viewCheckInExpandableArea.setVisibility(View.VISIBLE);
+                this.viewCheckInExpandableArea.requestLayout();
+                */
+            }else if(mCollapsedPositions.contains(itemId) && isExpandAreaVisible){
+                doCollapse(this.originalHeight,animate);
+                Log.d(TAG, String.format("handleTogglingExpandedAreaHolder=>Collapse ItemId:%s", itemId));
+                /*
+                this.viewCheckInExpandableArea.requestLayout();
+                this.viewCheckInExpandableArea.setVisibility(View.GONE);
+                */
+            }
+        }
+
+/*        @Override
+        public void onClick(View viewExpandableArea) {
+            //vh.isExpandCollapsingRequested = true;
+            CheckInViewHolder holder = (CheckInViewHolder) viewExpandableArea.getTag();
+            holder.setIsRecyclable(false);
+            final String position = String.valueOf(holder.getLayoutPosition());
+            final boolean isExpandAreaVisible =  holder.viewCheckInExpandableArea.getVisibility() == View.VISIBLE;
+            if(isExpandAreaVisible) {
+                if(mExpandedPositions.contains(position)) {
+                    mExpandedPositions.remove(position);
+                }
+                mCollapsedPositions.add(position);
+            }else {
+                if(mCollapsedPositions.contains(position)){
+                    mCollapsedPositions.remove(position);
+                }
+                mExpandedPositions.add(position);
+            }
+            //notifyItemChanged(vh.getLayoutPosition());
+            notifyDataSetChanged();
+        }
+        */
     }
 
-    public static interface IRecyclerItemToggleListener{
+
+
+
+
+    public interface IRecyclerItemToggleListener{
         void onItemToggled(int position);
     }
     
@@ -101,40 +254,6 @@ implements  View.OnClickListener{
 
     
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
-    public class CheckInViewHolder extends RecyclerView.ViewHolder /*implements OnClickListener*/ {
-        // each data item is just a string in this case
-        protected TextView vCheckInStatus;
-        protected TextView vCheckInTime;
-        protected View viewCheckInExpandableArea;
-        protected View viewCheckInHeader;
-        protected ListView mListView;
-        protected ImageButton mBtnCheckInDetailsInfo;
-        protected boolean IsExpanded = true;
-        protected int originalLayoutBottomHeight;
-        protected int originalItemViewHeight;
-        protected boolean isFirstToggle = true;
-        protected boolean isExpandCollapsingRequested = false;
-        public CheckInViewHolder(View v) {
-            super(v);
-            vCheckInStatus =  (TextView) v.findViewById(R.id.txtViewCheckInPainLevel);
-            vCheckInTime = (TextView)  v.findViewById(R.id.txtViewCheckInTime);
-            viewCheckInExpandableArea =  v.findViewById(R.id.viewCheckInDetails);
-            viewCheckInHeader =  v.findViewById(R.id.viewHeaderCheckInDetails);
-            mListView = (ListView)  v.findViewById(R.id.list_medicines_question);
-            mBtnCheckInDetailsInfo = (ImageButton)  v.findViewById(R.id.btnCheckInDetailsInfo);
-            //v.setOnClickListener(this);
-            viewCheckInHeader.setTag(this);
-        }
-
-        public void resetToDefault() {
-            viewCheckInExpandableArea.setVisibility(View.VISIBLE);
-        }
-    }
-
-
     private String traceVisibility(View v){
         return v.getVisibility() == View.VISIBLE ? "VISIBLE" : "GONE";
     }        
@@ -143,8 +262,8 @@ implements  View.OnClickListener{
     public void onViewRecycled(CheckInViewHolder holder) {
         super.onViewRecycled(holder);
         holder.resetToDefault();
-        Log.d(TAG,String.format("onViewRecycled=> ItemId:%d OldPosition:%d CurrentPosition:%d. ExpandedArea:%s",
-                holder.getItemId(),holder.getOldPosition(), holder.getLayoutPosition(),traceVisibility(holder.viewCheckInExpandableArea)));
+        //Log.d(TAG,String.format("onViewRecycled=> ItemId:%d OldPosition:%d CurrentPosition:%d. ExpandedArea:%s",
+        //        holder.getItemId(),holder.getOldPosition(), holder.getLayoutPosition(),traceVisibility(holder.viewCheckInExpandableArea)));
     }
 
     @Override
@@ -153,13 +272,13 @@ implements  View.OnClickListener{
         Animation slide = AnimationUtils.loadAnimation(mContext, (cursor.getPosition() > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);
         //holder.itemView.startAnimation(slide);
         lastPosition = holder.getLayoutPosition();
-        //handleItemViewExpanding(holder);
-        handleTogglingExpandedArea(holder);
+        //handleTogglingExpandedArea(holder);
+        holder.handleTogglingExpandedAreaHolder();
         final CheckIn checkIn = CheckIn.getByUnitId(cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.UNIT_ID)));
 
         final PainLevel painLevel = Enum.valueOf(PainLevel.class,cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.PAIN_LEVEL)));
         final FeedStatus feedStatus =  Enum.valueOf(FeedStatus.class, cursor.getString(cursor.getColumnIndex(ActiveContract.CHECKIN_COLUMNS.FEED_STATUS)));
-        holder.vCheckInStatus.setText(painLevel + " - " + feedStatus);
+        holder.vCheckInStatus.setText(painLevel + " - " + feedStatus + String.format(" (%s)",lastPosition));
         if(checkIn != null) {
             //if(holder.mListView != null) {
                 holder.mListView.setAdapter(new MedicationQuestionAdapter(mContext, MedicationQuestionItem.makeItemByCheckinQuestions(checkIn.getItemsQuestion()), false));
@@ -273,44 +392,7 @@ implements  View.OnClickListener{
         
     }
 
-    private void handleTogglingExpandedAreaExt(final CheckInViewHolder holder) {
-        final String position = String.valueOf(holder.getLayoutPosition());
-        final boolean isExpandAreaVisible =  holder.viewCheckInExpandableArea.getVisibility() == View.VISIBLE;
 
-        if(holder.isFirstToggle) {
-            holder.originalLayoutBottomHeight = holder.viewCheckInExpandableArea.getMeasuredHeight()
-                    + ((ViewGroup.MarginLayoutParams) holder.viewCheckInExpandableArea.getLayoutParams()).topMargin;
-            holder.isFirstToggle = false;
-        }
-
-        // Declare a ValueAnimator object
-        ValueAnimator valueAnimator = null;
-
-        if(mExpandedPositions.contains(position) && !isExpandAreaVisible){
-            valueAnimator = ValueAnimator.ofInt(0, 675);
-            //holder.viewCheckInExpandableArea.setVisibility(View.VISIBLE);
-        }else if(mCollapsedPositions.contains(position) && isExpandAreaVisible){
-            valueAnimator = ValueAnimator.ofInt(675,0);
-            //holder.viewCheckInExpandableArea.setVisibility(View.GONE);
-        }
-
-        if(valueAnimator != null) {
-            valueAnimator.setDuration(200);
-            valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-            valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    Integer value = (Integer) animation.getAnimatedValue();
-                    holder.viewCheckInExpandableArea.getLayoutParams().height = value;
-                    holder.itemView.requestLayout();
-                }
-            });
-            valueAnimator.start();
-        }
-
-
-//        holder.itemView.requestLayout();
-
-    }
 
 
     // Create new views (invoked by the layout manager)
@@ -321,32 +403,6 @@ implements  View.OnClickListener{
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_google_cardview_checkins, parent, false);
         // set the view's size, margins, paddings and layout parameters        
         v.setClickable(true);
-        final CheckInViewHolder vh = new CheckInViewHolder(v);
-        vh.viewCheckInHeader.setOnClickListener(this);
-        /*
-        vh.viewCheckInHeader.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                //vh.isExpandCollapsingRequested = true;
-                
-                final String position = String.valueOf(vh.getLayoutPosition());
-                final boolean isExpandAreaVisible =  vh.viewCheckInExpandableArea.getVisibility() == View.VISIBLE;
-                if(isExpandAreaVisible) {
-                    if(mExpandedPositions.contains(position)) {
-                        mExpandedPositions.remove(position);
-                    }
-                    mCollapsedPositions.add(position);
-                }else {
-                    if(mCollapsedPositions.contains(position)){
-                        mCollapsedPositions.remove(position);
-                    }
-                    mExpandedPositions.add(position);
-                }
-                //notifyItemChanged(vh.getLayoutPosition());
-                notifyDataSetChanged();
-            }
-        });*/
-        return vh;
+        return new CheckInViewHolder(v);
     }
 }

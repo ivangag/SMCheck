@@ -42,7 +42,7 @@ dependencies {
     compile 'com.android.support:support-v13:21.0.0'
     compile 'com.squareup.picasso:picasso:2.3.4'
     compile 'de.greenrobot:eventbus:2.2.1'
-    compile 'com.google.android.gms:play-services:6.5.87'
+    compile 'com.google.android.gms:play-services:7.0.0'
     compile 'com.squareup.retrofit:retrofit:1.7.1'
     compile 'commons-io:commons-io:2.4'
     compile 'org.apache.httpcomponents:httpclient-android:4.3.5'
@@ -81,7 +81,7 @@ dependencies {
     //compile 'com.avast:android-styled-dialogs:2.0.1'
 
     // Material Dialogs (another!)
-    compile 'com.afollestad:material-dialogs:0.6.4.4'
+    compile 'com.afollestad:material-dialogs:0.6.4.6'
 
     // FAB with menu and label
     compile 'com.getbase:floatingactionbutton:1.9.0'
@@ -99,7 +99,7 @@ dependencies {
     compile 'org.quanqi:mpandroidchart:1.7.5'
 
     //The MaterialDrawer library aims to provide the easiest possible implementation of a navigation drawer
-    compile('com.mikepenz.materialdrawer:library:2.5.4@aar') {
+    compile('com.mikepenz.materialdrawer:library:2.5.5@aar') {
         transitive = true
     }
 }
